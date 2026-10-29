@@ -1,0 +1,70 @@
+[[epic]]
+id = 1
+slug = "epic-foundation-expo"
+title = "Expo foundation and shared contracts"
+description = "A clean checkout runs the Expo Android baseline with shared design, routing, database, domain, and quality contracts."
+covers = ["R1", "R2", "R3", "R5", "R6", "R7"]
+
+[[epic]]
+id = 2
+slug = "epic-onboarding-security"
+title = "Onboarding and app security"
+description = "A new user can create a safe local workspace and return through PIN or biometric unlock on Android."
+covers = ["R4", "R6"]
+after = [{ epic = 1, needs = "Expo foundation, database contract, and security capability matrix" }]
+
+[[epic]]
+id = 3
+slug = "epic-wallets-categories"
+title = "Wallets and categories"
+description = "Users can manage wallets and flat income/expense categories while historical references remain safe."
+covers = ["R1", "R2", "R3", "R4"]
+after = [{ epic = 2, needs = "onboarding seed and local app state" }]
+
+[[epic]]
+id = 4
+slug = "epic-transactions-transfer"
+title = "Transactions and transfers"
+description = "Users can record, edit, inspect, undo-delete, and atomically transfer money across wallets."
+covers = ["R1", "R2", "R3", "R5", "R6"]
+after = [{ epic = 3, needs = "wallet/category commands and persistence" }]
+
+[[epic]]
+id = 5
+slug = "epic-dashboard-net-worth"
+title = "Dashboard and net worth"
+description = "The home screen explains current assets, liabilities, wallet summaries, and recent activity from live queries."
+covers = ["R2", "R5"]
+after = [{ epic = 4, needs = "transaction and balance queries" }]
+
+[[epic]]
+id = 6
+slug = "epic-reconciliation"
+title = "Balance reconciliation"
+description = "Users can compare a wallet with reality, resolve differences, and save an auditable checkpoint."
+covers = ["R2", "R3", "R5", "R6", "R7"]
+after = [{ epic = 4, needs = "atomic transaction writes and balance queries" }]
+
+[[epic]]
+id = 7
+slug = "epic-budget-recurring"
+title = "Budgets and recurring transactions"
+description = "Users can track category budgets and handle recurring transactions with durable reminder states."
+covers = ["R1", "R2", "R5", "R7", "R8"]
+after = [{ epic = 6, needs = "trusted balances and checkpoint behavior" }]
+
+[[epic]]
+id = 8
+slug = "epic-debt-group-order"
+title = "Debt and group order"
+description = "Users can split group purchases and track two-way debt, repayment, write-off, and netting without corrupting reports."
+covers = ["R1", "R2", "R3", "R5", "R8"]
+after = [{ epic = 4, needs = "transaction split and atomic write contracts" }]
+
+[[epic]]
+id = 9
+slug = "epic-ocr-backup-export"
+title = "OCR, backup, restore, and export"
+description = "Users can use optional document capture and safe data portability without making network or custom-native features required for MVP."
+covers = ["R4", "R6", "R7", "R8"]
+after = [{ epic = 2, needs = "security/key handling contract" }, { epic = 4, needs = "stable transaction schema" }]

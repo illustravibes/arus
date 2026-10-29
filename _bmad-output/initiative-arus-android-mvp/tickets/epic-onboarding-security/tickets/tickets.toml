@@ -1,0 +1,90 @@
+[[entry]]
+id = 1
+type = "story"
+title = "Establish security capability tiers and encrypted-storage guard"
+description = "Makes the Expo Go development path explicit and prepares the EAS development-build guard for encrypted storage without claiming SQLCipher before binary verification."
+verify = "The capability matrix and runtime guard show the explicit Expo Go unencrypted development mode, reject an unsupported cipher requirement safely, and pass the relevant unit checks."
+covers = [4]
+after = ["1.1"]
+hitl = true
+risk = "high"
+refine = true
+plan_checkpoint = true
+
+[[entry]]
+id = 2
+type = "story"
+title = "Implement first-run state and welcome flow"
+description = "Adds the offline first-run state and Indonesian welcome flow that routes a new user into workspace setup and returning users past onboarding."
+verify = "A fresh install shows the welcome flow, a returning initialized workspace bypasses it, and the state transition is durable without a network request."
+covers = [1]
+after = [1]
+hitl = false
+risk = "medium"
+
+[[entry]]
+id = 3
+type = "story"
+title = "Create the first workspace with idempotent seed"
+description = "Lets a new user create the required first wallet, choose preset categories, enter an opening balance, and commit the workspace exactly once."
+verify = "Completing setup creates one valid workspace with at least one wallet and selected categories; retrying or relaunching does not duplicate the seed or opening state."
+covers = [1, 5]
+after = [2]
+hitl = false
+risk = "high"
+
+[[entry]]
+id = 4
+type = "story"
+title = "Store and verify the PIN securely"
+description = "Adds PIN setup, salted verification, KDF parameters, invalid-attempt handling, throttling, and the recovery warning shown before security is enabled."
+verify = "A valid PIN unlocks a test workspace, plaintext PIN is absent from persisted state and logs, repeated failures throttle attempts, and the recovery warning is visible before confirmation."
+covers = [2, 5]
+after = [1]
+hitl = false
+risk = "high"
+
+[[entry]]
+id = 5
+type = "story"
+title = "Add biometric unlock and app-lock lifecycle"
+description = "Connects biometric unlock with PIN fallback and locks the app on launch or after the configured background timeout while clearing sensitive in-memory form state."
+verify = "A supported biometric opens the app, a rejected or unavailable biometric falls back to PIN, background timeout returns to the lock screen, and sensitive draft state is cleared."
+covers = [2, 3, 5]
+after = [4]
+hitl = true
+risk = "high"
+
+[[entry]]
+id = 6
+type = "story"
+title = "Harden security settings and privacy surfaces"
+description = "Adds security settings for auto-lock and biometric preference plus screenshot/recent-app protection and sanitized diagnostics with safe permission fallbacks."
+verify = "Changing security settings persists safely, sensitive screens are protected where the active capability supports it, denied permissions leave a usable PIN path, and diagnostics contain only sanitized codes."
+covers = [3, 5]
+after = [5]
+hitl = true
+risk = "medium"
+
+[[entry]]
+id = 7
+type = "story"
+title = "Run onboarding and security integration verification"
+description = "Verifies the complete first-run, relaunch, lock, unlock, failure, and capability-tier journeys on the supported Expo and Android build surfaces."
+verify = "The documented fresh-install and returning-user paths pass with airplane mode, invalid PIN, biometric fallback, auto-lock, no-leak checks, lint, typecheck, and the applicable Android development-build check."
+covers = [1, 2, 3, 4, 5]
+after = [8]
+hitl = true
+risk = "high"
+done_checkpoint = true
+
+[[entry]]
+id = 8
+type = "story"
+title = "Complete onboarding and security refactor sweep"
+description = "Performs cleanup and consistency work discovered across the onboarding and security stories without adding new behavior or expanding scope."
+verify = "A review of the epic diff finds no duplicated security policy, stale route/state boundary, unsanitized diagnostic, or unresolved lint/type/test issue, and the full quality gate passes."
+covers = []
+after = [2, 3, 4, 5, 6]
+hitl = false
+risk = "medium"

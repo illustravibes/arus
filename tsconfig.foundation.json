@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
+    "outDir": ".foundation-dist",
+    "rootDir": ".",
+    "noEmitOnError": true
+  },
+  "include": [
+    "src/domain/money.ts",
+    "src/domain/date.ts",
+    "src/db/migrations.ts"
+  ]
+}

@@ -6,13 +6,21 @@
     "@expo/ui": "~58.0.25",
     "expo": "~58.0.21",
     "expo-constants": "~58.0.14",
+    "expo-crypto": "~58.0.7",
+    "expo-dev-client": "~58.0.17",
     "expo-device": "~58.0.5",
     "expo-font": "~58.0.11",
     "expo-glass-effect": "~58.0.5",
+    "expo-haptics": "~58.0.7",
     "expo-image": "~58.0.18",
     "expo-linking": "~58.0.15",
+    "expo-local-authentication": "~58.0.2",
+    "expo-localization": "~58.0.5",
     "expo-router": "~58.0.28",
+    "expo-screen-capture": "~58.0.6",
+    "expo-secure-store": "~58.0.2",
     "expo-splash-screen": "~58.0.12",
+    "expo-sqlite": "~58.0.14",
     "expo-status-bar": "~58.0.4",
     "expo-symbols": "~58.0.4",
     "expo-system-ui": "~58.0.7",
@@ -29,6 +37,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.3.0",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~58.0.4",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -37,7 +47,11 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "typecheck": "tsc --noEmit",
+    "doctor": "npx expo-doctor",
+    "foundation:check": "npm run lint && npm run typecheck && npm run foundation:test && npm run doctor",
+    "foundation:test": "tsc -p tsconfig.foundation.json && node --test tests/foundation.test.cjs"
   },
   "private": true
 }

@@ -1,0 +1,1717 @@
+package com.illustravibes.arus.core.designsystem
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.illustravibes.arus.R
+import java.text.NumberFormat
+import java.util.Locale
+
+// ============================================================================
+// 1. CURRENCY FORMATTER UTILITY
+// ============================================================================
+
+fun Long.formatRupiah(): String {
+    val formatter = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("id-ID"))
+    formatter.maximumFractionDigits = 0
+    val formatted = formatter.format(this)
+    // Converts "Rp1.000.000,00" or "IDR 1.000.000" to clean "Rp1.000.000" or "Rp 1.000.000"
+    return formatted.replace("IDR", "Rp").replace(",00", "").trim()
+}
+
+fun formatInputRupiah(input: String): String {
+    val digits = input.filter { it.isDigit() }
+    if (digits.isEmpty()) return ""
+    val amount = digits.toLongOrNull() ?: 0L
+    val formatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID"))
+    return formatter.format(amount)
+}
+
+// ============================================================================
+// 2. ARUS CARD (Bevel White Rounded Card)
+// ============================================================================
+
+@Composable
+fun ArusCard(
+    modifier: Modifier = Modifier,
+    cornerRadius: Dp = 20.dp,
+    backgroundColor: Color = ArusSurface,
+    borderColor: Color = ArusBorder,
+    onClick: (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val shape = RoundedCornerShape(cornerRadius)
+    val cardModifier = modifier
+        .fillMaxWidth()
+        .clip(shape)
+        .background(backgroundColor)
+        .border(1.dp, borderColor, shape)
+        .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
+        .padding(16.dp)
+
+    Column(
+        modifier = cardModifier,
+        content = content
+    )
+}
+
+// ============================================================================
+// 3. ARUS BUTTONS (Pill CTA & Secondary Buttons)
+// ============================================================================
+
+@Composable
+fun ArusPrimaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    icon: ImageVector? = null
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        shape = PillShape,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = ArusBrandPrimary,
+            contentColor = Color.White,
+            disabledContainerColor = ArusBorder,
+            disabledContentColor = ArusTextSecondary
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(54.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            Text(
+                text = text,
+                style = ArusTypography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun ArusSecondaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    OutlinedButton(
+        onClick = onClick,
+        enabled = enabled,
+        shape = PillShape,
+        border = ButtonDefaults.outlinedButtonBorder.copy(
+            brush = androidx.compose.ui.graphics.SolidColor(ArusBorder)
+        ),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = ArusSurface,
+            contentColor = ArusTextPrimary
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(50.dp)
+    ) {
+        Text(
+            text = text,
+            style = ArusTypography.titleMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = ArusTextPrimary
+            )
+        )
+    }
+}
+
+// ============================================================================
+// 4. BEVEL FORM INPUTS (Hero Amount Input & Property Selector Row)
+// ============================================================================
+
+@Composable
+fun ArusAmountHeroInput(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    label: String = "NOMINAL TRANSAKSI",
+    placeholder: String = "0",
+    errorMessage: String? = null,
+    amountColor: Color = ArusTextPrimary
+) {
+    val formattedDisplayValue = androidx.compose.runtime.remember(value) {
+        formatInputRupiah(value)
+    }
+
+    var textFieldValueState by androidx.compose.runtime.remember(formattedDisplayValue) {
+        androidx.compose.runtime.mutableStateOf(
+            TextFieldValue(
+                text = formattedDisplayValue,
+                selection = TextRange(formattedDisplayValue.length)
+            )
+        )
+    }
+
+    ArusCard(
+        modifier = modifier,
+        cornerRadius = 24.dp
+    ) {
+        Text(
+            text = label.uppercase(),
+            style = ArusTypography.labelMedium,
+            color = ArusTextSecondary
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Rp ",
+                style = ArusTypography.displayLarge.copy(
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = amountColor
+                )
+            )
+            BasicTextField(
+                value = textFieldValueState,
+                onValueChange = { newTv ->
+                    textFieldValueState = newTv
+                    val cleanDigits = newTv.text.filter { it.isDigit() }
+                    onValueChange(cleanDigits)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = ArusTypography.displayLarge.copy(
+                    fontSize = 36.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = amountColor
+                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true,
+                decorationBox = { innerTextField ->
+                    Box {
+                        if (formattedDisplayValue.isEmpty()) {
+                            Text(
+                                text = placeholder,
+                                style = ArusTypography.displayLarge.copy(
+                                    fontSize = 36.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = ArusTextSecondary.copy(alpha = 0.4f)
+                                )
+                            )
+                        }
+                        innerTextField()
+                    }
+                }
+            )
+        }
+        if (errorMessage != null) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = errorMessage,
+                style = ArusTypography.labelSmall,
+                color = ArusExpense
+            )
+        }
+    }
+}
+
+@Composable
+fun ArusPropertySelectorRow(
+    label: String,
+    selectedValue: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    iconResId: Int? = null,
+    tileColor: Color = NotionSkySoft,
+    iconTint: Color = NotionSky,
+    placeholder: String = "Pilih"
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(ArusSurface)
+            .border(1.dp, ArusBorder, RoundedCornerShape(16.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            if (iconResId != null) {
+                ArusCategoryTile(
+                    iconResId = iconResId,
+                    tileColor = tileColor,
+                    iconTint = iconTint,
+                    size = 36.dp
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+            }
+            Text(
+                text = label,
+                style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = ArusTextPrimary
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = selectedValue.ifEmpty { placeholder },
+                style = ArusTypography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = if (selectedValue.isNotEmpty()) ArusTextPrimary else ArusTextSecondary
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(
+                painter = painterResource(id = R.drawable.fa_chevron_right),
+                contentDescription = null,
+                tint = ArusTextSecondary,
+                modifier = Modifier.size(14.dp)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ArusTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    placeholder: String = "",
+    isCurrency: Boolean = false,
+    errorMessage: String? = null,
+    singleLine: Boolean = true
+) {
+    val displayValue = if (isCurrency) {
+        androidx.compose.runtime.remember(value) { formatInputRupiah(value) }
+    } else value
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = label,
+            style = ArusTypography.labelLarge,
+            color = ArusTextPrimary,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+        OutlinedTextField(
+            value = displayValue,
+            onValueChange = { newValue ->
+                if (isCurrency) {
+                    val cleanDigits = newValue.filter { it.isDigit() }
+                    onValueChange(cleanDigits)
+                } else {
+                    onValueChange(newValue)
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    style = ArusTypography.bodyMedium,
+                    color = ArusTextSecondary
+                )
+            },
+            prefix = if (isCurrency) {
+                {
+                    Text(
+                        text = "Rp ",
+                        style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = ArusTextPrimary
+                    )
+                }
+            } else null,
+            textStyle = if (isCurrency) {
+                ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold, color = ArusTextPrimary)
+            } else {
+                ArusTypography.bodyLarge.copy(color = ArusTextPrimary)
+            },
+            keyboardOptions = if (isCurrency) {
+                KeyboardOptions(keyboardType = KeyboardType.Number)
+            } else KeyboardOptions.Default,
+            singleLine = singleLine,
+            isError = errorMessage != null,
+            shape = RoundedCornerShape(16.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = ArusSurface,
+                unfocusedContainerColor = ArusSurface,
+                errorContainerColor = ArusSurface,
+                focusedBorderColor = ArusBrandPrimary,
+                unfocusedBorderColor = ArusBorder,
+                errorBorderColor = ArusExpense
+            )
+        )
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                style = ArusTypography.labelSmall,
+                color = ArusExpense,
+                modifier = Modifier.padding(top = 4.dp, start = 4.dp)
+            )
+        }
+    }
+}
+
+// ============================================================================
+// 5. ARUS CATEGORY TILE (Soft Tile with Notion Accent Colors)
+// ============================================================================
+
+@Composable
+fun ArusCategoryTile(
+    iconResId: Int,
+    tileColor: Color,
+    modifier: Modifier = Modifier,
+    iconTint: Color = ArusTextPrimary,
+    size: Dp = 44.dp
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(SoftTileShape)
+            .background(tileColor),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(id = iconResId),
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.size(size * 0.5f)
+        )
+    }
+}
+
+// ============================================================================
+// 6. ARUS CHIP (Filter & Selector Pill Chip)
+// ============================================================================
+
+@Composable
+fun ArusChip(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    accentColor: Color = ArusBrandPrimary
+) {
+    val backgroundColor = if (selected) accentColor else ArusSurface
+    val textColor = if (selected) Color.White else ArusTextPrimary
+    val borderColor = if (selected) accentColor else ArusBorder
+
+    Box(
+        modifier = modifier
+            .heightIn(min = 42.dp)
+            .clip(PillShape)
+            .background(backgroundColor)
+            .border(1.dp, borderColor, PillShape)
+            .clickable { onClick() }
+            .padding(horizontal = 20.dp, vertical = 10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = ArusTypography.labelLarge.copy(
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                color = textColor
+            )
+        )
+    }
+}
+
+// ============================================================================
+// 7. ARUS STAT CARD (Financial Summary Card)
+// ============================================================================
+
+@Composable
+fun ArusStatCard(
+    title: String,
+    amount: Long,
+    modifier: Modifier = Modifier,
+    isIncome: Boolean? = null,
+    subtitle: String? = null,
+    showEyeButton: Boolean = false,
+    isBalanceHidden: Boolean = false,
+    onToggleHideBalance: (() -> Unit)? = null
+) {
+    val accentColor = when (isIncome) {
+        true -> ArusIncome
+        false -> ArusExpense
+        null -> ArusTextPrimary
+    }
+
+    val displayAmount = if (isBalanceHidden) "Rp ••••••••" else amount.formatRupiah()
+
+    ArusCard(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title.uppercase(),
+                style = ArusTypography.labelMedium,
+                color = ArusTextSecondary
+            )
+            if (showEyeButton && onToggleHideBalance != null) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(ArusBrandSoft)
+                        .clickable { onToggleHideBalance() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = if (isBalanceHidden) R.drawable.fa_eye_slash else R.drawable.fa_eye),
+                        contentDescription = if (isBalanceHidden) "Tampilkan Saldo" else "Sembunyikan Saldo",
+                        tint = ArusBrandPrimary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = displayAmount,
+            style = ArusTypography.displayMedium,
+            color = accentColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (subtitle != null) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = subtitle,
+                style = ArusTypography.labelSmall,
+                color = ArusTextSecondary
+            )
+        }
+    }
+}
+
+// ============================================================================
+// 8. ARUS WALLET CARD (Bevel Individual Wallet Card)
+// ============================================================================
+
+@Composable
+fun ArusWalletCard(
+    walletName: String,
+    balance: Long,
+    modifier: Modifier = Modifier,
+    iconResId: Int = R.drawable.fa_wallet,
+    tileColor: Color = NotionSkySoft,
+    iconTint: Color = NotionSky,
+    onClick: (() -> Unit)? = null
+) {
+    ArusCard(
+        modifier = modifier.width(180.dp),
+        onClick = onClick
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            ArusCategoryTile(
+                iconResId = iconResId,
+                tileColor = tileColor,
+                iconTint = iconTint,
+                size = 36.dp
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = walletName,
+            style = ArusTypography.labelMedium,
+            color = ArusTextSecondary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = balance.formatRupiah(),
+            style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = ArusTextPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+// ============================================================================
+// 9. ARUS SEGMENTED CONTROL (Pill Switcher)
+// ============================================================================
+
+@Composable
+fun ArusSegmentedControl(
+    options: List<String>,
+    selectedIndex: Int,
+    onOptionSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = PillShape,
+        color = ArusSurface,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        border = androidx.compose.foundation.BorderStroke(1.dp, ArusBorder),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(50.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            options.forEachIndexed { index, option ->
+                val isSelected = index == selectedIndex
+                val backgroundColor = if (isSelected) ArusBrandPrimary else Color.Transparent
+                val textColor = if (isSelected) Color.White else ArusTextSecondary
+                val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(PillShape)
+                        .background(backgroundColor)
+                        .clickable { onOptionSelected(index) }
+                        .padding(horizontal = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = option,
+                        style = ArusTypography.titleMedium.copy(
+                            fontSize = 13.5.sp,
+                            fontWeight = fontWeight,
+                            letterSpacing = 0.sp,
+                            color = textColor
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ============================================================================
+// 10. ARUS TRANSACTION ROW (List Row with Category Soft Tile)
+// ============================================================================
+
+enum class TransactionType { INCOME, EXPENSE, TRANSFER }
+
+@Composable
+fun ArusTransactionRow(
+    title: String,
+    subtitle: String,
+    amount: Long,
+    type: TransactionType,
+    iconResId: Int,
+    tileColor: Color,
+    iconTint: Color,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
+) {
+    val amountPrefix = when (type) {
+        TransactionType.INCOME -> "+ "
+        TransactionType.EXPENSE -> "− "
+        TransactionType.TRANSFER -> ""
+    }
+    val amountColor = when (type) {
+        TransactionType.INCOME -> ArusIncome
+        TransactionType.EXPENSE -> ArusExpense
+        TransactionType.TRANSFER -> ArusTextPrimary
+    }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(ArusSurface)
+            .border(1.dp, ArusBorder, RoundedCornerShape(16.dp))
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ArusCategoryTile(
+            iconResId = iconResId,
+            tileColor = tileColor,
+            iconTint = iconTint,
+            size = 44.dp
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = ArusTextPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                style = ArusTypography.labelSmall,
+                color = ArusTextSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = "$amountPrefix${amount.formatRupiah()}",
+            style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            color = amountColor
+        )
+    }
+}
+
+// ============================================================================
+// 11. ARUS BAR CHART (Compose Canvas Dual Bar Chart)
+// ============================================================================
+
+data class BarChartEntry(
+    val label: String,
+    val incomeAmount: Long,
+    val expenseAmount: Long
+)
+
+@Composable
+fun ArusBarChart(
+    entries: List<BarChartEntry>,
+    modifier: Modifier = Modifier
+) {
+    ArusCard(modifier = modifier) {
+        Text(
+            text = "PERBANDINGAN PEMASUKAN VS PENGELUARAN",
+            style = ArusTypography.labelMedium,
+            color = ArusTextSecondary
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (entries.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Belum ada data laporan",
+                    style = ArusTypography.bodyMedium,
+                    color = ArusTextSecondary
+                )
+            }
+        } else {
+            val maxVal = entries.maxOf { maxOf(it.incomeAmount, it.expenseAmount) }.coerceAtLeast(1L)
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                entries.forEach { entry ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.Bottom,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            val incomeRatio = (entry.incomeAmount.toFloat() / maxVal).coerceIn(0.05f, 1f)
+                            Box(
+                                modifier = Modifier
+                                    .width(12.dp)
+                                    .fillMaxHeight(incomeRatio)
+                                    .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
+                                    .background(ArusIncome)
+                            )
+                            val expenseRatio = (entry.expenseAmount.toFloat() / maxVal).coerceIn(0.05f, 1f)
+                            Box(
+                                modifier = Modifier
+                                    .width(12.dp)
+                                    .fillMaxHeight(expenseRatio)
+                                    .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
+                                    .background(ArusExpense)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = entry.label,
+                            style = ArusTypography.labelSmall,
+                            color = ArusTextSecondary,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(ArusIncome)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(text = "Pemasukan", style = ArusTypography.labelSmall, color = ArusTextPrimary)
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(ArusExpense)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(text = "Pengeluaran", style = ArusTypography.labelSmall, color = ArusTextPrimary)
+            }
+        }
+    }
+}
+
+// ============================================================================
+// 12. ARUS TOP APP BAR (Clean Top Bar with Back Navigation)
+// ============================================================================
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ArusTopAppBar(
+    title: String,
+    modifier: Modifier = Modifier,
+    showBackButton: Boolean = false,
+    onBackClick: (() -> Unit)? = null,
+    actions: @Composable RowScope.() -> Unit = {}
+) {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = title,
+                style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = ArusTextPrimary
+            )
+        },
+        navigationIcon = {
+            if (showBackButton && onBackClick != null) {
+                Box(
+                    modifier = Modifier
+                        .padding(start = 12.dp)
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(ArusSurface)
+                        .border(1.dp, ArusBorder, CircleShape)
+                        .clickable { onBackClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_arrow_left),
+                        contentDescription = "Kembali",
+                        tint = ArusTextPrimary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        },
+        actions = actions,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = ArusBackground
+        ),
+        windowInsets = TopAppBarDefaults.windowInsets,
+        modifier = modifier
+    )
+}
+
+// ============================================================================
+// 13. ARUS BOTTOM NAVIGATION (Floating Pill 4 Tabs + FAB Pill (+))
+// ============================================================================
+
+enum class ArusTab(val title: String, val iconRes: Int) {
+    BERANDA("Beranda", R.drawable.fa_house),
+    TRANSAKSI("Transaksi", R.drawable.fa_receipt),
+    LAPORAN("Laporan", R.drawable.fa_chart_column),
+    PENGATURAN("Pengaturan", R.drawable.fa_sliders)
+}
+
+@Composable
+fun ArusBottomNavigation(
+    selectedTab: ArusTab,
+    onTabSelected: (ArusTab) -> Unit,
+    onAddClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        // Ultra-smooth multi-stop gradient layer extending lower down behind navbar
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(140.dp)
+                .background(
+                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                        colors = listOf(
+                            ArusBackground.copy(alpha = 0f),
+                            ArusBackground.copy(alpha = 0.05f),
+                            ArusBackground.copy(alpha = 0.2f),
+                            ArusBackground.copy(alpha = 0.45f),
+                            ArusBackground.copy(alpha = 0.75f),
+                            ArusBackground.copy(alpha = 0.95f),
+                            ArusBackground,
+                            ArusBackground
+                        )
+                    )
+                )
+        )
+
+        Surface(
+            shape = PillShape,
+            color = ArusSurface,
+            tonalElevation = 6.dp,
+            shadowElevation = 8.dp,
+            border = androidx.compose.foundation.BorderStroke(1.dp, ArusBorder),
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ArusTab.entries.forEach { tab ->
+                    val isSelected = tab == selectedTab
+                    val backgroundColor = if (isSelected) ArusBrandPrimary else Color.Transparent
+                    val contentColor = if (isSelected) Color.White else ArusTextSecondary
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(PillShape)
+                            .background(backgroundColor)
+                            .clickable { onTabSelected(tab) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = tab.iconRes),
+                                contentDescription = tab.title,
+                                tint = contentColor,
+                                modifier = Modifier.size(19.dp)
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = tab.title,
+                                style = ArusTypography.labelSmall.copy(
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                    color = contentColor
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ============================================================================
+// 14. ARUS EMPTY STATE & LOADING STATE
+// ============================================================================
+
+@Composable
+fun ArusEmptyState(
+    title: String,
+    description: String,
+    modifier: Modifier = Modifier,
+    actionButtonText: String? = null,
+    onActionClick: (() -> Unit)? = null
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(CircleShape)
+                .background(ArusBrandSoft),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.fa_money_bill),
+                contentDescription = null,
+                tint = ArusBrandPrimary,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = title,
+            style = ArusTypography.titleLarge,
+            color = ArusTextPrimary,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = description,
+            style = ArusTypography.bodyMedium,
+            color = ArusTextSecondary,
+            textAlign = TextAlign.Center
+        )
+        if (actionButtonText != null && onActionClick != null) {
+            Spacer(modifier = Modifier.height(20.dp))
+            ArusPrimaryButton(
+                text = actionButtonText,
+                onClick = onActionClick,
+                modifier = Modifier.widthIn(max = 220.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun ArusLoadingState(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            color = ArusBrandPrimary,
+            strokeWidth = 3.dp
+        )
+    }
+}
+
+// ============================================================================
+// 15. ARUS HELPER COMPONENTS (Section Header, Date Header, Confirmation Sheet)
+// ============================================================================
+
+@Composable
+fun ArusSectionHeader(
+    title: String,
+    modifier: Modifier = Modifier,
+    actionText: String? = null,
+    onActionClick: (() -> Unit)? = null
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = ArusTextPrimary
+        )
+        if (actionText != null && onActionClick != null) {
+            Text(
+                text = actionText,
+                style = ArusTypography.labelLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = ArusBrandPrimary
+                ),
+                modifier = Modifier.clickable { onActionClick() }
+            )
+        }
+    }
+}
+
+@Composable
+fun ArusDateHeaderRow(
+    dateText: String,
+    modifier: Modifier = Modifier,
+    totalDailyText: String? = null
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = dateText.uppercase(),
+            style = ArusTypography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = ArusTextSecondary
+        )
+        if (totalDailyText != null) {
+            Text(
+                text = totalDailyText,
+                style = ArusTypography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                color = ArusTextSecondary
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ArusConfirmationSheet(
+    title: String,
+    message: String,
+    confirmButtonText: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    iconResId: Int? = R.drawable.fa_money_bill,
+    tileColor: Color = NotionCoralSoft,
+    iconTint: Color = NotionCoral,
+    isDestructive: Boolean = false
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = ArusSurface,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 12.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(PillShape)
+                    .background(ArusBorder)
+            )
+        },
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (iconResId != null) {
+                ArusCategoryTile(
+                    iconResId = iconResId,
+                    tileColor = tileColor,
+                    iconTint = iconTint,
+                    size = 56.dp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            Text(
+                text = title,
+                style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = ArusTextPrimary,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = message,
+                style = ArusTypography.bodyMedium,
+                color = ArusTextSecondary,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ArusSecondaryButton(
+                    text = "Batal",
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f)
+                )
+                Button(
+                    onClick = {
+                        onConfirm()
+                        onDismiss()
+                    },
+                    shape = PillShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isDestructive) ArusExpense else ArusBrandPrimary,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp)
+                ) {
+                    Text(
+                        text = confirmButtonText,
+                        style = ArusTypography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+data class SelectionItem(
+    val id: String,
+    val title: String,
+    val subtitle: String? = null,
+    val iconResId: Int? = null,
+    val tileColor: Color = NotionSkySoft,
+    val iconTint: Color = NotionSky
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ArusSelectionSheet(
+    title: String,
+    items: List<SelectionItem>,
+    selectedItemId: String?,
+    onItemSelected: (SelectionItem) -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = ArusSurface,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 12.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(PillShape)
+                    .background(ArusBorder)
+            )
+        },
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp)
+        ) {
+            Text(
+                text = title,
+                style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = ArusTextPrimary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items.forEach { item ->
+                    val isSelected = item.id == selectedItemId
+                    val rowBorderColor = if (isSelected) ArusBrandPrimary else ArusBorder
+                    val rowBgColor = if (isSelected) ArusBrandSoft else ArusSurface
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(rowBgColor)
+                            .border(1.dp, rowBorderColor, RoundedCornerShape(16.dp))
+                            .clickable {
+                                onItemSelected(item)
+                                onDismiss()
+                            }
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            if (item.iconResId != null) {
+                                ArusCategoryTile(
+                                    iconResId = item.iconResId,
+                                    tileColor = item.tileColor,
+                                    iconTint = item.iconTint,
+                                    size = 40.dp
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                            }
+                            Column {
+                                Text(
+                                    text = item.title,
+                                    style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = ArusTextPrimary
+                                )
+                                if (item.subtitle != null) {
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = item.subtitle,
+                                        style = ArusTypography.labelSmall,
+                                        color = ArusTextSecondary
+                                    )
+                                }
+                            }
+                        }
+                        RadioButton(
+                            selected = isSelected,
+                            onClick = {
+                                onItemSelected(item)
+                                onDismiss()
+                            },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = ArusBrandPrimary,
+                                unselectedColor = ArusTextSecondary
+                            )
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+// ============================================================================
+// 15B. ARUS TRANSACTION DETAIL SHEET (Modal Bottom Sheet Preview)
+// ============================================================================
+
+data class TransactionDetailData(
+    val title: String,
+    val amount: Long,
+    val type: TransactionType,
+    val dateText: String,
+    val walletText: String,
+    val noteText: String? = null,
+    val iconResId: Int = R.drawable.fa_tags,
+    val tileColor: Color = NotionSkySoft,
+    val iconTint: Color = NotionSky
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ArusTransactionDetailSheet(
+    data: TransactionDetailData,
+    onDeleteClick: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val (amountPrefix, amountColor) = when (data.type) {
+        TransactionType.INCOME -> "+ " to ArusIncome
+        TransactionType.EXPENSE -> "- " to ArusExpense
+        TransactionType.TRANSFER -> "" to ArusTextPrimary
+    }
+
+    val typeBadgeText = when (data.type) {
+        TransactionType.INCOME -> "PEMASUKAN"
+        TransactionType.EXPENSE -> "PENGELUARAN"
+        TransactionType.TRANSFER -> "TRANSFER"
+    }
+
+    val trendStyle = when (data.type) {
+        TransactionType.INCOME -> TrendStyle.POSITIVE
+        TransactionType.EXPENSE -> TrendStyle.NEGATIVE
+        TransactionType.TRANSFER -> TrendStyle.NEUTRAL
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = ArusSurface,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 12.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(PillShape)
+                    .background(ArusBorder)
+            )
+        },
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // 1. Notion Soft Tile Icon Badge
+            ArusCategoryTile(
+                iconResId = data.iconResId,
+                tileColor = data.tileColor,
+                iconTint = data.iconTint,
+                size = 56.dp
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = data.title,
+                style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = ArusTextPrimary
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+
+            ArusTrendBadge(text = typeBadgeText, style = trendStyle)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 2. Large Nominal Amount
+            Text(
+                text = "$amountPrefix${data.amount.formatRupiah()}",
+                style = ArusTypography.displayLarge.copy(
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = amountColor
+                )
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 3. Property Details List Card
+            ArusCard(cornerRadius = 20.dp) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    DetailRow(label = "Tanggal & Waktu", value = data.dateText)
+                    DetailRow(label = "Dompet", value = data.walletText)
+                    if (!data.noteText.isNullOrBlank()) {
+                        DetailRow(label = "Catatan", value = data.noteText)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 4. Action Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ArusSecondaryButton(
+                    text = "Tutup",
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f)
+                )
+                ArusPrimaryButton(
+                    text = "Hapus",
+                    onClick = {
+                        onDeleteClick()
+                        onDismiss()
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = ArusTypography.bodyMedium,
+            color = ArusTextSecondary
+        )
+        Text(
+            text = value,
+            style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = ArusTextPrimary
+        )
+    }
+}
+
+// ============================================================================
+// 16. BEVEL ADVANCED COMPONENTS (Badge, Toggle Row, Progress Card, Keypad)
+// ============================================================================
+
+enum class TrendStyle { POSITIVE, NEGATIVE, NEUTRAL, FUTURE }
+
+@Composable
+fun ArusTrendBadge(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: TrendStyle = TrendStyle.NEUTRAL
+) {
+    val (bgColor, textColor) = when (style) {
+        TrendStyle.POSITIVE -> ArusIncomeSoft to ArusIncome
+        TrendStyle.NEGATIVE -> ArusExpenseSoft to ArusExpense
+        TrendStyle.NEUTRAL -> ArusBrandSoft to ArusTextPrimary
+        TrendStyle.FUTURE -> NotionLavenderSoft to NotionLavender
+    }
+
+    Box(
+        modifier = modifier
+            .clip(PillShape)
+            .background(bgColor)
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = ArusTypography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = textColor
+        )
+    }
+}
+
+@Composable
+fun ArusToggleRow(
+    title: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    iconResId: Int? = null,
+    tileColor: Color = NotionLavenderSoft,
+    iconTint: Color = NotionLavender
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(ArusSurface)
+            .border(1.dp, ArusBorder, RoundedCornerShape(16.dp))
+            .clickable { onCheckedChange(!checked) }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            if (iconResId != null) {
+                ArusCategoryTile(
+                    iconResId = iconResId,
+                    tileColor = tileColor,
+                    iconTint = iconTint,
+                    size = 36.dp
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+            }
+            Column {
+                Text(
+                    text = title,
+                    style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = ArusTextPrimary
+                )
+                if (subtitle != null) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = subtitle,
+                        style = ArusTypography.labelSmall,
+                        color = ArusTextSecondary
+                    )
+                }
+            }
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = ArusBrandPrimary,
+                uncheckedThumbColor = Color.White,
+                uncheckedTrackColor = ArusBorder
+            )
+        )
+    }
+}
+
+@Composable
+fun ArusProgressCard(
+    title: String,
+    currentAmount: Long,
+    totalAmount: Long,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    progressColor: Color = ArusIncome
+) {
+    val progress = if (totalAmount > 0) {
+        (currentAmount.toFloat() / totalAmount.toFloat()).coerceIn(0f, 1f)
+    } else 0f
+    val percentage = (progress * 100).toInt()
+
+    ArusCard(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title.uppercase(),
+                style = ArusTypography.labelMedium,
+                color = ArusTextSecondary
+            )
+            ArusTrendBadge(
+                text = "$percentage%",
+                style = if (progress <= 0.8f) TrendStyle.POSITIVE else TrendStyle.NEGATIVE
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Text(
+                text = currentAmount.formatRupiah(),
+                style = ArusTypography.displayMedium,
+                color = ArusTextPrimary
+            )
+            Text(
+                text = "dari ${totalAmount.formatRupiah()}",
+                style = ArusTypography.labelSmall,
+                color = ArusTextSecondary
+            )
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .clip(PillShape),
+            color = progressColor,
+            trackColor = ArusBrandSoft
+        )
+        if (subtitle != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = subtitle,
+                style = ArusTypography.labelSmall,
+                color = ArusTextSecondary
+            )
+        }
+    }
+}
+
+@Composable
+fun ArusKeypadView(
+    onKeyPress: (String) -> Unit,
+    onDeletePress: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val keys = listOf(
+        listOf("1", "2", "3"),
+        listOf("4", "5", "6"),
+        listOf("7", "8", "9"),
+        listOf("000", "0", "⌫")
+    )
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        keys.forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                row.forEach { key ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(54.dp)
+                            .clip(PillShape)
+                            .background(ArusSurface)
+                            .border(1.dp, ArusBorder, PillShape)
+                            .clickable {
+                                if (key == "⌫") onDeletePress()
+                                else onKeyPress(key)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = key,
+                            style = ArusTypography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = if (key == "000") 16.sp else 22.sp
+                            ),
+                            color = ArusTextPrimary
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,374 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+:root{--brand:#0009ff;--brand-soft:#eceeff;--page:#f6f8fe;--card:#fff;--subtle:#e8effe;--ink:#34364a;--muted:#60657a;--border:#e5e9f2;--income:#087e56;--income-soft:#e3f8ee;--expense:#b7324c;--expense-soft:#fdeaf0;--warning:#986105;--warning-soft:#fff4d7;--shadow:0 8px 30px rgba(44,55,99,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--ink);font:14px/1.45 'Plus Jakarta Sans',system-ui,-apple-system,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer;color:inherit}#app{min-height:100dvh}.shell{max-width:460px;min-height:100dvh;margin:auto;background:var(--page);position:relative;overflow:hidden}.topbar{height:64px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(246,248,254,.92);backdrop-filter:blur(16px);z-index:5}.brand{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:800;letter-spacing:-.5px}.brandmark{width:34px;height:34px;border-radius:12px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:18px}.avatar{width:38px;height:38px;border:0;border-radius:50%;background:#fff;color:var(--brand);font-weight:800;box-shadow:inset 0 0 0 1px var(--border)}main{padding:4px 18px 108px}.heading{display:flex;align-items:flex-end;justify-content:space-between;margin:12px 2px 18px;gap:12px}.eyebrow{color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.02em}.h1{font-size:24px;line-height:1.2;letter-spacing:-.8px;margin:3px 0 0;font-weight:800}.h2{font-size:17px;letter-spacing:-.3px;margin:0;font-weight:800}.sub{color:var(--muted);font-size:12px;margin-top:4px}.link{border:0;background:transparent;color:var(--brand);font-weight:700;padding:8px 0}.stack{display:grid;gap:14px}.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;box-shadow:var(--shadow)}.balance-card{padding:20px;background:linear-gradient(140deg,#fff 0%,#f4f5ff 100%);position:relative;overflow:hidden}.balance-card:after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;background:#eceeff;right:-52px;top:-60px;opacity:.8}.balance-top{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center}.balance{position:relative;z-index:1;font-size:30px;font-weight:800;letter-spacing:-1.2px;margin:8px 0 3px;line-height:1.2}.balance-foot{position:relative;z-index:1;color:var(--muted);font-size:12px}.eye{border:0;background:#fff;border-radius:50%;width:36px;height:36px;color:var(--muted)}.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.quick button{border:0;background:transparent;padding:8px 2px;display:grid;justify-items:center;gap:7px;color:var(--ink);font-size:12px;font-weight:700}.quick-icon{width:52px;height:52px;border-radius:18px;display:grid;place-items:center;font-size:22px;background:var(--brand-soft);color:var(--brand)}.quick button:nth-child(2) .quick-icon{background:var(--expense-soft);color:var(--expense)}.quick button:nth-child(3) .quick-icon{background:#e9f3ff;color:#315bb5}.section-head{display:flex;align-items:center;justify-content:space-between;margin:5px 2px 10px}.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.metric{padding:15px}.metric .metric-icon{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:var(--income-soft);color:var(--income);font-weight:800;margin-bottom:10px}.metric.out .metric-icon{background:var(--expense-soft);color:var(--expense)}.metric-label{color:var(--muted);font-size:12px}.metric-value{font-size:16px;font-weight:800;margin-top:3px;letter-spacing:-.3px}.wallet-list,.transaction-list{display:grid;gap:2px}.wallet-row,.tx-row,.setting-row{display:flex;align-items:center;gap:12px;padding:11px 0}.wallet-row+.wallet-row,.tx-row+.tx-row,.setting-row+.setting-row{border-top:1px solid #f0f2f8}.tile{width:42px;height:42px;flex:none;border-radius:15px;background:var(--subtle);display:grid;place-items:center;color:var(--brand);font-size:18px;font-weight:800}.wallet-info,.tx-info{flex:1;min-width:0}.row-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row-meta{font-size:11px;color:#4d5265;margin-top:3px}.row-time{display:block;margin-top:4px;color:#60657a;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.25}.row-amount{font-size:12px;font-weight:800;white-space:nowrap}.positive{color:var(--income)}.negative{color:var(--expense)}.tx-sign{font-size:12px;font-weight:800}.date-label{font-size:12px;color:var(--muted);font-weight:700;margin:10px 0 2px}.bottomnav{position:fixed;z-index:6;bottom:0;left:50%;transform:translateX(-50%);width:min(460px,100%);padding:10px 12px max(12px,env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(5,1fr);align-items:center;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);border-top:1px solid var(--border)}.navitem{border:0;background:transparent;color:#888da0;display:grid;justify-items:center;gap:3px;font-size:10px;font-weight:600;padding:3px}.navitem .navicon{font-size:19px;line-height:21px}.navitem.active{color:var(--brand)}.navitem.add{width:52px;height:52px;margin:-24px auto 0;border-radius:18px;background:var(--brand);color:white;font-size:25px;box-shadow:0 8px 18px rgba(0,9,255,.24)}.navitem.add .navicon{font-size:26px}.pill-row{display:flex;gap:8px;overflow:auto;scrollbar-width:none}.pill{border:1px solid var(--border);background:#fff;border-radius:99px;padding:9px 14px;font-size:12px;font-weight:700;white-space:nowrap}.pill.active{color:var(--brand);background:var(--brand-soft);border-color:transparent}.search{height:46px;border-radius:16px;border:1px solid var(--border);background:#fff;padding:0 14px;display:flex;align-items:center;gap:9px;color:var(--muted)}.search input{border:0;outline:0;background:transparent;width:100%;color:var(--ink)}.month-select{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid var(--border);background:#fff;border-radius:15px;font-weight:700}.chart{height:178px;display:flex;align-items:flex-end;justify-content:space-around;padding:14px 8px 0;border-bottom:1px solid var(--border)}.chart-group{height:100%;display:flex;align-items:flex-end;gap:4px;position:relative;padding-bottom:24px}.bar{width:13px;border-radius:7px 7px 3px 3px;background:var(--brand)}.bar.exp{background:#f2a2b1}.chart-label{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted)}.legend{display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:11px;color:var(--muted)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--brand);margin-right:5px}.dot.exp{background:#f2a2b1}.form-card{display:grid;gap:15px}.type-tabs{display:grid;grid-template-columns:repeat(3,1fr);padding:4px;background:#edf0f7;border-radius:15px}.type-tabs button{border:0;background:transparent;border-radius:12px;padding:10px 4px;font-size:12px;font-weight:700;color:var(--muted)}.type-tabs button.active{background:#fff;color:var(--brand);box-shadow:0 2px 8px #25335c12}.amount-input{border:0;outline:0;text-align:center;width:100%;font-size:32px;font-weight:800;letter-spacing:-1px;color:var(--ink);padding:10px}.field{display:grid;gap:6px}.field label{font-size:12px;font-weight:700;color:var(--muted)}.control{width:100%;border:1px solid var(--border);border-radius:14px;background:#fff;padding:12px 13px;color:var(--ink);outline-color:var(--brand)}textarea.control{resize:vertical;min-height:70px}.primary{height:50px;border:0;border-radius:99px;background:var(--brand);color:#fff;font-weight:800;box-shadow:0 8px 18px #0009ff26}.secondary{height:46px;border:0;border-radius:99px;background:var(--brand-soft);color:var(--brand);font-weight:700;padding:0 18px}.full{width:100%}.empty{padding:30px 14px;text-align:center}.empty-icon{width:54px;height:54px;margin:0 auto 12px;border-radius:19px;background:var(--brand-soft);display:grid;place-items:center;color:var(--brand);font-size:24px}.empty p{color:var(--muted);font-size:12px;margin:6px 0 16px}.setting-group{font-size:11px;letter-spacing:.08em;color:var(--muted);font-weight:800;margin:8px 4px 0}.setting-row{padding:13px 0}.setting-row .tile{width:38px;height:38px;border-radius:13px}.chevron{color:#9ba0b1;margin-left:auto;font-size:18px}.modal-backdrop{position:fixed;inset:0;background:#1b214466;z-index:10;display:flex;align-items:flex-end;justify-content:center}.sheet{width:min(460px,100%);background:#fff;border-radius:26px 26px 0 0;padding:10px 20px max(24px,env(safe-area-inset-bottom));box-shadow:0 -10px 40px #1b21441c}.handle{width:38px;height:4px;background:#d9dce7;border-radius:9px;margin:2px auto 18px}.sheet h3{font-size:18px;margin:0 0 13px}.sheet-action{width:100%;border:0;background:#fff;display:flex;align-items:center;gap:13px;padding:12px 2px;text-align:left;font-weight:700}.sheet-action .tile{width:44px;height:44px}.toast{position:fixed;z-index:20;left:50%;bottom:88px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#303248;color:#fff;padding:11px 16px;border-radius:99px;font-size:12px;font-weight:700;transition:.2s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}.back{border:0;background:#fff;border-radius:13px;width:40px;height:40px;font-size:19px;box-shadow:inset 0 0 0 1px var(--border)}.top-title{font-size:16px;font-weight:800}.button-row{display:flex;gap:9px}.muted{color:var(--muted)}
+@media(min-width:700px){body{padding:22px 0}.shell{min-height:calc(100dvh - 44px);border-radius:30px;box-shadow:0 24px 80px #29345a20}.bottomnav{bottom:22px;border-radius:0 0 30px 30px}.topbar{border-radius:30px 30px 0 0}}
+
+/* Refinement: clearer hierarchy, tactile controls, and consistent Font Awesome icon weight. */
+:root{--shadow:0 5px 20px rgba(45,55,96,.055);--shadow-hover:0 10px 28px rgba(45,55,96,.10)}
+body{letter-spacing:-.12px}.shell{max-width:480px}.topbar{height:68px;padding-inline:22px}.brand{font-size:20px}.brandmark{border-radius:13px;box-shadow:0 6px 14px rgba(0,9,255,.2)}
+main{padding-inline:20px}.heading{margin:13px 2px 20px}.h1{font-size:25px;letter-spacing:-1px}.stack{gap:16px}.card{box-shadow:var(--shadow);transition:box-shadow .18s ease,transform .18s ease}.balance-card{background:#fff}.balance-card:after{width:166px;height:166px;background:var(--brand-soft);right:-54px;top:-66px}.balance{font-size:32px;letter-spacing:-1.35px;font-variant-numeric:tabular-nums}.quick{gap:14px}.quick button{gap:9px;font-size:12px}.quick-icon{width:54px;height:54px;border-radius:19px;font-size:18px;transition:transform .18s ease}.quick button:hover .quick-icon{transform:translateY(-2px)}.quick-icon.income,.tile.income{background:var(--income-soft);color:var(--income)}.quick-icon.expense,.tile.expense{background:var(--expense-soft);color:var(--expense)}.quick-icon.transfer,.tile.transfer{background:#e9f3ff;color:#315bb5}.section-head{margin-bottom:11px}.h2{font-size:17px;letter-spacing:-.45px}.metric{padding:16px}.metric-value{font-size:15px;font-variant-numeric:tabular-nums;letter-spacing:-.45px}.metric .metric-icon{font-size:13px}.tile{font-size:15px}.tx-tile.income{background:var(--income-soft);color:var(--income)}.tx-tile.expense{background:var(--expense-soft);color:var(--expense)}.tx-tile.transfer{background:var(--subtle);color:var(--brand)}.row-amount{font-variant-numeric:tabular-nums}.link{display:inline-flex;align-items:center;gap:7px}.link i{font-size:10px}.search-icon{width:18px;display:grid;place-items:center;font-size:13px}.eye i{font-size:14px}.navicon{display:grid;place-items:center}.navicon i{font-size:16px}.navitem.add .navicon i{font-size:18px}.back{display:grid;place-items:center;font-size:14px}.chevron{font-size:12px}.primary,.secondary,.pill,.navitem,.back,.eye,.avatar{transition:filter .15s ease,transform .15s ease,box-shadow .15s ease}.primary:hover{filter:brightness(.94);box-shadow:0 10px 22px rgba(0,9,255,.27)}.secondary:hover,.pill:hover{filter:brightness(.97)}button:active{transform:scale(.985)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(0,9,255,.25);outline-offset:2px}.primary i{margin-right:8px}.sheet-action .tile{font-size:15px}.empty-icon{font-size:19px}.date-label{letter-spacing:.06em;font-size:10px}.setting-row .chevron{margin-left:auto}
+@media(min-width:700px){.shell{min-height:calc(100dvh - 44px)}main{padding-inline:22px}.bottomnav{width:min(480px,100%)}}
+
+/* Settings rows are buttons: reset browser defaults and stack their text. */
+button.setting-row{width:100%;min-height:64px;padding:11px 0;border:0;background:transparent;color:inherit;text-align:left;font:inherit;box-shadow:none;border-radius:0;appearance:none;-webkit-appearance:none}
+.setting-row .wallet-info .row-title,.setting-row .wallet-info .row-meta{display:block}
+.setting-row .wallet-info .row-meta{line-height:1.45}
+.setting-row+.setting-row{border-top:1px solid var(--border)}
+.setting-row:focus-visible{outline:3px solid rgba(0,9,255,.22);outline-offset:2px;border-radius:12px}
+.setting-row:hover{background:#f9faff}
+
+/* Floating, fully rounded bottom navigation with a circular add action. */
+.bottomnav{bottom:max(12px,env(safe-area-inset-bottom));width:min(440px,calc(100% - 28px));padding:7px 12px max(7px,env(safe-area-inset-bottom));border:1px solid rgba(229,233,242,.95);border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 12px 34px rgba(42,51,91,.14);}
+.navitem{min-height:48px;border-radius:999px;align-content:center;}
+.navitem.add{width:56px;height:56px;min-height:56px;margin:-22px auto 0;border-radius:50%;align-content:center;box-shadow:0 8px 18px rgba(0,9,255,.26);}
+.navitem.add .navicon{width:100%;height:100%;display:grid;place-items:center;}
+@media(min-width:700px){.bottomnav{bottom:34px;border-radius:999px;width:min(440px,calc(100% - 28px));}}
+.chart.dense{justify-content:space-between;padding-inline:0}.chart.dense .chart-group{gap:2px}.chart.dense .bar{width:8px}.chart.dense .chart-label{font-size:9px}
+
+/* Transaction detail and edit flow */
+button.tx-row{width:100%;border:0;background:transparent;text-align:left;font:inherit;color:inherit;cursor:pointer;border-radius:14px;padding:11px 8px;margin-inline:-8px;transition:background .15s ease}
+button.tx-row:hover{background:#f8f9ff}
+button.tx-row:focus-visible{outline:3px solid rgba(0,9,255,.22);outline-offset:1px}
+.tx-row .tx-info{display:grid;gap:3px}.detail-hero{text-align:center;padding:25px 18px}.detail-icon{width:58px;height:58px;border-radius:20px;display:grid;place-items:center;margin:0 auto 13px;background:var(--expense-soft);color:var(--expense);font-size:20px}.detail-icon.income{background:var(--income-soft);color:var(--income)}.detail-icon.transfer{background:var(--subtle);color:var(--brand)}.detail-kind{color:var(--muted);font-weight:700;font-size:13px}.detail-amount{font-size:30px;font-weight:800;letter-spacing:-1px;margin:5px 0;font-variant-numeric:tabular-nums}.detail-date{color:var(--muted);font-size:12px}.detail-fields{padding:4px 16px}.detail-field{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:14px 0}.detail-field+.detail-field{border-top:1px solid var(--border)}.detail-field span{color:var(--muted);font-size:12px}.detail-field strong{font-size:13px;text-align:right;overflow-wrap:anywhere}.danger-button{height:48px;border:1px solid #f3cbd4;background:var(--expense-soft);border-radius:999px;color:var(--expense);font-weight:800;padding:0 20px}.danger-button.full{width:100%}.danger-button i,.primary i{margin-right:8px}.delete-mark{width:46px;height:46px;border-radius:16px;background:var(--expense-soft);color:var(--expense);display:grid;place-items:center;margin:0 0 12px}.delete-actions{display:grid;grid-template-columns:1fr 1.3fr;gap:10px;margin-top:18px}.delete-actions .danger-button{height:46px}.sheet[role="alertdialog"]{padding-bottom:max(28px,env(safe-area-inset-bottom))}
+
+/* Locally hosted SVG icon sprite: no icon font or CDN request is required. */
+/* Small screens, touch targets, keyboard navigation, and motion preferences. */
+.pill{min-height:44px}.link{min-height:44px;padding:8px 2px}.period-arrow{width:44px;height:44px}.navitem{min-height:48px}.quick button{min-height:76px}.control{min-height:46px}
+@media(max-width:380px){
+  .topbar{padding-inline:16px}main{padding-inline:15px;padding-bottom:120px}.heading{margin-bottom:16px}.h1{font-size:clamp(22px,6.5vw,25px)}.balance{font-size:clamp(24px,7.5vw,32px);letter-spacing:-.9px}.balance-card{padding:17px}.card{padding:14px}.metric{padding:12px}.metric-value{font-size:clamp(12px,3.6vw,15px)}.quick{gap:5px}.quick-icon{width:49px;height:49px}.tx-row{gap:8px;padding-inline:5px;margin-inline:-5px}.tx-row .tile{width:38px;height:38px}.row-amount{font-size:10px}.row-title{font-size:12px}.row-meta{font-size:10px}.bottomnav{width:calc(100% - 20px);padding-inline:7px}.navitem{font-size:9px}.navitem.add{width:52px;height:52px;min-height:52px;margin-top:-19px}
+}
+@media(max-width:340px){.metric-grid{grid-template-columns:1fr}.bottomnav{gap:0}.navitem{font-size:8px}.detail-amount{font-size:26px}.delete-actions{grid-template-columns:1fr 1fr}}
+@supports selector(.shell:has(input:focus)){.shell:has(#search:focus) .bottomnav{opacity:0;pointer-events:none;transform:translate(-50%,12px)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+@media(prefers-contrast:more){.card,.search,.control,.bottomnav{border-color:#7d8292}.muted,.sub,.eyebrow,.row-meta{color:#4d5265}}
+.period-control{min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 8px;border:1px solid var(--border);border-radius:16px;background:#fff}.period-control strong{text-align:center;text-transform:capitalize;font-size:13px}.period-arrow{border:0;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;flex:none}.report-wallet>span{font-size:12px;font-weight:700;color:var(--muted)}
+.primary{height:auto;min-height:50px;padding:12px 18px}.secondary{height:auto;min-height:46px;padding-block:11px}.danger-button{height:auto;min-height:48px;padding-block:11px}
+@media(max-width:380px){.primary{min-height:48px;padding-inline:14px}.secondary{min-height:44px;padding-inline:14px}}
+@media(forced-colors:active){.primary,.navitem.add{border:1px solid ButtonText}.card,.control,.pill{border:1px solid CanvasText}.positive,.negative{color:CanvasText}}
+
+/* Keep the scrollable screen above the floating tab bar, as in a native scaffold. */
+html,body,#app{height:100%;min-height:100%}
+.shell{height:100dvh;min-height:0;display:flex;flex-direction:column}
+.topbar{flex:0 0 auto}
+.shell main{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:24px}
+.shell.with-nav main{margin-bottom:calc(82px + env(safe-area-inset-bottom))}
+@media(min-width:700px){.shell{height:calc(100dvh - 44px);min-height:0}.shell.with-nav main{margin-bottom:82px}}
+@media(max-width:380px){.shell main{padding-bottom:24px}}
+.category-list{padding-block:4px}.category-row{display:flex;align-items:center;gap:10px;padding:10px 0}.category-row+.category-row{border-top:1px solid var(--border)}.category-info{display:grid;gap:3px;min-width:0;flex:1}.icon-action{width:42px;height:42px;flex:none;border:0;border-radius:14px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center}.icon-action.delete{background:var(--expense-soft);color:var(--expense)}.icon-action:disabled{opacity:.45;cursor:not-allowed}
+.filter-wallet{gap:6px}.filter-wallet>span{font-size:11px;font-weight:700;color:var(--muted)}.filter-wallet .control{min-height:46px}.date-filters{padding-bottom:2px}.date-filters .pill{flex:none}
+
+/* Keep labels legible and inside their columns when users enlarge text. */
+.quick button{min-width:0;text-align:center;font-size:9px;white-space:nowrap}
+.quick-label{display:block;max-width:100%;line-height:1.2;white-space:nowrap;overflow-wrap:normal}
+.bottomnav{grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;padding-right:12px}
+.navitem{min-width:0}
+.navlabel{display:block;max-width:100%;line-height:1.1;text-align:center;overflow-wrap:anywhere}
+.navitem .navlabel{font-size:10px}
+@media(max-width:380px){.navitem .navlabel{font-size:9px}}
+.nav-add{position:relative;left:auto;top:auto;transform:none;grid-column:3;grid-row:1;justify-self:center;align-self:center;width:48px;height:48px;margin:-16px 0 0;border:2px solid white;border-radius:50%;display:grid;place-items:center;background:#0009ff;color:white;font-size:19px;box-shadow:0 8px 18px rgba(0,9,255,.24)}
+.nav-add:hover{filter:brightness(.94)}
+.nav-add:focus-visible{outline:3px solid rgba(0,9,255,.3);outline-offset:3px}
+@media(max-width:380px){.bottomnav{margin-bottom:5px}.nav-add{width:46px;height:46px;margin-top:-14px}}
+.section-head{flex-wrap:wrap;align-items:center;gap:4px 8px}
+.section-head>*{min-width:0;max-width:100%}
+.section-head .link{white-space:normal;text-align:right;overflow-wrap:anywhere}
+.home-screen .section-head{flex-wrap:nowrap;align-items:center}
+.home-screen .section-head .link{flex:none;white-space:nowrap;font-size:12px}
+@media(max-width:380px){.home-screen .section-head .link{font-size:11px;gap:4px}}
+.heading>div{min-width:0;max-width:100%}
+.avatar{flex:none;min-width:38px;min-height:38px;display:grid;place-items:center;overflow:hidden}
+
+/* Home uses one strong balance surface, tactile transaction actions, and quieter grouped information. */
+/* Home screen follows Stitch content order while preserving Arus product rules. */
+.home-screen .topbar{height:76px;padding:12px 20px;background:rgba(255,255,255,.9);border-bottom:1px solid #e8ebf2}
+.home-top-brand{display:flex;align-items:center;gap:11px}
+.home-monogram{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#eef1ff;border:1px solid #dfe4ff;color:var(--brand);font-size:12px;font-weight:800;letter-spacing:-.4px}
+.home-top-copy{display:grid;gap:1px;line-height:1.25}
+.home-top-copy span{color:#60657a;font-size:11px;font-weight:500}
+.home-top-copy strong{color:var(--ink);font-size:15px;font-weight:800}
+.home-settings{display:grid;place-items:center;color:#60657a;background:#f1f3f8;border:0;box-shadow:none}
+.home-screen main{padding-top:12px;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.home-screen .stack{gap:15px}
+.home-screen .balance-card{padding:20px;border:0;border-radius:18px;background:linear-gradient(120deg,#1745bd 0%,#2563eb 58%,#3b82f6 100%);color:white;box-shadow:0 12px 27px rgba(37,99,235,.3)}
+.home-screen .balance-card:after{content:"";display:block;position:absolute;width:190px;height:190px;right:-80px;top:-70px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.25),rgba(255,255,255,0) 72%)}
+.home-screen .balance-label{color:#dbe2ff;font-size:11px;font-weight:700;letter-spacing:.09em}
+.home-screen .balance-top{align-items:center}
+.home-screen .balance{margin:5px 0 12px;color:white;font-size:clamp(27px,7.4vw,34px);letter-spacing:-1.2px;font-variant-numeric:tabular-nums}
+.home-screen .eye{width:40px;height:40px;background:rgba(255,255,255,.14);color:white;border:1px solid rgba(255,255,255,.2)}
+.home-screen .balance-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:9px;border-top:1px solid rgba(255,255,255,.24);color:#e1e6ff;font-size:12px}
+.home-screen .balance-detail{min-height:36px}
+.home-screen .balance-footer>span{display:flex;align-items:center;gap:7px}
+.home-screen .balance-detail{display:flex;align-items:center;gap:6px;border:0;background:none;color:white;font-weight:700;padding:7px 0}
+.home-screen .home-actions-panel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;padding:12px 8px;border:1px solid var(--border);border-radius:18px;background:white;box-shadow:0 5px 18px rgba(45,55,96,.045)}
+.home-action{min-width:0;min-height:76px;border:0;border-radius:15px;background:transparent;display:grid;grid-template-rows:44px auto;justify-items:center;align-content:center;gap:5px;padding:5px 2px;text-align:center;font-size:11px;font-weight:700;line-height:1.2;overflow-wrap:anywhere}
+.home-action:hover{background:#f8f9ff}
+.home-action-icon{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand);font-size:19px}
+.home-action-icon.income{background:var(--income-soft);color:var(--income)}
+.home-action-icon.expense{background:var(--expense-soft);color:var(--expense)}
+.home-action-icon.transfer{background:#e9f3ff;color:#315bb5}
+.home-action-icon.wallet-shortcut{background:#eef0ff;color:#4047c8}
+.home-action:focus-visible{outline:3px solid rgba(0,9,255,.25);outline-offset:1px}
+.home-screen .home-summary.card{padding:16px;border-radius:18px;background:white;box-shadow:0 5px 18px rgba(45,55,96,.045)}
+.home-summary .section-head{align-items:center;margin:0 0 13px}
+.home-summary .h2,.home-list-section .h2{margin-top:2px}
+.summary-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.summary-cell{min-width:0;display:grid;gap:7px;padding:0 9px;text-align:center}
+.summary-cell:first-child{padding-left:0}
+.summary-cell+.summary-cell{border-left:1px solid var(--border)}
+.summary-label{display:flex;align-items:center;justify-content:center;gap:4px;color:#4d5265;font-size:10px;font-weight:700;white-space:nowrap}
+.summary-label i{font-size:10px}
+.summary-cell strong{font-size:clamp(11px,3.2vw,13px);font-weight:800;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.summary-cell.net strong{color:var(--brand)}
+.home-screen .flow-caption{margin-top:8px;color:#4d5265;font-size:11px;font-weight:600;line-height:1.4}
+.home-transfer-note{margin:-8px 2px 0;color:#4d5265;font-size:11px;font-weight:600}
+.home-screen .home-list-section .section-head{margin:0 2px 10px}
+.home-transfer-note{margin:-8px 2px 0;color:#4d5265;font-size:11px;font-weight:600}
+.home-cashflow{padding:16px;border-radius:18px;background:#fff;box-shadow:0 5px 18px rgba(45,55,96,.045)}
+.home-cashflow .section-head{margin:0 0 10px;align-items:center}
+.cashflow-caption{display:block;margin-top:2px;color:#8991a6;font-size:10px}
+.cashflow-period{display:inline-flex;align-items:center;gap:8px;padding:6px 9px;border:1px solid var(--border);border-radius:9px;color:#4d5265;font-size:10px;font-weight:600;white-space:nowrap;flex:none}
+.cashflow-period i{font-size:9px}
+.cashflow-chart{height:95px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;padding:4px 2px 0}
+.cashflow-day{min-width:0;min-height:84px;padding:0;border:0;border-radius:9px;background:transparent;color:inherit;display:grid;grid-template-rows:1fr auto;gap:6px;text-align:center;cursor:pointer}
+.cashflow-day:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.cashflow-bars{height:68px;display:flex;align-items:flex-end;justify-content:center;gap:3px;padding:0 4px 0;border-bottom:1px solid #e5e9f2;background:repeating-linear-gradient(to top,transparent 0,transparent 19px,#eef1f6 20px,#eef1f6 21px)}
+.cashflow-bar{width:min(100%,18px);min-height:3px;border-radius:4px 4px 0 0;box-shadow:0 0 0 2px #fff;transition:filter .15s ease,transform .15s ease}
+.cashflow-bar.income{background:#2563eb}
+.cashflow-bar.expense{background:#f5a0b1}
+.cashflow-label{color:#7a8194;font-size:9px;font-weight:600;text-transform:capitalize}
+.cashflow-legend{display:flex;justify-content:center;gap:18px;margin-top:10px;color:#60657a;font-size:10px}
+.cashflow-legend span{display:inline-flex;align-items:center;gap:6px}
+.cashflow-dot{width:8px;height:8px;border-radius:2px;background:#2563eb}
+.cashflow-dot.expense{background:#f5a0b1}
+.cashflow-day:hover .cashflow-bars,.cashflow-day.selected .cashflow-bars{background-color:#f5f7fc;border-radius:8px 8px 0 0}
+.cashflow-day:hover .cashflow-bar,.cashflow-day.selected .cashflow-bar{filter:saturate(1.15);transform:translateY(-1px)}
+.cashflow-detail{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px 12px;margin-top:10px;padding:9px 10px;border:1px solid var(--border);border-radius:12px;background:#fbfcff;color:var(--muted);font-size:10px;line-height:1.35}
+.cashflow-detail[hidden]{display:none}
+.cashflow-detail strong{grid-column:1/-1;color:var(--ink);font-size:11px}
+.cashflow-detail span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.cashflow-detail .cashflow-dot{width:7px;height:7px;margin:0;flex:none}
+@media(max-width:380px){.cashflow-detail{grid-template-columns:1fr 1fr;gap:7px;padding:8px;font-size:9px}.cashflow-detail strong{grid-column:1/-1}.cashflow-day{min-height:82px}}
+.wallet-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.home-wallet-section .section-head{margin:0 0 10px}
+.wallet-card{min-width:0;min-height:100px;padding:11px 10px;border:1px solid var(--border);border-radius:14px;background:white;display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:5px;box-shadow:0 2px 8px rgba(45,55,96,.025)}
+.wallet-card:hover{border-color:#c7ceff}
+.wallet-card-icon{width:28px;height:28px;border-radius:9px;background:var(--subtle);color:var(--brand);display:grid;place-items:center;font-size:13px}
+.wallet-card-name{max-width:100%;color:#4d5265;font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wallet-card strong{max-width:100%;color:var(--ink);font-size:clamp(10px,2.8vw,12px);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.home-recent{padding:3px 12px;border:1px solid var(--border);border-radius:18px;background:white}
+.home-screen .home-list-section .tx-row{padding-block:13px}
+.home-empty{display:grid;justify-items:center;gap:7px;padding:22px 12px;text-align:center;color:#60657a;font-size:12px}
+.home-empty strong{color:var(--ink);font-size:13px}
+.home-empty-icon{width:42px;height:42px;border-radius:14px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-size:17px}
+.home-screen .row-time{color:#4d5265;font-size:11px}
+.shell.with-nav main{margin-bottom:0;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+@media(max-width:360px){.summary-cell{padding-inline:5px}.summary-cell strong{font-size:10px}.wallet-grid{gap:5px}.wallet-card{padding:9px 7px}.home-screen .balance{font-size:26px}.home-action{font-size:9px;white-space:nowrap}.home-action>span:last-child{white-space:nowrap;word-break:normal}}
+
+/* Typography and spacing pass: align page rhythm and raise small-text legibility. */
+:root{--type-caption:12px;--type-body:14px;--type-section:17px;--type-title:24px}
+body{font-size:var(--type-body);line-height:1.5;letter-spacing:-.1px}
+main{padding-top:8px}
+.h1{font-size:var(--type-title);line-height:1.22;letter-spacing:-.75px;margin-top:4px}
+.h2{font-size:var(--type-section);line-height:1.3;letter-spacing:-.35px}
+.eyebrow,.sub,.field label,.metric-label,.detail-date,.detail-field>span{font-size:var(--type-caption);line-height:1.45}
+.heading{align-items:center;margin:16px 2px 20px;gap:12px}
+.stack{gap:18px}
+.section-head{gap:10px;margin:0 2px 12px;line-height:1.35}
+.link{font-size:13px;line-height:1.3}
+.card{padding:16px}
+.row-title{font-size:14px;line-height:1.35}
+.row-meta,.row-time{font-size:12px;line-height:1.4}
+.row-amount{font-size:13px;line-height:1.35}
+.metric-label,.setting-group,.date-label{font-size:12px}
+.metric-value{font-size:16px;line-height:1.35}
+.wallet-card-name{font-size:12px;line-height:1.35}
+.wallet-card strong{font-size:12px;line-height:1.35}
+.summary-label{font-size:11px;line-height:1.3}
+.summary-cell strong{font-size:12px;line-height:1.35}
+.home-screen .stack{gap:17px}
+.home-screen .home-action{font-size:12px;line-height:1.3;gap:7px}
+.home-screen .balance-label{font-size:12px;line-height:1.3}
+.home-screen .balance{line-height:1.2}
+.home-screen .balance-footer{font-size:12px;line-height:1.4}
+.cashflow-caption,.cashflow-period,.cashflow-legend,.cashflow-data,.home-empty{font-size:12px;line-height:1.4}
+.cashflow-label{font-size:10px}
+.navitem .navlabel{font-size:10px;line-height:1.2}
+.type-tabs button,.pill{font-size:13px}
+.control,.search input,.amount-input{font-size:15px}
+.primary,.secondary,.danger-button{font-size:14px;line-height:1.35}
+.sheet h3{font-size:19px;line-height:1.3}
+.sheet-action{font-size:14px;line-height:1.4}
+@media(max-width:380px){
+  :root{--type-title:23px;--type-section:16px}
+  main{padding-inline:16px}
+  .stack,.home-screen .stack{gap:16px}
+  .card{padding:14px}
+  .home-screen .home-summary.card,.home-cashflow{padding:14px}
+  .home-screen .home-action{font-size:11px}
+  .home-screen .balance{font-size:clamp(25px,7.2vw,31px)}
+  .wallet-card-name,.wallet-card strong{font-size:11px}
+  .summary-cell strong{font-size:11px}
+  .row-title{font-size:13px}
+  .row-amount{font-size:12px}
+}
+@media(max-width:380px){.navitem .navlabel{font-size:9px;white-space:nowrap;overflow-wrap:normal}}
+@media(max-width:340px){
+  .summary-label{font-size:10px}
+  .summary-cell strong{font-size:10px}
+  .wallet-card-name,.wallet-card strong{font-size:10px}
+  .navitem .navlabel{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){.card{transition:none}}
+
+/* Wallet cards: align account identity and balance on a steady card grid. */
+.home-wallet-section .section-head{margin:0 2px 12px;align-items:center}
+.home-wallet-section .h2{font-size:17px;line-height:1.3}
+.home-wallet-section .wallet-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.home-wallet-section .wallet-card{min-height:116px;padding:12px;border-radius:16px;gap:7px;justify-content:flex-start;box-shadow:0 2px 8px rgba(45,55,96,.035)}
+.home-wallet-section .wallet-card-icon{width:32px;height:32px;border-radius:11px;font-size:14px}
+.home-wallet-section .wallet-card-name{width:100%;font-size:12px;line-height:1.3;color:var(--muted)}
+.home-wallet-section .wallet-card strong{width:100%;margin-top:auto;font-size:clamp(10px,2.9vw,12px);line-height:1.3;letter-spacing:-.15px;white-space:normal;overflow-wrap:anywhere}
+.home-wallet-section .wallet-add-card{justify-content:center;border-style:dashed;background:rgba(255,255,255,.65);box-shadow:none}
+.home-wallet-section .wallet-add-card .wallet-card-icon{background:var(--brand-soft)}
+.home-wallet-section .wallet-add-card strong{font-size:11px;font-weight:700;color:var(--brand)}
+@media(max-width:380px){
+  .home-wallet-section .wallet-grid{gap:8px}
+  .home-wallet-section .wallet-card{min-height:112px;padding:10px}
+  .home-wallet-section .wallet-card-name{font-size:11px}
+  .home-wallet-section .wallet-card strong{font-size:10px;letter-spacing:-.2px}
+}
+@media(max-width:340px){
+  .home-wallet-section .wallet-grid{gap:6px}
+  .home-wallet-section .wallet-card{padding:9px 8px}
+  .home-wallet-section .wallet-card strong{font-size:9px}
+}
+
+/* Wallet cards: icon at left, amount and wallet name stacked in one flexible column. */
+.home-wallet-section .wallet-card{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;min-height:82px;padding:12px;gap:10px}
+.home-wallet-section .wallet-card-icon{flex:none;width:34px;height:34px}
+.home-wallet-section .wallet-card-copy{display:grid;min-width:0;flex:1;gap:4px;text-align:left}
+.home-wallet-section .wallet-card-copy strong{min-width:0;margin:0;color:var(--ink);font-size:clamp(11px,3.2vw,14px);line-height:1.25;letter-spacing:-.25px;font-weight:800;white-space:nowrap;overflow:visible;text-overflow:clip;font-variant-numeric:tabular-nums}
+.home-wallet-section .wallet-card-name{min-width:0;font-size:11px;line-height:1.25;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-wallet-section .wallet-add-card{justify-content:flex-start}
+.home-wallet-section .wallet-add-card .wallet-card-copy strong{font-size:12px;white-space:normal}
+@media(max-width:380px){
+  .home-wallet-section .wallet-card{min-height:78px;padding:10px;gap:7px}
+  .home-wallet-section .wallet-card-icon{width:30px;height:30px}
+  .home-wallet-section .wallet-card-copy strong{font-size:clamp(10px,3vw,12px);letter-spacing:-.35px}
+  .home-wallet-section .wallet-card-name{font-size:10px}
+}
+@media(max-width:340px){
+  .home-wallet-section .wallet-card{padding:8px 6px;gap:6px}
+  .home-wallet-section .wallet-card-icon{width:28px;height:28px}
+  .home-wallet-section .wallet-card-copy strong{font-size:10px;letter-spacing:-.45px}
+  .home-wallet-section .wallet-card-name{font-size:9px}
+}
+/* Two columns give full balances enough room beside their wallet icons. */
+.home-wallet-section .wallet-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.home-wallet-section .wallet-card-copy strong{font-size:clamp(11px,3.4vw,14px);letter-spacing:-.2px;overflow-wrap:anywhere;white-space:nowrap}
+@media(max-width:380px){.home-wallet-section .wallet-grid{gap:8px}.home-wallet-section .wallet-card-copy strong{font-size:clamp(11px,3.5vw,13px)}}
+@media(max-width:340px){.home-wallet-section .wallet-card-copy strong{font-size:11px;letter-spacing:-.3px}}
+
+/* Compact wallet category carousel: short cards with swipe affordance. */
+.home-wallet-section .wallet-grid{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;padding:0 1px 4px;scroll-snap-type:x mandatory;scroll-padding-inline:1px;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.home-wallet-section .wallet-grid::-webkit-scrollbar{display:none}
+.home-wallet-section .wallet-card{flex:0 0 38%;min-width:0;min-height:78px;padding:8px 10px;gap:9px;justify-content:flex-start;scroll-snap-align:start;scroll-snap-stop:always}
+.home-wallet-section .wallet-card-icon{width:38px;height:38px;flex:none;border-radius:13px;font-size:18px}
+.home-wallet-section .wallet-card-copy{display:grid;gap:4px;min-width:0;max-width:none;flex:1;align-content:center;text-align:left}
+.home-wallet-section .wallet-card-copy strong{min-width:0;font-size:clamp(14px,3.8vw,16px);font-weight:800;line-height:1.2;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);font-variant-numeric:tabular-nums}
+.home-wallet-section .wallet-card-name{font-size:11px;color:var(--muted);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-wallet-section .wallet-group-count{display:none}
+.home-summary.card{padding:14px}
+.home-summary .section-head{margin-bottom:9px}
+.home-summary .summary-columns{gap:0}
+.home-summary .summary-cell{gap:4px;padding-inline:6px}
+.home-summary .summary-cell strong{font-size:11px}
+.home-wallet-section .wallet-card:focus-visible{outline:3px solid rgba(0,9,255,.28);outline-offset:2px}
+@media(max-width:380px){.home-wallet-section .wallet-card{flex-basis:44%;min-height:76px;padding:8px;gap:7px}.home-wallet-section .wallet-card-icon{width:36px;height:36px;font-size:17px}.home-wallet-section .wallet-card-copy strong{font-size:13px;letter-spacing:-.35px}}
+
+/* Readability and hierarchy pass: prioritize legible labels and balanced density. */
+.home-screen .topbar{height:78px;padding-inline:20px}
+.home-top-copy span{font-size:12px;line-height:1.35}
+.home-top-copy strong{font-size:16px;line-height:1.3}
+.home-screen .balance-label{font-size:12px;letter-spacing:.07em}
+.home-screen .balance-footer{font-size:13px;line-height:1.45}
+.home-screen .home-actions-panel{gap:4px;padding:12px 10px}
+.home-screen .home-action{font-size:12px;line-height:1.3;white-space:normal;overflow-wrap:normal}
+.home-screen .home-wallet-section .h2,.home-screen .home-summary .h2,.home-screen .home-cashflow .h2,.home-screen .home-list-section .h2{font-size:17px;line-height:1.35}
+.home-screen .home-wallet-section .section-head .link,.home-screen .home-summary .link,.home-screen .home-list-section .link{font-size:13px;line-height:1.3}
+.home-wallet-section .wallet-grid{gap:8px}
+.home-wallet-section .wallet-card{flex-basis:49%;min-height:82px;padding:9px 10px;gap:9px}
+.home-wallet-section .wallet-card-icon{width:40px;height:40px;font-size:18px}
+.home-wallet-section .wallet-card-copy strong{font-size:clamp(14px,3.8vw,16px);line-height:1.3;letter-spacing:-.25px}
+.home-wallet-section .wallet-card-name{font-size:12px;line-height:1.35}
+.home-summary.card{padding:16px}
+.home-summary .section-head{margin-bottom:12px}
+.home-summary .summary-cell{gap:6px;padding-inline:8px}
+.home-summary .summary-label{font-size:12px;line-height:1.35}
+.home-summary .summary-cell strong{font-size:clamp(11px,3vw,13px);line-height:1.35;white-space:nowrap}
+.cashflow-caption,.cashflow-period{font-size:12px;line-height:1.35}
+.cashflow-label,.cashflow-legend,.cashflow-data{font-size:11px;line-height:1.4}
+.home-screen .home-list-section .row-title{font-size:14px;line-height:1.35}
+.home-screen .home-list-section .row-meta,.home-screen .home-list-section .row-time{font-size:12px;line-height:1.4}
+.home-screen .home-list-section .row-amount{font-size:13px}
+.home-screen .home-recent .transaction-list{gap:0}
+.home-screen .home-recent .tx-row-compact{width:100%;margin:0;border-radius:0;display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;column-gap:10px;row-gap:0;padding-block:12px;background:transparent}
+.home-screen .home-recent .tx-row-compact+.tx-row-compact{border-top:1px solid var(--border)}
+.home-screen .home-recent .tx-row-compact:hover{background:transparent}
+.home-screen .home-recent .tx-row-compact .tx-tile{grid-column:1;grid-row:1;align-self:center;width:40px;height:40px;border-radius:14px}
+.home-screen .home-recent .tx-row-compact .tx-info{grid-column:2;grid-row:1;display:grid;grid-template-columns:minmax(0,1fr);min-width:0;gap:4px}
+.home-screen .home-recent .tx-row-compact .row-title{min-width:0;padding:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-screen .home-recent .tx-row-compact .row-meta{min-width:0;margin:0;color:var(--muted);font-size:11px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-screen .home-recent .tx-row-compact .row-meta time{color:var(--muted)}
+.home-screen .home-recent .tx-row-compact .meta-separator{padding-inline:3px;color:#9ba0b1}
+.home-screen .home-recent .tx-row-compact .row-amount{grid-column:3;grid-row:1;align-self:center;max-width:112px;font-size:12px;letter-spacing:-.2px;font-variant-numeric:tabular-nums}
+.home-screen main{padding-top:14px}
+@media(max-width:380px){
+  .home-screen .topbar{padding-inline:16px}
+  .home-screen .home-action{font-size:11px}
+  .home-wallet-section .wallet-card{flex-basis:42%;min-height:80px;padding:8px 10px;gap:7px}
+  .home-wallet-section .wallet-card-icon{width:36px;height:36px}
+  .home-wallet-section .wallet-card-copy strong{font-size:13px}
+  .home-wallet-section .wallet-card-name{font-size:11px}
+  .home-summary.card{padding:14px 12px}
+  .home-summary .summary-cell{padding-inline:5px}
+  .home-summary .summary-label{font-size:11px}
+  .home-summary .summary-cell strong{font-size:10px}
+}
+@media(max-width:340px){
+  .home-summary .summary-label{font-size:10px}
+  .home-summary .summary-cell strong{font-size:9px}
+}
+
+/* Less-is-more pass: remove redundant controls, surfaces and decorative weight. */
+.home-screen .balance-card{background:var(--card);color:var(--ink);border:1px solid var(--border);box-shadow:var(--shadow);padding:18px 20px}
+.home-screen .balance-card:after{background:var(--brand-soft);opacity:.65}
+.home-screen .balance-label{color:var(--muted);font-weight:700;letter-spacing:.04em}
+.home-screen .balance{color:var(--ink);margin-bottom:10px}
+.home-screen .eye{background:var(--brand-soft);border:0;color:var(--brand)}
+.home-screen .balance-footer{color:var(--muted);border-color:var(--border)}
+.home-screen .home-actions-panel{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;background:transparent;border:0;box-shadow:none;padding:0}
+.home-actions-title{margin:0 2px;color:var(--muted);font-size:12px;line-height:1.3;font-weight:700}
+.home-actions-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.home-screen .home-action{position:relative;min-height:64px;padding:8px 10px;border:1px solid var(--border);border-radius:16px;background:var(--card);display:flex;align-items:center;justify-content:flex-start;gap:9px;text-align:left;font-size:12px;line-height:1.25;font-weight:700;white-space:normal;overflow-wrap:normal;box-shadow:0 2px 8px rgba(45,55,96,.035)}
+.home-screen .home-action:hover{background:#fff;border-color:#ccd3ff;box-shadow:0 4px 12px rgba(45,55,96,.07)}
+.home-screen .home-action-icon{width:36px;height:36px;flex:none;border-radius:12px;font-size:15px}
+@media(max-width:380px){.home-screen .home-action{min-height:60px;padding:7px;gap:6px;font-size:10px}.home-screen .home-action-icon{width:32px;height:32px}}
+@media(max-width:340px){.home-screen .home-action{flex-direction:column;justify-content:center;min-height:66px;padding:7px 3px;gap:4px;text-align:center}}
+.home-screen .home-wallet-section .section-head{margin-bottom:9px}
+.home-wallet-section .wallet-grid{padding-right:0;scroll-padding-right:0}
+.home-screen .home-wallet-section .h2{font-size:16px}
+.home-screen .wallet-card{box-shadow:none;border-color:var(--border);background:var(--card)}
+.home-screen .wallet-card:hover{box-shadow:none;background:#fbfcff}
+.home-screen .home-summary.card,.home-screen .home-cashflow{box-shadow:none;border-color:var(--border)}
+.home-screen .home-summary .h2,.home-screen .home-cashflow .h2,.home-screen .home-list-section .h2{font-size:16px}
+.home-screen .summary-columns{margin-top:2px}
+.home-screen .home-list-section .section-head{margin-bottom:8px}
+/* Keep wallet cards visually consistent; reveal next category at every viewport width. */
+.home-wallet-section .wallet-grid{gap:8px}
+.home-wallet-section .wallet-card{display:flex;flex:0 0 44%;flex-direction:row;align-items:center;gap:9px;min-height:82px;padding:9px 10px}
+.home-wallet-section .wallet-card-icon{width:40px;height:40px;flex:none}
+.home-wallet-section .wallet-card-copy{display:grid;min-width:0;flex:1;gap:4px;text-align:left}
+.home-wallet-section .wallet-card-copy strong{min-width:0;font-size:clamp(11px,3.5vw,16px);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-wallet-section .wallet-card-name{min-width:0;font-size:clamp(10px,2.8vw,12px);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:380px){.home-wallet-section .wallet-card{flex-basis:44%;min-height:78px;padding:8px;gap:7px}.home-wallet-section .wallet-card-icon{width:32px;height:32px}.home-wallet-section .wallet-card-copy strong{font-size:clamp(11px,3.5vw,13px);letter-spacing:-.3px}.home-wallet-section .wallet-card-name{font-size:10px}}

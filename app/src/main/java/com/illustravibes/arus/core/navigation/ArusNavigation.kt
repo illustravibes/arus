@@ -133,22 +133,14 @@ fun ArusAppShell() {
                 is ArusScreen.TransactionHistory -> {
                     val historyViewModel = remember { TransactionHistoryViewModel(walletRepository, categoryRepository, transactionRepository) }
                     TransactionHistoryScreen(
-                        viewModel = historyViewModel,
-                        onBackClick = {
-                            selectedTab = ArusTab.BERANDA
-                            currentScreen = ArusScreen.Home
-                        }
+                        viewModel = historyViewModel
                     )
                 }
 
                 is ArusScreen.Report -> {
                     val reportViewModel = remember { ReportViewModel(walletRepository, transactionRepository) }
                     ReportScreen(
-                        viewModel = reportViewModel,
-                        onBackClick = {
-                            selectedTab = ArusTab.BERANDA
-                            currentScreen = ArusScreen.Home
-                        }
+                        viewModel = reportViewModel
                     )
                 }
 
@@ -161,10 +153,6 @@ fun ArusAppShell() {
                         },
                         onNavigateToCategoryManagement = {
                             currentScreen = ArusScreen.CategoryManagement
-                        },
-                        onBackClick = {
-                            selectedTab = ArusTab.BERANDA
-                            currentScreen = ArusScreen.Home
                         }
                     )
                 }

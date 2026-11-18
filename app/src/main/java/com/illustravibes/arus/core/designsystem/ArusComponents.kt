@@ -1259,6 +1259,81 @@ fun ArusConfirmationSheet(
 }
 
 // ============================================================================
+// ARUS ACTION PILL & FORM SHEET (komponen bersama untuk aksi kecil + form sheet)
+enum class ArusActionPillStyle { NEUTRAL, DESTRUCTIVE }
+
+@Composable
+fun ArusActionPill(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    style: ArusActionPillStyle = ArusActionPillStyle.NEUTRAL
+) {
+    val backgroundColor = when (style) {
+        ArusActionPillStyle.NEUTRAL -> ArusBrandSoft
+        ArusActionPillStyle.DESTRUCTIVE -> ArusExpenseSoft
+    }
+    val contentColor = when (style) {
+        ArusActionPillStyle.NEUTRAL -> ArusBrandPrimary
+        ArusActionPillStyle.DESTRUCTIVE -> ArusExpense
+    }
+    Box(
+        modifier = modifier
+            .clip(PillShape)
+            .background(backgroundColor)
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = ArusTypography.labelSmall,
+            color = contentColor
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ArusFormSheet(
+    title: String,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = ArusSurface,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 12.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(PillShape)
+                    .background(ArusBorder)
+            )
+        },
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = title,
+                style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = ArusTextPrimary
+            )
+            content()
+        }
+    }
+}
+
 // 13b. ARUS PASSWORD SHEET (Bottom Sheet dengan Field Kata Sandi)
 // Dipakai dialog Backup/Restore: ArusConfirmationSheet tidak punya slot input,
 // jadi kata sandi tidak pernah bisa dimasukkan (alur backup putus di UI).

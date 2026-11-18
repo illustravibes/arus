@@ -6,7 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,18 +65,18 @@ fun HomeContent(
     val greetingText = getGreetingText()
     val todayDateText = getTodayDateText()
 
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .statusBarsPadding()
-            .imePadding()
-            .padding(horizontal = 16.dp)
-            .verticalScroll(rememberScrollState()),
+            .imePadding(),
+        contentPadding = PaddingValues(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
+        item { Spacer(modifier = Modifier.height(8.dp)) }
 
         // 1. Viewing Area: Greeting Header
+        item {
         Column {
             Text(
                 text = greetingText,
@@ -89,8 +90,10 @@ fun HomeContent(
                 color = ArusTextSecondary
             )
         }
+        }
 
         // 2. Hero Total Balance Card (Bevel Style B&W)
+        item {
         ArusStatCard(
             title = "Total Saldo",
             amount = uiState.totalBalance,
@@ -99,8 +102,10 @@ fun HomeContent(
             isBalanceHidden = uiState.isBalanceHidden,
             onToggleHideBalance = onToggleHideBalance
         )
+        }
 
         // 3. Monthly Income vs Expense 2-Col Grid
+        item {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -120,9 +125,11 @@ fun HomeContent(
                 modifier = Modifier.weight(1f)
             )
         }
+        }
 
         // 4. Quick Actions Grid (3 Bevel Action Pills)
-        ArusSectionHeader(title = "Aksi Cepat")
+        item { ArusSectionHeader(title = "Aksi Cepat") }
+        item {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -152,13 +159,17 @@ fun HomeContent(
                 modifier = Modifier.weight(1f)
             )
         }
+        }
 
         // 5. Wallet Carousel Section
-        ArusSectionHeader(
-            title = "Daftar Dompet",
-            actionText = "Kelola ›",
-            onActionClick = onNavigateToWalletManagement
-        )
+        item {
+            ArusSectionHeader(
+                title = "Daftar Dompet",
+                actionText = "Kelola ›",
+                onActionClick = onNavigateToWalletManagement
+            )
+        }
+        item {
         if (uiState.wallets.isEmpty()) {
             ArusCard {
                 Text(
@@ -190,26 +201,28 @@ fun HomeContent(
                 }
             }
         }
+        }
 
         // 6. Recent Activity Section
-        ArusSectionHeader(
-            title = "Aktivitas Terbaru",
-            actionText = if (uiState.recentTransactions.isNotEmpty()) "Lihat Semua ›" else null,
-            onActionClick = onNavigateToTransactionHistory
-        )
+        item {
+            ArusSectionHeader(
+                title = "Aktivitas Terbaru",
+                actionText = if (uiState.recentTransactions.isNotEmpty()) "Lihat Semua ›" else null,
+                onActionClick = onNavigateToTransactionHistory
+            )
+        }
 
         if (uiState.recentTransactions.isEmpty()) {
+            item {
             ArusEmptyState(
                 title = "Belum ada transaksi",
                 description = "Mulai catat transaksi pertamamu untuk memantau arus keuangan dengan akurat.",
                 actionButtonText = "+ Catat Transaksi",
                 onActionClick = { onNavigateToEntry(1) }
             )
+            }
         } else {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                uiState.recentTransactions.forEach { tx ->
+            items(uiState.recentTransactions, key = { it.id }) { tx ->
                     val category = uiState.categoriesMap[tx.categoryId]
                     val txType = when (tx.type) {
                         "INCOME" -> TransactionType.INCOME
@@ -232,11 +245,10 @@ fun HomeContent(
                         iconTint = iconTint,
                         onClick = onNavigateToTransactionHistory
                     )
-                }
             }
         }
 
-        Spacer(modifier = Modifier.height(110.dp))
+        item { Spacer(modifier = Modifier.height(110.dp)) }
     }
 }
 
@@ -283,10 +295,10 @@ private fun QuickActionButton(
 private fun getGreetingText(): String {
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     return when (hour) {
-        in 4..11 -> "Selamat Pagi 👋"
-        in 12..15 -> "Selamat Siang ☀️"
-        in 16..18 -> "Selamat Sore 🌤️"
-        else -> "Selamat Malam 🌙"
+        in 4..11 -> "Selamat Pagi"
+        in 12..15 -> "Selamat Siang"
+        in 16..18 -> "Selamat Sore"
+        else -> "Selamat Malam"
     }
 }
 

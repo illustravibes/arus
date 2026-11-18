@@ -1,27 +1,19 @@
 package com.illustravibes.arus.feature.category
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.core.database.entity.CategoryEntity
 import com.illustravibes.arus.core.designsystem.*
 import com.illustravibes.arus.feature.home.mapDrawableIcon
 import com.illustravibes.arus.feature.home.parseHexColor
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryScreen(
     viewModel: CategoryViewModel,
@@ -108,19 +100,11 @@ fun CategoryScreen(
                                 )
                             }
 
-                            Box(
-                                modifier = Modifier
-                                    .clip(PillShape)
-                                    .background(ArusExpenseSoft)
-                                    .clickable { categoryToArchive = category }
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                            ) {
-                                Text(
-                                    text = "Arsipkan",
-                                    style = ArusTypography.labelSmall,
-                                    color = ArusExpense
-                                )
-                            }
+                            ArusActionPill(
+                                text = "Arsipkan",
+                                onClick = { categoryToArchive = category },
+                                style = ArusActionPillStyle.DESTRUCTIVE
+                            )
                         }
                     }
                 }
@@ -149,33 +133,10 @@ fun CategoryScreen(
 
         // Create Category Modal Sheet
         if (uiState.showDialog) {
-            ModalBottomSheet(
-                onDismissRequest = { viewModel.closeDialog() },
-                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                containerColor = ArusSurface,
-                dragHandle = {
-                    Box(
-                        modifier = Modifier
-                            .padding(vertical = 12.dp)
-                            .width(36.dp)
-                            .height(4.dp)
-                            .clip(PillShape)
-                            .background(ArusBorder)
-                    )
-                }
+            ArusFormSheet(
+                title = "Tambah Kategori ${if (uiState.selectedTypeTab == "EXPENSE") "Pengeluaran" else "Pemasukan"}",
+                onDismiss = { viewModel.closeDialog() }
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = "Tambah Kategori ${if (uiState.selectedTypeTab == "EXPENSE") "Pengeluaran" else "Pemasukan"}",
-                        style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = ArusTextPrimary
-                    )
 
                     ArusTextField(
                         value = uiState.nameInput,
@@ -191,7 +152,6 @@ fun CategoryScreen(
                         text = "Simpan Kategori",
                         onClick = { viewModel.saveCategory() }
                     )
-                }
             }
         }
     }

@@ -1,20 +1,13 @@
 package com.illustravibes.arus.feature.wallet
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.R
 import com.illustravibes.arus.core.database.entity.WalletEntity
@@ -22,7 +15,6 @@ import com.illustravibes.arus.core.designsystem.*
 import com.illustravibes.arus.feature.home.mapDrawableIcon
 import com.illustravibes.arus.feature.home.parseHexColor
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WalletScreen(
     viewModel: WalletViewModel,
@@ -109,34 +101,17 @@ fun WalletScreen(
                             }
 
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Box(
-                                    modifier = Modifier
-                                        .clip(PillShape)
-                                        .background(ArusBrandSoft)
-                                        .clickable { viewModel.openEditDialog(wallet) }
-                                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                                ) {
-                                    Text(
-                                        text = "Edit",
-                                        style = ArusTypography.labelSmall,
-                                        color = ArusBrandPrimary
-                                    )
-                                }
+                                ArusActionPill(
+                                    text = "Edit",
+                                    onClick = { viewModel.openEditDialog(wallet) }
+                                )
 
                                 if (uiState.wallets.size > 1) {
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(PillShape)
-                                            .background(ArusExpenseSoft)
-                                            .clickable { walletToDelete = wallet }
-                                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                                    ) {
-                                        Text(
-                                            text = "Hapus",
-                                            style = ArusTypography.labelSmall,
-                                            color = ArusExpense
-                                        )
-                                    }
+                                    ArusActionPill(
+                                        text = "Hapus",
+                                        onClick = { walletToDelete = wallet },
+                                        style = ArusActionPillStyle.DESTRUCTIVE
+                                    )
                                 }
                             }
                         }
@@ -167,33 +142,10 @@ fun WalletScreen(
 
         // Create / Edit Wallet Modal Sheet
         if (uiState.showDialog) {
-            ModalBottomSheet(
-                onDismissRequest = { viewModel.closeDialog() },
-                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                containerColor = ArusSurface,
-                dragHandle = {
-                    Box(
-                        modifier = Modifier
-                            .padding(vertical = 12.dp)
-                            .width(36.dp)
-                            .height(4.dp)
-                            .clip(PillShape)
-                            .background(ArusBorder)
-                    )
-                }
+            ArusFormSheet(
+                title = if (uiState.editingWallet == null) "Tambah Dompet Baru" else "Edit Dompet",
+                onDismiss = { viewModel.closeDialog() }
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = if (uiState.editingWallet == null) "Tambah Dompet Baru" else "Edit Dompet",
-                        style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = ArusTextPrimary
-                    )
 
                     ArusTextField(
                         value = uiState.nameInput,
@@ -217,7 +169,6 @@ fun WalletScreen(
                         text = "Simpan Dompet",
                         onClick = { viewModel.saveWallet() }
                     )
-                }
             }
         }
     }

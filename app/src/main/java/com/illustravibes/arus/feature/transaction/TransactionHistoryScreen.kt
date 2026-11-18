@@ -3,7 +3,8 @@ package com.illustravibes.arus.feature.transaction
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -18,7 +19,7 @@ import java.util.*
 @Composable
 fun TransactionHistoryScreen(
     viewModel: TransactionHistoryViewModel,
-    onBackClick: () -> Unit,
+    onBackClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -28,7 +29,7 @@ fun TransactionHistoryScreen(
         topBar = {
             ArusTopAppBar(
                 title = "Riwayat Transaksi",
-                showBackButton = true,
+                showBackButton = onBackClick != null,
                 onBackClick = onBackClick
             )
         },
@@ -43,8 +44,7 @@ fun TransactionHistoryScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .imePadding()
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Spacer(modifier = Modifier.height(4.dp))
@@ -107,7 +107,13 @@ fun TransactionHistoryScreen(
             } else {
                 val groupedTransactions = groupTransactionsByDate(uiState.transactions)
 
-                groupedTransactions.forEach { (dateHeader, txList) ->
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    groupedTransactions.forEach { (dateHeader, txList) ->
                     val dailyTotal = txList.sumOf { tx ->
                         when (tx.type) {
                             "INCOME" -> tx.amount
@@ -116,13 +122,14 @@ fun TransactionHistoryScreen(
                         }
                     }
 
-                    ArusDateHeaderRow(
-                        dateText = dateHeader,
-                        totalDailyText = if (dailyTotal != 0L) (if (dailyTotal > 0) "+ " else "") + dailyTotal.formatRupiah() else null
-                    )
+                        item(key = "header-$dateHeader") {
+                            ArusDateHeaderRow(
+                                dateText = dateHeader,
+                                totalDailyText = if (dailyTotal != 0L) (if (dailyTotal > 0) "+ " else "") + dailyTotal.formatRupiah() else null
+                            )
+                        }
 
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        txList.forEach { tx ->
+                        items(txList, key = { it.id }) { tx ->
                             val category = uiState.categoriesMap[tx.categoryId]
                             val txType = when (tx.type) {
                                 "INCOME" -> TransactionType.INCOME
@@ -147,10 +154,10 @@ fun TransactionHistoryScreen(
                             )
                         }
                     }
+
+                    item { Spacer(modifier = Modifier.height(102.dp)) }
                 }
             }
-
-            Spacer(modifier = Modifier.height(110.dp))
         }
         }
 

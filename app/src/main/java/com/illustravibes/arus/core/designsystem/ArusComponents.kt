@@ -20,8 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -180,7 +183,9 @@ fun ArusAmountHeroInput(
     label: String = "NOMINAL TRANSAKSI",
     placeholder: String = "0",
     errorMessage: String? = null,
-    amountColor: Color = ArusTextPrimary
+    amountColor: Color = ArusTextPrimary,
+    readOnly: Boolean = false,
+    onFocusChange: (Boolean) -> Unit = {}
 ) {
     val formattedDisplayValue = androidx.compose.runtime.remember(value) {
         formatInputRupiah(value)
@@ -224,7 +229,7 @@ fun ArusAmountHeroInput(
                     val cleanDigits = newTv.text.filter { it.isDigit() }
                     onValueChange(cleanDigits)
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().onFocusChanged { onFocusChange(it.isFocused) },
                 textStyle = ArusTypography.displayLarge.copy(
                     fontSize = 36.sp,
                     fontWeight = FontWeight.Bold,
@@ -232,6 +237,7 @@ fun ArusAmountHeroInput(
                 ),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
+                readOnly = readOnly,
                 decorationBox = { innerTextField ->
                     Box {
                         if (formattedDisplayValue.isEmpty()) {
@@ -1943,6 +1949,7 @@ fun ArusKeypadView(
     onDeletePress: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val haptic = LocalHapticFeedback.current
     val keys = listOf(
         listOf("1", "2", "3"),
         listOf("4", "5", "6"),
@@ -1970,6 +1977,7 @@ fun ArusKeypadView(
                             .background(ArusSurface)
                             .border(1.dp, ArusBorder, PillShape)
                             .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 if (key == "⌫") onDeletePress()
                                 else onKeyPress(key)
                             },

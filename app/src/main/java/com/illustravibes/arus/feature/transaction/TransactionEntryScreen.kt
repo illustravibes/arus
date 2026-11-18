@@ -1,5 +1,10 @@
 package com.illustravibes.arus.feature.transaction
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,7 +23,7 @@ import java.util.*
 fun TransactionEntryScreen(
     viewModel: TransactionEntryViewModel,
     onBackClick: () -> Unit,
-    onSaveSuccess: () -> Unit,
+    onSaveSuccess: (savedAmount: Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -27,9 +32,12 @@ fun TransactionEntryScreen(
     var showTargetWalletSheet by remember { mutableStateOf(false) }
     var showCategorySheet by remember { mutableStateOf(false) }
 
+    // P0-2: keypad in-app tampil saat field nominal fokus.
+    var keypadVisible by remember { mutableStateOf(false) }
+
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
-            onSaveSuccess()
+            onSaveSuccess(uiState.amountInput.toLongOrNull() ?: 0L)
         }
     }
 
@@ -80,8 +88,29 @@ fun TransactionEntryScreen(
                     0 -> ArusIncome
                     1 -> ArusExpense
                     else -> ArusTextPrimary
-                }
+                },
+                readOnly = true,
+                onFocusChange = { keypadVisible = it }
             )
+
+            // Keypad in-app (P0-2): muncul saat field nominal fokus; keyboard
+            // sistem tetap dipakai untuk field Catatan.
+            AnimatedVisibility(
+                visible = keypadVisible,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                ArusKeypadView(
+                    onKeyPress = { key ->
+                        if (uiState.amountInput.length + key.length <= 18) {
+                            viewModel.onAmountChange(uiState.amountInput + key)
+                        }
+                    },
+                    onDeletePress = {
+                        viewModel.onAmountChange(uiState.amountInput.dropLast(1))
+                    }
+                )
+            }
 
             // 3. Property Selector Rows
             if (uiState.typeIndex == 2) {

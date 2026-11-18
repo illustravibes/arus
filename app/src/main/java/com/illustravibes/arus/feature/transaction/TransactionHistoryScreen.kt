@@ -2,6 +2,8 @@ package com.illustravibes.arus.feature.transaction
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,7 +22,8 @@ import java.util.*
 fun TransactionHistoryScreen(
     viewModel: TransactionHistoryViewModel,
     onBackClick: (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedDetailTx by remember { mutableStateOf<TransactionEntity?>(null) }
@@ -108,6 +111,7 @@ fun TransactionHistoryScreen(
                 val groupedTransactions = groupTransactionsByDate(uiState.transactions)
 
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),

@@ -5,6 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,7 +36,8 @@ fun HomeScreen(
     onNavigateToEntry: (typeIndex: Int) -> Unit,
     onNavigateToTransactionHistory: () -> Unit,
     onNavigateToWalletManagement: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -49,7 +52,8 @@ fun HomeScreen(
         onNavigateToTransactionHistory = onNavigateToTransactionHistory,
         onNavigateToWalletManagement = onNavigateToWalletManagement,
         onToggleHideBalance = { viewModel.toggleHideBalance() },
-        modifier = modifier
+        modifier = modifier,
+        listState = listState
     )
 }
 
@@ -60,12 +64,14 @@ fun HomeContent(
     onNavigateToTransactionHistory: () -> Unit,
     onNavigateToWalletManagement: () -> Unit,
     onToggleHideBalance: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState()
 ) {
     val greetingText = getGreetingText()
     val todayDateText = getTodayDateText()
 
     LazyColumn(
+        state = listState,
         modifier = modifier
             .fillMaxSize()
             .statusBarsPadding()

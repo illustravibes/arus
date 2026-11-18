@@ -37,15 +37,13 @@ class HomeViewModel(
     }
 
     private fun loadHomeData() {
-        val (startOfMonth, endOfMonth) = getMonthBounds()
-
         combine(
-            combine(walletRepository.walletsFlow, walletRepository.totalCombinedBalanceFlow) { w, b -> Pair(w, b) },
-            combine(transactionRepository.allTransactionsFlow, categoryRepository.activeCategoriesFlow) { t, c -> Pair(t, c) },
-            combine(transactionRepository.getIncomeReportFlow(startOfMonth, endOfMonth), transactionRepository.getExpenseReportFlow(startOfMonth, endOfMonth)) { i, e -> Pair(i, e) }
-        ) { (wallets, totalBalance), (allTransactions, categories), (incomeMonth, expenseMonth) ->
+            walletRepository.walletsFlow,
+            combine(transactionRepository.allTransactionsFlow, categoryRepository.activeCategoriesFlow) { t, c -> Pair(t, c) }
+        ) { wallets, (allTransactions, categories) ->
             val categoriesMap = categories.associateBy { it.id }
             val nowMillis = System.currentTimeMillis()
+            val (startOfMonth, endOfMonth) = getMonthBounds()
 
             val effectiveRecentTransactions = allTransactions
                 .filter { it.dateMillis <= nowMillis }
@@ -60,11 +58,22 @@ class HomeViewModel(
                 wallet.id to calculated
             }
 
+            // Total + bulanan dihitung di Kotlin dari aliran yang sama (bukan query
+            // SQL dengan nowMillis beku) supaya langsung benar setelah simpan/hapus
+            // tanpa restart aplikasi.
+            val totalBalance = walletBalances.values.sum()
+            val incomeThisMonth = allTransactions
+                .filter { it.type == "INCOME" && it.dateMillis in startOfMonth..endOfMonth && it.dateMillis <= nowMillis }
+                .sumOf { it.amount }
+            val expenseThisMonth = allTransactions
+                .filter { it.type == "EXPENSE" && it.dateMillis in startOfMonth..endOfMonth && it.dateMillis <= nowMillis }
+                .sumOf { it.amount }
+
             HomeUiState(
                 isLoading = false,
                 totalBalance = totalBalance,
-                incomeThisMonth = incomeMonth,
-                expenseThisMonth = expenseMonth,
+                incomeThisMonth = incomeThisMonth,
+                expenseThisMonth = expenseThisMonth,
                 wallets = wallets,
                 walletBalances = walletBalances,
                 recentTransactions = effectiveRecentTransactions,

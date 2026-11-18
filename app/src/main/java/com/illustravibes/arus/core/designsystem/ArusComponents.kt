@@ -27,7 +27,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -154,7 +156,7 @@ fun ArusSecondaryButton(
         ),
         modifier = modifier
             .fillMaxWidth()
-            .height(50.dp)
+            .height(54.dp)
     ) {
         Text(
             text = text,
@@ -988,6 +990,37 @@ fun ArusBottomNavigation(
                 }
             }
         }
+
+        // FAB "+" — tombol tambah transaksi global (DESIGN.md: 4 tab + tombol (+)).
+        // Sebelumnya onAddClick diteruskan ke sini tapi tidak pernah digambar.
+        Surface(
+            onClick = onAddClick,
+            shape = CircleShape,
+            color = ArusSurface,
+            tonalElevation = 6.dp,
+            shadowElevation = 8.dp,
+            border = androidx.compose.foundation.BorderStroke(1.dp, ArusBorder),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = 84.dp)
+                .size(56.dp)
+        ) {
+            // Ikon "+" digambar dari dua batang (tidak ada drawable fa_plus di proyek).
+            Box(contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier
+                        .size(width = 22.dp, height = 3.dp)
+                        .clip(RoundedCornerShape(1.5.dp))
+                        .background(ArusTextPrimary)
+                )
+                Box(
+                    modifier = Modifier
+                        .size(width = 3.dp, height = 22.dp)
+                        .clip(RoundedCornerShape(1.5.dp))
+                        .background(ArusTextPrimary)
+                )
+            }
+        }
     }
 }
 
@@ -1209,7 +1242,7 @@ fun ArusConfirmationSheet(
                     ),
                     modifier = Modifier
                         .weight(1f)
-                        .height(50.dp)
+                        .height(54.dp)
                 ) {
                     Text(
                         text = confirmButtonText,
@@ -1217,6 +1250,167 @@ fun ArusConfirmationSheet(
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+// ============================================================================
+// 13b. ARUS PASSWORD SHEET (Bottom Sheet dengan Field Kata Sandi)
+// Dipakai dialog Backup/Restore: ArusConfirmationSheet tidak punya slot input,
+// jadi kata sandi tidak pernah bisa dimasukkan (alur backup putus di UI).
+// Tombol konfirmasi nonaktif sampai kata sandi >= 4 karakter.
+// ============================================================================
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ArusPasswordSheet(
+    title: String,
+    message: String,
+    confirmButtonText: String,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    isDestructive: Boolean = false
+) {
+    var isPasswordVisible by remember { mutableStateOf(false) }
+    val isValid = password.length >= 4
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = ArusSurface,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 12.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(PillShape)
+                    .background(ArusBorder)
+            )
+        },
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = title,
+                style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = ArusTextPrimary,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = message,
+                style = ArusTypography.bodyMedium,
+                color = ArusTextSecondary,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            OutlinedTextField(
+                value = password,
+                onValueChange = onPasswordChange,
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text(
+                        text = "Kata Sandi",
+                        style = ArusTypography.labelLarge,
+                        color = ArusTextPrimary
+                    )
+                },
+                placeholder = {
+                    Text(
+                        text = "Minimal 4 karakter",
+                        style = ArusTypography.bodyMedium,
+                        color = ArusTextSecondary
+                    )
+                },
+                singleLine = true,
+                visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                        Icon(
+                            painter = painterResource(
+                                id = if (isPasswordVisible) R.drawable.fa_eye_slash else R.drawable.fa_eye
+                            ),
+                            contentDescription = if (isPasswordVisible) "Sembunyikan kata sandi" else "Tampilkan kata sandi",
+                            tint = ArusTextSecondary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                },
+                isError = password.isNotEmpty() && !isValid,
+                supportingText = if (password.isNotEmpty() && !isValid) {
+                    {
+                        Text(
+                            text = "Kata sandi minimal 4 karakter.",
+                            style = ArusTypography.labelSmall,
+                            color = ArusExpense
+                        )
+                    }
+                } else null,
+                textStyle = ArusTypography.bodyLarge.copy(color = ArusTextPrimary),
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = ArusSurface,
+                    unfocusedContainerColor = ArusSurface,
+                    errorContainerColor = ArusSurface,
+                    focusedBorderColor = ArusBrandPrimary,
+                    unfocusedBorderColor = ArusBorder,
+                    errorBorderColor = ArusExpense
+                )
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ArusSecondaryButton(
+                    text = "Batal",
+                    onClick = onDismiss,
+                    modifier = Modifier.weight(1f)
+                )
+                if (isDestructive) {
+                    Button(
+                        onClick = onConfirm,
+                        enabled = isValid,
+                        shape = PillShape,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = ArusExpense,
+                            contentColor = Color.White,
+                            disabledContainerColor = ArusBorder,
+                            disabledContentColor = ArusTextSecondary
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(54.dp)
+                    ) {
+                        Text(
+                            text = confirmButtonText,
+                            style = ArusTypography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        )
+                    }
+                } else {
+                    ArusPrimaryButton(
+                        text = confirmButtonText,
+                        onClick = onConfirm,
+                        modifier = Modifier.weight(1f),
+                        enabled = isValid
                     )
                 }
             }

@@ -173,10 +173,12 @@ fun SettingsScreen(
 
         // Export Password Prompt Sheet/Dialog
         if (showExportPasswordDialog) {
-            ArusConfirmationSheet(
+            ArusPasswordSheet(
                 title = "Buat Kata Sandi Backup",
                 message = "Masukkan kata sandi minimal 4 karakter untuk mengamankan file backup Anda.",
                 confirmButtonText = "Simpan Backup",
+                password = passwordInput,
+                onPasswordChange = { passwordInput = it },
                 onConfirm = {
                     val uri = selectedExportUri
                     if (uri != null && passwordInput.length >= 4) {
@@ -185,16 +187,21 @@ fun SettingsScreen(
                         showExportPasswordDialog = false
                     }
                 },
-                onDismiss = { showExportPasswordDialog = false }
+                onDismiss = {
+                    passwordInput = ""
+                    showExportPasswordDialog = false
+                }
             )
         }
 
         // Restore Password Prompt Sheet/Dialog
         if (showRestorePasswordDialog) {
-            ArusConfirmationSheet(
+            ArusPasswordSheet(
                 title = "Masukkan Kata Sandi Restore",
                 message = "Masukkan kata sandi yang digunakan saat membuat file backup ini.",
                 confirmButtonText = "Pulihkan Data",
+                password = passwordInput,
+                onPasswordChange = { passwordInput = it },
                 onConfirm = {
                     val uri = selectedRestoreUri
                     if (uri != null && passwordInput.length >= 4) {
@@ -203,7 +210,10 @@ fun SettingsScreen(
                         showRestorePasswordDialog = false
                     }
                 },
-                onDismiss = { showRestorePasswordDialog = false },
+                onDismiss = {
+                    passwordInput = ""
+                    showRestorePasswordDialog = false
+                },
                 isDestructive = true
             )
         }

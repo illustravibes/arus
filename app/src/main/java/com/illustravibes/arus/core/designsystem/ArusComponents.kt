@@ -891,7 +891,7 @@ fun ArusTopAppBar(
 }
 
 // ============================================================================
-// 13. ARUS BOTTOM NAVIGATION (Floating Pill 4 Tabs + FAB Pill (+))
+// 13. ARUS BOTTOM NAVIGATION (Floating Pill 4 Tabs + Center FAB (+))
 // ============================================================================
 
 enum class ArusTab(val title: String, val iconRes: Int) {
@@ -903,125 +903,130 @@ enum class ArusTab(val title: String, val iconRes: Int) {
 
 @Composable
 fun ArusBottomNavigation(
-    selectedTab: ArusTab,
-    onTabSelected: (ArusTab) -> Unit,
-    onAddClick: () -> Unit,
-    modifier: Modifier = Modifier
+	selectedTab: ArusTab,
+	onTabSelected: (ArusTab) -> Unit,
+	onAddClick: () -> Unit,
+	modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        // Ultra-smooth multi-stop gradient layer extending lower down behind navbar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(140.dp)
-                .background(
-                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                        colors = listOf(
-                            ArusBackground.copy(alpha = 0f),
-                            ArusBackground.copy(alpha = 0.05f),
-                            ArusBackground.copy(alpha = 0.2f),
-                            ArusBackground.copy(alpha = 0.45f),
-                            ArusBackground.copy(alpha = 0.75f),
-                            ArusBackground.copy(alpha = 0.95f),
-                            ArusBackground,
-                            ArusBackground
-                        )
-                    )
-                )
-        )
+	Box(
+		modifier = modifier.fillMaxWidth(),
+		contentAlignment = Alignment.BottomCenter
+	) {
+		// Ultra-smooth multi-stop gradient layer extending lower down behind navbar.
+		// Di mode overlay, konten layar menggeser di bawah gradasi ini.
+		Box(
+			modifier = Modifier
+				.fillMaxWidth()
+				.height(140.dp)
+				.background(
+					brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+						colors = listOf(
+							ArusBackground.copy(alpha = 0f),
+							ArusBackground.copy(alpha = 0.05f),
+							ArusBackground.copy(alpha = 0.2f),
+							ArusBackground.copy(alpha = 0.45f),
+							ArusBackground.copy(alpha = 0.75f),
+							ArusBackground.copy(alpha = 0.95f),
+							ArusBackground,
+							ArusBackground
+						)
+					)
+				)
+		)
 
-        Surface(
-            shape = PillShape,
-            color = ArusSurface,
-            tonalElevation = 6.dp,
-            shadowElevation = 8.dp,
-            border = androidx.compose.foundation.BorderStroke(1.dp, ArusBorder),
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(horizontal = 4.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ArusTab.entries.forEach { tab ->
-                    val isSelected = tab == selectedTab
-                    val backgroundColor = if (isSelected) ArusBrandPrimary else Color.Transparent
-                    val contentColor = if (isSelected) Color.White else ArusTextSecondary
+		Surface(
+			shape = PillShape,
+			color = ArusSurface,
+			tonalElevation = 6.dp,
+			shadowElevation = 8.dp,
+			border = androidx.compose.foundation.BorderStroke(1.dp, ArusBorder),
+			modifier = Modifier
+				.fillMaxWidth()
+				.navigationBarsPadding()
+				.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+		) {
+			Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.height(64.dp)
+					.padding(horizontal = 4.dp, vertical = 4.dp),
+				horizontalArrangement = Arrangement.SpaceBetween,
+				verticalAlignment = Alignment.CenterVertically
+			) {
+				ArusTab.entries.forEachIndexed { index, tab ->
+					if (index == 2) {
+						// Celah tengah untuk FAB (dock di tengah pill).
+						Spacer(modifier = Modifier.width(64.dp))
+					}
+					val isSelected = tab == selectedTab
+					val backgroundColor = if (isSelected) ArusBrandPrimary else Color.Transparent
+					val contentColor = if (isSelected) Color.White else ArusTextSecondary
 
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clip(PillShape)
-                            .background(backgroundColor)
-                            .clickable { onTabSelected(tab) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                painter = painterResource(id = tab.iconRes),
-                                contentDescription = tab.title,
-                                tint = contentColor,
-                                modifier = Modifier.size(19.dp)
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = tab.title,
-                                style = ArusTypography.labelSmall.copy(
-                                    fontSize = 11.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                                    color = contentColor
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-        }
+					Box(
+						modifier = Modifier
+							.weight(1f)
+							.fillMaxHeight()
+							.clip(PillShape)
+							.background(backgroundColor)
+							.clickable { onTabSelected(tab) },
+						contentAlignment = Alignment.Center
+					) {
+						Column(
+							horizontalAlignment = Alignment.CenterHorizontally,
+							verticalArrangement = Arrangement.Center
+						) {
+							Icon(
+								painter = painterResource(id = tab.iconRes),
+								contentDescription = tab.title,
+								tint = contentColor,
+								modifier = Modifier.size(19.dp)
+							)
+							Spacer(modifier = Modifier.height(2.dp))
+							Text(
+								text = tab.title,
+								style = ArusTypography.labelSmall.copy(
+									fontSize = 11.sp,
+									fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+									color = contentColor
+								)
+							)
+						}
+					}
+				}
+			}
+		}
 
-        // FAB "+" — tombol tambah transaksi global (DESIGN.md: 4 tab + tombol (+)).
-        // Sebelumnya onAddClick diteruskan ke sini tapi tidak pernah digambar.
-        Surface(
-            onClick = onAddClick,
-            shape = CircleShape,
-            color = ArusSurface,
-            tonalElevation = 6.dp,
-            shadowElevation = 8.dp,
-            border = androidx.compose.foundation.BorderStroke(1.dp, ArusBorder),
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 84.dp)
-                .size(56.dp)
-        ) {
-            // Ikon "+" digambar dari dua batang (tidak ada drawable fa_plus di proyek).
-            Box(contentAlignment = Alignment.Center) {
-                Box(
-                    modifier = Modifier
-                        .size(width = 22.dp, height = 3.dp)
-                        .clip(RoundedCornerShape(1.5.dp))
-                        .background(ArusTextPrimary)
-                )
-                Box(
-                    modifier = Modifier
-                        .size(width = 3.dp, height = 22.dp)
-                        .clip(RoundedCornerShape(1.5.dp))
-                        .background(ArusTextPrimary)
-                )
-            }
-        }
-    }
+		// FAB "+" di tengah — docked ke pill (2 tab kiri, 2 tab kanan).
+		// Hitam (primary) supaya menonjol dari pill putih; "+" putih.
+		Surface(
+			onClick = onAddClick,
+			shape = CircleShape,
+			color = ArusBrandPrimary,
+			tonalElevation = 6.dp,
+			shadowElevation = 10.dp,
+			modifier = Modifier
+				.align(Alignment.BottomCenter)
+				.navigationBarsPadding()
+				.padding(bottom = 22.dp)
+				.size(60.dp)
+		) {
+			// Ikon "+" digambar dari dua batang (tidak ada drawable fa_plus di proyek).
+			Box(contentAlignment = Alignment.Center) {
+				Box(
+					modifier = Modifier
+						.size(width = 22.dp, height = 3.dp)
+						.clip(RoundedCornerShape(1.5.dp))
+						.background(Color.White)
+				)
+				Box(
+					modifier = Modifier
+						.size(width = 3.dp, height = 22.dp)
+						.clip(RoundedCornerShape(1.5.dp))
+						.background(Color.White)
+				)
+			}
+		}
+	}
 }
 
 // ============================================================================

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.illustravibes.arus.core.database.ArusDatabase
@@ -85,32 +86,13 @@ fun ArusAppShell() {
             currentScreen is ArusScreen.Settings
 
     Scaffold(
-        bottomBar = {
-            if (showBottomBar) {
-                ArusBottomNavigation(
-                    selectedTab = selectedTab,
-                    onTabSelected = { tab ->
-                        selectedTab = tab
-                        currentScreen = when (tab) {
-                            ArusTab.BERANDA -> ArusScreen.Home
-                            ArusTab.TRANSAKSI -> ArusScreen.TransactionHistory
-                            ArusTab.LAPORAN -> ArusScreen.Report
-                            ArusTab.PENGATURAN -> ArusScreen.Settings
-                        }
-                    },
-                    onAddClick = {
-                        currentScreen = ArusScreen.TransactionEntry(1)
-                    }
-                )
-            }
-        },
         containerColor = ArusBackground,
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = paddingValues.calculateBottomPadding())
+                .padding(paddingValues)
         ) {
             when (val screen = currentScreen) {
                 is ArusScreen.Home -> {
@@ -192,6 +174,27 @@ fun ArusAppShell() {
                         }
                     )
                 }
+            }
+
+            // Bottom bar melayang di atas konten (overlay): konten layar bisa
+            // menggeser sampai ke bawah gradasi, bukan berhenti 140dp di atas.
+            if (showBottomBar) {
+                ArusBottomNavigation(
+                    selectedTab = selectedTab,
+                    onTabSelected = { tab ->
+                        selectedTab = tab
+                        currentScreen = when (tab) {
+                            ArusTab.BERANDA -> ArusScreen.Home
+                            ArusTab.TRANSAKSI -> ArusScreen.TransactionHistory
+                            ArusTab.LAPORAN -> ArusScreen.Report
+                            ArusTab.PENGATURAN -> ArusScreen.Settings
+                        }
+                    },
+                    onAddClick = {
+                        currentScreen = ArusScreen.TransactionEntry(1)
+                    },
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
         }
     }

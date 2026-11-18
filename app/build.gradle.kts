@@ -53,8 +53,8 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.sqlite)
-    implementation("net.zetetic:sqlcipher-android:4.6.0")
-    testImplementation("net.zetetic:sqlcipher-android:4.6.0")
+    implementation(libs.sqlcipher.android)
+    testImplementation(libs.sqlcipher.android)
     testImplementation("junit:junit:4.13.2")
     ksp(libs.androidx.room.compiler)
 

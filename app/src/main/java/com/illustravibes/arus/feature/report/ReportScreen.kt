@@ -31,6 +31,9 @@ fun ReportScreen(
         containerColor = ArusBackground,
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
+        if (uiState.isLoading) {
+            ArusLoadingState()
+        } else {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -102,6 +105,7 @@ fun ReportScreen(
                     title = "Rasio Pengeluaran",
                     currentAmount = uiState.totalExpense,
                     totalAmount = uiState.totalIncome,
+                    progressColor = ArusExpense,
                     subtitle = if (uiState.totalExpense <= uiState.totalIncome) "Pengeluaran masih dalam batas aman" else "Pengeluaran melebihi total pemasukan"
                 )
             }
@@ -110,6 +114,7 @@ fun ReportScreen(
             ArusBarChart(entries = uiState.barChartEntries)
 
             Spacer(modifier = Modifier.height(110.dp))
+        }
         }
     }
 }

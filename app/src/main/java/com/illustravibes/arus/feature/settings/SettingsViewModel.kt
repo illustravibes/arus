@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 data class SettingsUiState(
+    val isLoading: Boolean = true,
     val wallets: List<WalletEntity> = emptyList(),
     val categories: List<CategoryEntity> = emptyList(),
     val isSecurityLockEnabled: Boolean = false,
@@ -43,7 +44,8 @@ class SettingsViewModel(
         ) { wallets, categories ->
             SettingsUiState(
                 wallets = wallets,
-                categories = categories
+                categories = categories,
+                isLoading = false
             )
         }.onEach { state ->
             // Jangan menimpa status backup: loadData() jalan ulang tiap kali

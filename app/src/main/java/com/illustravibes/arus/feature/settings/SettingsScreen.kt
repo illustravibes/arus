@@ -74,6 +74,9 @@ fun SettingsScreen(
         containerColor = ArusBackground,
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
+        if (uiState.isLoading) {
+            ArusLoadingState()
+        } else {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -169,6 +172,7 @@ fun SettingsScreen(
             }
 
             Spacer(modifier = Modifier.height(80.dp))
+        }
         }
 
         // Export Password Prompt Sheet/Dialog

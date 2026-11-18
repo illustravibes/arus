@@ -44,6 +44,9 @@ fun WalletScreen(
         containerColor = ArusBackground,
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
+        if (uiState.isLoading) {
+            ArusLoadingState()
+        } else {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -61,7 +64,13 @@ fun WalletScreen(
 
             ArusSectionHeader(title = "Daftar Dompet Aktif (${uiState.wallets.size})")
 
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (uiState.wallets.isEmpty()) {
+                ArusEmptyState(
+                    title = "Belum ada dompet",
+                    description = "Tambah dompet pertama Anda dengan tombol di atas."
+                )
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 uiState.wallets.forEach { wallet ->
                     val calculatedBalance = uiState.walletBalances[wallet.id] ?: wallet.initialBalance
                     val iconTint = parseHexColor(wallet.colorHex, NotionSky)
@@ -134,8 +143,10 @@ fun WalletScreen(
                     }
                 }
             }
+            }
 
             Spacer(modifier = Modifier.height(80.dp))
+        }
         }
 
         // Delete Wallet Confirmation Sheet

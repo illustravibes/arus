@@ -35,6 +35,9 @@ fun TransactionHistoryScreen(
         containerColor = ArusBackground,
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
+        if (uiState.isLoading) {
+            ArusLoadingState()
+        } else {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -42,7 +45,7 @@ fun TransactionHistoryScreen(
                 .imePadding()
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Spacer(modifier = Modifier.height(4.dp))
 
@@ -148,6 +151,7 @@ fun TransactionHistoryScreen(
             }
 
             Spacer(modifier = Modifier.height(110.dp))
+        }
         }
 
         // Transaction Detail Preview Sheet

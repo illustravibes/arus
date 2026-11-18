@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 data class TransactionHistoryUiState(
+    val isLoading: Boolean = true,
     val searchQuery: String = "",
     val selectedWalletFilterId: Long? = null,
     val selectedTypeFilter: String? = null, // "INCOME", "EXPENSE", "TRANSFER", or null
@@ -58,7 +59,8 @@ class TransactionHistoryViewModel(
             _uiState.value.copy(
                 transactions = filtered,
                 wallets = wallets,
-                categoriesMap = categoriesMap
+                categoriesMap = categoriesMap,
+                isLoading = false
             )
         }.onEach { state ->
             _uiState.value = state

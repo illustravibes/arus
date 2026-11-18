@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 data class ReportUiState(
+    val isLoading: Boolean = true,
     val selectedPeriodIndex: Int = 2, // 0 = Harian, 1 = Mingguan, 2 = Bulanan
     val selectedWalletId: Long? = null,
     val totalIncome: Long = 0L,
@@ -58,6 +59,7 @@ class ReportViewModel(
                 .sumOf { it.amount }
 
             ReportUiState(
+                isLoading = false,
                 selectedPeriodIndex = periodIndex,
                 selectedWalletId = walletId,
                 totalIncome = totalIncome,

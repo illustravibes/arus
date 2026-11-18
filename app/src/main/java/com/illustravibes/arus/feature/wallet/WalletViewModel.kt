@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 data class WalletUiState(
+    val isLoading: Boolean = true,
     val wallets: List<WalletEntity> = emptyList(),
     val walletBalances: Map<Long, Long> = emptyMap(),
     val showDialog: Boolean = false,
@@ -48,7 +49,8 @@ class WalletViewModel(
             }
             WalletUiState(
                 wallets = wallets,
-                walletBalances = balances
+                walletBalances = balances,
+                isLoading = false
             )
         }.onEach { state ->
             _uiState.value = state

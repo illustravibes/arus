@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 data class CategoryUiState(
+    val isLoading: Boolean = true,
     val categories: List<CategoryEntity> = emptyList(),
     val selectedTypeTab: String = "EXPENSE", // "EXPENSE" or "INCOME"
     val showDialog: Boolean = false,
@@ -34,7 +35,7 @@ class CategoryViewModel(
             _uiState.map { it.selectedTypeTab }.distinctUntilChanged()
         ) { allCategories, type ->
             val filtered = allCategories.filter { it.type == type }
-            _uiState.value.copy(categories = filtered)
+            _uiState.value.copy(categories = filtered, isLoading = false)
         }.onEach { state ->
             _uiState.value = state
         }.launchIn(viewModelScope)

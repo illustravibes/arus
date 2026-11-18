@@ -158,7 +158,7 @@ fun TransactionEntryScreen(
                         id = wallet.id.toString(),
                         title = wallet.name,
                         iconResId = mapDrawableIcon(wallet.icon),
-                        tileColor = parseHexColor(wallet.colorHex, NotionSkySoft),
+                        tileColor = parseHexColor(wallet.colorHex, NotionSkySoft).copy(alpha = 0.15f),
                         iconTint = parseHexColor(wallet.colorHex, NotionSky)
                     )
                 },
@@ -179,7 +179,7 @@ fun TransactionEntryScreen(
                         id = wallet.id.toString(),
                         title = wallet.name,
                         iconResId = mapDrawableIcon(wallet.icon),
-                        tileColor = parseHexColor(wallet.colorHex, NotionMintSoft),
+                        tileColor = parseHexColor(wallet.colorHex, NotionMintSoft).copy(alpha = 0.15f),
                         iconTint = parseHexColor(wallet.colorHex, NotionMint)
                     )
                 },
@@ -200,7 +200,7 @@ fun TransactionEntryScreen(
                         id = category.id.toString(),
                         title = category.name,
                         iconResId = mapDrawableIcon(category.icon),
-                        tileColor = parseHexColor(category.colorHex, NotionMintSoft),
+                        tileColor = parseHexColor(category.colorHex, NotionMintSoft).copy(alpha = 0.15f),
                         iconTint = parseHexColor(category.colorHex, NotionMint)
                     )
                 },

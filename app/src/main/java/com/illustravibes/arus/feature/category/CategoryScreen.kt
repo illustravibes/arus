@@ -43,6 +43,9 @@ fun CategoryScreen(
         containerColor = ArusBackground,
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
+        if (uiState.isLoading) {
+            ArusLoadingState()
+        } else {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -53,12 +56,12 @@ fun CategoryScreen(
         ) {
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Type Segmented Control (Pengeluaran / Pemasukan)
+            // Type Segmented Control (Pemasukan / Pengeluaran — sama seperti layar Catat Transaksi)
             ArusSegmentedControl(
-                options = listOf("Pengeluaran", "Pemasukan"),
-                selectedIndex = if (uiState.selectedTypeTab == "EXPENSE") 0 else 1,
+                options = listOf("Pemasukan", "Pengeluaran"),
+                selectedIndex = if (uiState.selectedTypeTab == "INCOME") 0 else 1,
                 onOptionSelected = { index ->
-                    viewModel.onTypeTabChange(if (index == 0) "EXPENSE" else "INCOME")
+                    viewModel.onTypeTabChange(if (index == 0) "INCOME" else "EXPENSE")
                 }
             )
 
@@ -69,7 +72,13 @@ fun CategoryScreen(
 
             ArusSectionHeader(title = "Daftar Kategori (${uiState.categories.size})")
 
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (uiState.categories.isEmpty()) {
+                ArusEmptyState(
+                    title = "Belum ada kategori ${if (uiState.selectedTypeTab == "EXPENSE") "pengeluaran" else "pemasukan"}",
+                    description = "Tambah kategori pertama Anda dengan tombol di atas."
+                )
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 uiState.categories.forEach { category ->
                     val defaultTint = if (category.type == "EXPENSE") NotionCoral else NotionMint
                     val iconTint = parseHexColor(category.colorHex, defaultTint)
@@ -89,7 +98,7 @@ fun CategoryScreen(
                                     iconResId = mapDrawableIcon(category.icon),
                                     tileColor = tileColor,
                                     iconTint = iconTint,
-                                    size = 40.dp
+                                    size = 44.dp
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(
@@ -116,8 +125,10 @@ fun CategoryScreen(
                     }
                 }
             }
+            }
 
             Spacer(modifier = Modifier.height(80.dp))
+        }
         }
 
         // Archive Confirmation Sheet

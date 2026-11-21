@@ -1238,6 +1238,7 @@ fun ArusConfirmationSheet(
     isDestructive: Boolean = false
 ) {
     ModalBottomSheet(
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         containerColor = ArusSurface,
@@ -1366,6 +1367,7 @@ fun ArusFormSheet(
     content: @Composable ColumnScope.() -> Unit
 ) {
     ModalBottomSheet(
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         containerColor = ArusSurface,
@@ -1431,6 +1433,7 @@ val ArusColorOptions: List<String> = listOf(
 fun ArusIconPicker(
     selectedIcon: String,
     onIconChange: (String) -> Unit,
+    selectedColorHex: String? = null,
     modifier: Modifier = Modifier
 ) {
     FlowRow(
@@ -1441,12 +1444,14 @@ fun ArusIconPicker(
     ) {
         ArusIconOptions.forEach { (iconName, iconResId) ->
             val isSelected = iconName == selectedIcon
+            val selectedTileColor = selectedColorHex?.let { arusColorFromHex(it, ArusBrandPrimary) }
+                ?: ArusBrandPrimary
             Box(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(SoftTileShape)
-                    .background(if (isSelected) ArusBrandPrimary else ArusBrandSoft)
-                    .border(1.dp, if (isSelected) ArusBrandPrimary else ArusBorder, SoftTileShape)
+                    .background(if (isSelected) selectedTileColor else ArusBrandSoft)
+                    .border(1.dp, if (isSelected) selectedTileColor else ArusBorder, SoftTileShape)
                     .clickable { onIconChange(iconName) },
                 contentAlignment = Alignment.Center
             ) {
@@ -1529,6 +1534,7 @@ fun ArusPasswordSheet(
     val isValid = password.length >= 4
 
     ModalBottomSheet(
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         containerColor = ArusSurface,
@@ -1687,6 +1693,7 @@ fun ArusSelectionSheet(
     modifier: Modifier = Modifier
 ) {
     ModalBottomSheet(
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         containerColor = ArusSurface,
@@ -1830,6 +1837,7 @@ fun ArusTransactionDetailSheet(
     }
 
     ModalBottomSheet(
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         containerColor = ArusSurface,

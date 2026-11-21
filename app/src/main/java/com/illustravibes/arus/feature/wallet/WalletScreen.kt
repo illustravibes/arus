@@ -170,7 +170,8 @@ fun WalletScreen(
                     )
                     ArusIconPicker(
                         selectedIcon = uiState.selectedIcon,
-                        onIconChange = { icon -> viewModel.onIconChange(icon) }
+                        onIconChange = { icon -> viewModel.onIconChange(icon) },
+                        selectedColorHex = uiState.selectedColorHex
                     )
 
                     Text(

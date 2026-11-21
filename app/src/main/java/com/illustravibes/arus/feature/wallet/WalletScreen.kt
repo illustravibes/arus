@@ -110,7 +110,7 @@ fun WalletScreen(
                                 }
                             }
 
-                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                 ArusActionPill(
                                     onClick = { viewModel.openEditDialog(wallet) },
                                     iconResId = R.drawable.fa_pen
@@ -207,7 +207,8 @@ fun WalletScreen(
                         ArusWalletBrandPicker(
                             brands = WalletMasterData.brandsFor(uiState.selectedType),
                             selectedSlug = uiState.selectedLogoSlug,
-                            onBrandSelected = { brand -> viewModel.onBrandSelect(brand) }
+                            onBrandSelected = { brand -> viewModel.onBrandSelect(brand) },
+                            searchPlaceholder = if (uiState.selectedType == WalletType.BANK) "Cari bank..." else "Cari e-wallet..."
                         )
                     }
 

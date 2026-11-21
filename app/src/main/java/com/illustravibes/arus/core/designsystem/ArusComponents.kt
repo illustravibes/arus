@@ -1716,18 +1716,31 @@ fun ArusActionPill(
         .clickable(enabled = enabled) { onClick() }
         .alpha(if (enabled) 1f else 0.4f)
     if (text == null) {
-        // Ikon saja: tombol bulat 48dp ala SwiftUI (tanpa label).
+        // Ikon saja: cakram visual 40dp, area sentuh tetap 48dp.
         Box(
-            modifier = buttonModifier.size(48.dp),
+            modifier = modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .clickable(enabled = enabled) { onClick() }
+                .alpha(if (enabled) 1f else 0.4f),
             contentAlignment = Alignment.Center
         ) {
-            if (iconResId != null) {
-                Icon(
-                    painter = painterResource(id = iconResId),
-                    contentDescription = null,
-                    tint = contentColor,
-                    modifier = Modifier.size(20.dp)
-                )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(backgroundColor)
+                    .border(1.dp, borderColor, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                if (iconResId != null) {
+                    Icon(
+                        painter = painterResource(id = iconResId),
+                        contentDescription = null,
+                        tint = contentColor,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     } else {
@@ -1917,46 +1930,107 @@ fun ArusWalletBrandPicker(
     brands: List<WalletBrand>,
     selectedSlug: String?,
     onBrandSelected: (WalletBrand) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    searchPlaceholder: String = "Cari..."
 ) {
-    FlowRow(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        maxItemsInEachRow = 3
-    ) {
-        brands.forEach { brand ->
-            val isSelected = brand.slug == selectedSlug
-            Column(
-                modifier = Modifier
-                    .width(96.dp)
-                    .clip(SoftTileShape)
-                    .background(if (isSelected) ArusBrandSoft else ArusSurface)
-                    .border(
-                        if (isSelected) 2.dp else 1.dp,
-                        if (isSelected) ArusBrandPrimary else ArusBorder,
-                        SoftTileShape
-                    )
-                    .clickable { onBrandSelected(brand) }
-                    .padding(vertical = 10.dp, horizontal = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(id = brand.logoResId),
-                    contentDescription = brand.name,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.height(28.dp).fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(6.dp))
+    var query by remember { mutableStateOf("") }
+    val filteredBrands = remember(brands, query) {
+        if (query.isBlank()) brands
+        else brands.filter { it.name.contains(query.trim(), ignoreCase = true) }
+    }
+    Column(modifier = modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = {
                 Text(
-                    text = brand.name,
-                    style = ArusTypography.labelSmall.copy(
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                    ),
-                    color = ArusTextPrimary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    text = searchPlaceholder,
+                    style = ArusTypography.bodyMedium,
+                    color = ArusTextSecondary
                 )
+            },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.fa_magnifying_glass),
+                    contentDescription = null,
+                    tint = ArusTextSecondary,
+                    modifier = Modifier.size(20.dp)
+                )
+            },
+            trailingIcon = if (query.isNotEmpty()) {
+                {
+                    IconButton(
+                        onClick = { query = "" },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_close),
+                            contentDescription = "Hapus pencarian",
+                            tint = ArusTextSecondary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            } else null,
+            singleLine = true,
+            shape = PillShape,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = ArusSurface,
+                unfocusedContainerColor = ArusSurface,
+                focusedBorderColor = ArusBrandPrimary,
+                unfocusedBorderColor = ArusBorder
+            )
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        if (filteredBrands.isEmpty()) {
+            Text(
+                text = "Tidak ditemukan",
+                style = ArusTypography.bodyMedium,
+                color = ArusTextSecondary,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        } else {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                maxItemsInEachRow = 3
+            ) {
+                filteredBrands.forEach { brand ->
+                    val isSelected = brand.slug == selectedSlug
+                    Column(
+                        modifier = Modifier
+                            .width(96.dp)
+                            .clip(SoftTileShape)
+                            .background(if (isSelected) ArusBrandSoft else ArusSurface)
+                            .border(
+                                if (isSelected) 2.dp else 1.dp,
+                                if (isSelected) ArusBrandPrimary else ArusBorder,
+                                SoftTileShape
+                            )
+                            .clickable { onBrandSelected(brand) }
+                            .padding(vertical = 10.dp, horizontal = 8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(id = brand.logoResId),
+                            contentDescription = brand.name,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.width(72.dp).height(32.dp)
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = brand.name,
+                            style = ArusTypography.labelSmall.copy(
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                            ),
+                            color = ArusTextPrimary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
             }
         }
     }

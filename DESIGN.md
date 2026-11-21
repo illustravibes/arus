@@ -25,6 +25,7 @@ Hasil audit 587 screenshot referensi lokal (`design/bevel` + `design/notion`) da
 - **Chip:** terpilih = pill hitam; tidak terpilih = latar `ArusBrandSoft` tanpa border.
 - **Baris transaksi:** judul = catatan (dominan), subtitle = `dompet • kategori • jam` (pemisah dot).
 - **Baris dompet (Kelola Dompet):** nama dompet dominan di atas (`titleLarge`), nominal di bawahnya (`bodyMedium` abu-abu); tanpa tombol ••• — ketuk barisnya untuk buka menu Edit/Hapus.
+- **Baris kategori (Kelola Kategori):** sama seperti baris dompet — nama dominan (`titleLarge`), tanpa tombol •••, ketuk barisnya untuk buka menu Arsipkan/Pulihkan (terarsip: nama abu-abu).
 - **Chart Laporan:** batang hijau/merah (semantik uang); label sumbu-Y di kanan (format ringkas "3 jt"/"250 rb"); batang terpilih opacity penuh, yang lain 0.45.
 - **Snackbar:** `ArusSnackbar` — pill hitam + centang putih + aksi "Lihat" putih Bold, di atas bottom nav (bottom 160dp).
 - **Detail sheet transaksi:** "Ubah" hitam penuh + "Hapus" teks merah di bawahnya; "Tutup" via drag/scrim/back (tanpa tombol).

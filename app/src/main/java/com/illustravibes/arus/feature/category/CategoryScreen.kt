@@ -1,17 +1,15 @@
 package com.illustravibes.arus.feature.category
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.core.database.entity.CategoryEntity
@@ -89,16 +87,16 @@ fun CategoryScreen(
                             val iconTint = parseHexColor(category.colorHex, defaultTint)
                             val tileColor = iconTint.copy(alpha = 0.15f)
 
+                            // Baris kategori: ketuk barisnya untuk buka menu
+                            // Arsipkan/Pulihkan (tombol ••• dihapus, sama
+                            // seperti Kelola Dompet — keputusan user
+                            // 2026-11-21).
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .clickable { menuCategory = category }
                                     .padding(vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.weight(1f)
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 ArusCategoryTile(
                                     iconResId = mapDrawableIcon(category.icon),
@@ -109,23 +107,12 @@ fun CategoryScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(
                                     text = category.name,
-                                    style = ArusTypography.titleMedium,
+                                    style = ArusTypography.titleLarge,
                                     color = ArusTextPrimary,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
                                 )
-                            }
-
-IconButton(onClick = { menuCategory = category }) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.fa_ellipsis_vertical),
-                                        contentDescription = "Opsi lainnya",
-                                        tint = ArusTextSecondary,
-                                        // Viewport ikon 128x512 (1:4) — ukuran ikut rasio supaya
-                                        // titik-titiknya tetap bulat, bukan oval.
-                                        modifier = Modifier.size(width = 6.dp, height = 24.dp)
-                                    )
-                                }
                         }
                     }
                 }
@@ -147,39 +134,25 @@ IconButton(onClick = { menuCategory = category }) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .clickable { menuCategory = category }
                                     .padding(vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
+                                ArusCategoryTile(
+                                    iconResId = mapDrawableIcon(category.icon),
+                                    tileColor = tileColor,
+                                    iconTint = iconTint,
+                                    size = 40.dp
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = category.name,
+                                    style = ArusTypography.titleLarge,
+                                    color = ArusTextSecondary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.weight(1f)
-                                ) {
-                                    ArusCategoryTile(
-                                        iconResId = mapDrawableIcon(category.icon),
-                                        tileColor = tileColor,
-                                        iconTint = iconTint,
-                                        size = 40.dp
-                                    )
-                                    Spacer(modifier = Modifier.width(12.dp))
-                                    Text(
-                                        text = category.name,
-                                        style = ArusTypography.titleMedium,
-                                        color = ArusTextSecondary,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-IconButton(onClick = { menuCategory = category }) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.fa_ellipsis_vertical),
-                                        contentDescription = "Opsi lainnya",
-                                        tint = ArusTextSecondary,
-                                        // Viewport ikon 128x512 (1:4) — ukuran ikut rasio supaya
-                                        // titik-titiknya tetap bulat, bukan oval.
-                                        modifier = Modifier.size(width = 6.dp, height = 24.dp)
-                                    )
-                                }
+                                )
                             }
                         }
                     }

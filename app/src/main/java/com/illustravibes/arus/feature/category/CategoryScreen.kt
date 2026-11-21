@@ -27,6 +27,7 @@ fun CategoryScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     var categoryToArchive by remember { mutableStateOf<CategoryEntity?>(null) }
+    var categoryToDelete by remember { mutableStateOf<CategoryEntity?>(null) }
     var menuCategory by remember { mutableStateOf<CategoryEntity?>(null) }
 
     Scaffold(
@@ -169,20 +170,37 @@ fun CategoryScreen(
             val isArchived = uiState.archivedCategories.contains(targetCategory)
             ArusActionSheet(
                 title = targetCategory.name,
-                items = if (isArchived) {
-                    listOf(
+                items = buildList {
+                    add(
                         ArusActionSheetItem(
-                            label = "Pulihkan",
-                            iconResId = R.drawable.fa_arrow_rotate_left,
-                            onClick = { viewModel.unarchiveCategory(targetCategory) }
+                            label = "Edit",
+                            iconResId = R.drawable.fa_pen,
+                            onClick = { viewModel.openEditDialog(targetCategory) }
                         )
                     )
-                } else {
-                    listOf(
+                    if (isArchived) {
+                        add(
+                            ArusActionSheetItem(
+                                label = "Pulihkan",
+                                iconResId = R.drawable.fa_arrow_rotate_left,
+                                onClick = { viewModel.unarchiveCategory(targetCategory) }
+                            )
+                        )
+                    } else {
+                        add(
+                            ArusActionSheetItem(
+                                label = "Arsipkan",
+                                iconResId = R.drawable.fa_box_archive,
+                                onClick = { categoryToArchive = targetCategory }
+                            )
+                        )
+                    }
+                    add(
                         ArusActionSheetItem(
-                            label = "Arsipkan",
-                            iconResId = R.drawable.fa_box_archive,
-                            onClick = { categoryToArchive = targetCategory }
+                            label = "Hapus",
+                            iconResId = R.drawable.fa_trash_can,
+                            destructive = true,
+                            onClick = { categoryToDelete = targetCategory }
                         )
                     )
                 },
@@ -206,10 +224,26 @@ fun CategoryScreen(
             )
         }
 
+        // Delete Confirmation Sheet
+        if (categoryToDelete != null) {
+            val targetCategory = categoryToDelete!!
+            ArusConfirmationSheet(
+                title = "Hapus Kategori Ini?",
+                message = "Kategori \"${targetCategory.name}\" akan dihapus. Transaksi yang memakai kategori ini tetap tersimpan, tetapi tidak lagi terhubung ke kategori mana pun. Lanjutkan?",
+                confirmButtonText = "Ya, Hapus Kategori",
+                onConfirm = {
+                    viewModel.deleteCategory(targetCategory)
+                    categoryToDelete = null
+                },
+                onDismiss = { categoryToDelete = null },
+                isDestructive = true
+            )
+        }
+
         // Create Category Modal Sheet
         if (uiState.showDialog) {
             ArusFormSheet(
-                title = "Tambah Kategori ${if (uiState.selectedTypeTab == "EXPENSE") "Pengeluaran" else "Pemasukan"}",
+                title = if (uiState.editingCategory == null) "Tambah Kategori ${if (uiState.selectedTypeTab == "EXPENSE") "Pengeluaran" else "Pemasukan"}" else "Edit Kategori",
                 onDismiss = { viewModel.closeDialog() }
             ) {
 

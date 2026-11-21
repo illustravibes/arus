@@ -15,6 +15,7 @@ data class CategoryUiState(
     val allCategories: List<CategoryEntity> = emptyList(),
     val selectedTypeTab: String = "EXPENSE", // "EXPENSE" or "INCOME"
     val showDialog: Boolean = false,
+    val editingCategory: CategoryEntity? = null,
     val nameInput: String = "",
     val selectedIcon: String = "fa_tags",
     val selectedColorHex: String = "#00A86B",
@@ -58,9 +59,23 @@ class CategoryViewModel(
         _uiState.update {
             it.copy(
                 showDialog = true,
+                editingCategory = null,
                 nameInput = "",
                 selectedIcon = "fa_tags",
                 selectedColorHex = if (it.selectedTypeTab == "EXPENSE") "#F64932" else "#00A86B",
+                errorMessage = null
+            )
+        }
+    }
+
+    fun openEditDialog(category: CategoryEntity) {
+        _uiState.update {
+            it.copy(
+                showDialog = true,
+                editingCategory = category,
+                nameInput = category.name,
+                selectedIcon = category.icon,
+                selectedColorHex = category.colorHex,
                 errorMessage = null
             )
         }
@@ -92,21 +107,35 @@ class CategoryViewModel(
 
             // V2-P2-6: nama duplikat (abaikan kapitalisasi/spasi, termasuk
             // yang terarsip) ditolak — pulihkan yang lama, jangan buat baru.
+            // Saat edit, nama sendiri dikecualikan; tipe ikut kategori
+            // yang diedit (tipe tidak berubah).
+            val type = state.editingCategory?.type ?: state.selectedTypeTab
             val normalizedName = state.nameInput.trim()
             val isDuplicateName = state.allCategories.any {
-                it.type == state.selectedTypeTab && it.name.trim().equals(normalizedName, ignoreCase = true)
+                it.type == type && it.name.trim().equals(normalizedName, ignoreCase = true) &&
+                    it.id != state.editingCategory?.id
             }
             if (isDuplicateName) {
                 _uiState.update { it.copy(errorMessage = "Nama kategori sudah dipakai") }
                 return@launch
             }
 
-            categoryRepository.createCategory(
-                name = state.nameInput.trim(),
-                type = state.selectedTypeTab,
-                icon = state.selectedIcon,
-                colorHex = state.selectedColorHex
-            )
+            if (state.editingCategory == null) {
+                categoryRepository.createCategory(
+                    name = state.nameInput.trim(),
+                    type = state.selectedTypeTab,
+                    icon = state.selectedIcon,
+                    colorHex = state.selectedColorHex
+                )
+            } else {
+                categoryRepository.updateCategory(
+                    state.editingCategory.copy(
+                        name = state.nameInput.trim(),
+                        icon = state.selectedIcon,
+                        colorHex = state.selectedColorHex
+                    )
+                )
+            }
 
             _uiState.update { it.copy(showDialog = false) }
         }
@@ -122,6 +151,12 @@ class CategoryViewModel(
     fun unarchiveCategory(category: CategoryEntity) {
         viewModelScope.launch {
             categoryRepository.unarchiveCategory(category)
+        }
+    }
+
+    fun deleteCategory(category: CategoryEntity) {
+        viewModelScope.launch {
+            categoryRepository.deleteCategory(category)
         }
     }
 }

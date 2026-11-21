@@ -41,4 +41,12 @@ class CategoryRepository(private val db: ArusDatabase) {
     suspend fun unarchiveCategory(category: CategoryEntity) {
         db.categoryDao().updateCategory(category.copy(isArchived = false))
     }
+
+    suspend fun updateCategory(category: CategoryEntity) {
+        db.categoryDao().updateCategory(category)
+    }
+
+    suspend fun deleteCategory(category: CategoryEntity) {
+        db.categoryDao().deleteCategory(category)
+    }
 }

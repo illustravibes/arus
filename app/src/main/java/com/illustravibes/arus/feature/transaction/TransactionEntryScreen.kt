@@ -102,7 +102,7 @@ fun TransactionEntryScreen(
                     val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
                     val targetWalletTint = parseHexColor(uiState.selectedTargetWallet?.colorHex ?: "#00A86B", NotionMint)
 
-                    LabeledFieldCard(label = "Dompet Asal") {
+                    LabeledField(label = "Dompet Asal") {
                         ArusPropertySelectorRow(
                             label = "Dompet Asal",
                             valueOnLeft = true,
@@ -112,10 +112,10 @@ fun TransactionEntryScreen(
                             tileColor = walletTint.copy(alpha = 0.15f),
                             iconTint = walletTint,
                             logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug),
-                            inCard = true
+                            compact = true
                         )
                     }
-                    LabeledFieldCard(label = "Dompet Tujuan") {
+                    LabeledField(label = "Dompet Tujuan") {
                         ArusPropertySelectorRow(
                             label = "Dompet Tujuan",
                             valueOnLeft = true,
@@ -125,7 +125,7 @@ fun TransactionEntryScreen(
                             tileColor = targetWalletTint.copy(alpha = 0.15f),
                             iconTint = targetWalletTint,
                             logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedTargetWallet?.logoSlug),
-                            inCard = true
+                            compact = true
                         )
                     }
                 } else {
@@ -133,7 +133,7 @@ fun TransactionEntryScreen(
                     val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
                     val categoryTint = parseHexColor(uiState.selectedCategory?.colorHex ?: "#00A86B", NotionMint)
 
-                    LabeledFieldCard(label = "Dompet") {
+                    LabeledField(label = "Dompet") {
                         ArusPropertySelectorRow(
                             label = "Pilih Dompet",
                             valueOnLeft = true,
@@ -143,10 +143,10 @@ fun TransactionEntryScreen(
                             tileColor = walletTint.copy(alpha = 0.15f),
                             iconTint = walletTint,
                             logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug),
-                            inCard = true
+                            compact = true
                         )
                     }
-                    LabeledFieldCard(label = "Kategori") {
+                    LabeledField(label = "Kategori") {
                         ArusPropertySelectorRow(
                             label = "Kategori",
                             valueOnLeft = true,
@@ -155,14 +155,14 @@ fun TransactionEntryScreen(
                             iconResId = mapDrawableIcon(uiState.selectedCategory?.icon ?: "fa_tags"),
                             tileColor = categoryTint.copy(alpha = 0.15f),
                             iconTint = categoryTint,
-                            inCard = true
+                            compact = true
                         )
                     }
                 }
                 // Tanggal transaksi (bisa diubah; maks. hari ini).
                 // tileColor: NotionSkySoft polos (dulu NotionSkySoft 15% — nyaris
                 // tak terlihat di atas putih; pola yang sama dengan Kelola Data).
-                LabeledFieldCard(label = "Tanggal") {
+                LabeledField(label = "Tanggal") {
                     ArusPropertySelectorRow(
                         label = "Tanggal",
                         valueOnLeft = true,
@@ -171,7 +171,7 @@ fun TransactionEntryScreen(
                         iconResId = R.drawable.fa_calendar,
                         tileColor = NotionSkySoft,
                         iconTint = NotionSky,
-                        inCard = true
+                        compact = true
                     )
                 }
 
@@ -286,12 +286,13 @@ fun TransactionEntryScreen(
 }
 
 /**
- * Satu field form: label di atas + isi dalam kartu.
+ * Satu field form: label di atas + isi berupa pill penuh (baris selector
+ * standalone, 56dp — sama tinggi dengan field Catatan Transaksi).
  * Dipakai di form Catat (Dompet, Kategori, Tanggal) agar tiap baris jelas
  * maksudnya — gaya label sama dengan [ArusTextField].
  */
 @Composable
-private fun LabeledFieldCard(
+private fun LabeledField(
     label: String,
     content: @Composable () -> Unit
 ) {
@@ -302,8 +303,6 @@ private fun LabeledFieldCard(
             color = ArusTextPrimary,
             modifier = Modifier.padding(bottom = 6.dp)
         )
-        ArusCard {
-            content()
-        }
+        content()
     }
 }

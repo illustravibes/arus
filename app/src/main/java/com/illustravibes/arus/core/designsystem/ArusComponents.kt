@@ -409,7 +409,8 @@ fun ArusPropertySelectorRow(
     logoResId: Int? = null,
     inCard: Boolean = false,
     valueOnLeft: Boolean = false,
-    badgeText: String? = null
+    badgeText: String? = null,
+    compact: Boolean = false
 ) {
     Row(
         modifier = modifier
@@ -422,7 +423,7 @@ fun ArusPropertySelectorRow(
                     .border(1.dp, ArusBorder, PillShape)
             )
             .clickable { onClick() }
-            .padding(horizontal = if (inCard) 0.dp else 12.dp, vertical = 14.dp),
+            .padding(horizontal = if (inCard) 0.dp else 12.dp, vertical = if (compact) 10.dp else 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

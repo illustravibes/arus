@@ -150,9 +150,10 @@ fun TransactionHistoryScreen(
                                     }
 
                                     val wallet = uiState.wallets.find { it.id == tx.walletId }
+                                    val timeString = SimpleDateFormat("HH:mm", Locale.forLanguageTag("id-ID")).format(Date(tx.dateMillis))
                                     ArusTransactionRow(
                                         title = category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer Antardompet" else "Transaksi",
-                                        subtitle = tx.note.orEmpty().ifBlank { wallet?.name ?: "Dompet" },
+                                        subtitle = "$timeString • " + tx.note.orEmpty().ifBlank { wallet?.name ?: "Dompet" },
                                         amount = tx.amount,
                                         type = txType,
                                         iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),

@@ -456,9 +456,10 @@ private fun groupTransactionsByDate(transactions: List<TransactionEntity>): Map<
 }
 
 private fun formatDateSubtitle(dateMillis: Long, note: String?): String {
-    val formatter = SimpleDateFormat("d MMM yyyy", Locale.forLanguageTag("id-ID"))
-    val dateString = formatter.format(Date(dateMillis))
-    return if (!note.isNullOrBlank()) "$dateString • $note" else dateString
+    // Jam transaksi (tanggal sudah ada di header kartu harian).
+    val formatter = SimpleDateFormat("HH:mm", Locale.forLanguageTag("id-ID"))
+    val timeString = formatter.format(Date(dateMillis))
+    return if (!note.isNullOrBlank()) "$timeString • $note" else timeString
 }
 
 @Preview(showBackground = true, showSystemUi = true)

@@ -876,7 +876,7 @@ fun ArusWalletCard(
     onClick: (() -> Unit)? = null,
     logoResId: Int? = null
 ) {
-    // V2-P1-4: saldo sangat panjang mengecil otomatis (kartu dompet 180dp).
+    // V2-P1-4: saldo sangat panjang mengecil otomatis (kartu dompet 220dp).
     val balanceText = balance.formatRupiah()
     val balanceStyle = when {
         balanceText.length > 18 -> ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 12.sp, lineHeight = 16.sp)
@@ -885,38 +885,41 @@ fun ArusWalletCard(
         else -> ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold)
     }
     ArusCard(
-        modifier = modifier.width(180.dp),
+        modifier = modifier.width(220.dp),
         onClick = onClick
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
+            // Kolom 1: ikon/logo dompet.
             ArusWalletTile(
                 logoResId = logoResId,
                 iconResId = iconResId,
                 tileColor = tileColor,
                 iconTint = iconTint,
-                size = 36.dp
+                size = 40.dp
             )
+            Spacer(modifier = Modifier.width(12.dp))
+            // Kolom 2: nominal dominan + nama dompet.
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = balanceText,
+                    style = balanceStyle,
+                    color = ArusTextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = walletName,
+                    style = ArusTypography.labelMedium,
+                    color = ArusTextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = walletName,
-            style = ArusTypography.labelMedium,
-            color = ArusTextSecondary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text = balanceText,
-            style = balanceStyle,
-            color = ArusTextPrimary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
     }
 }
 
@@ -2165,7 +2168,6 @@ fun ArusWalletBrandPicker(
                                 .size(width = 64.dp, height = 32.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(ArusSurface)
-                                .border(1.dp, ArusBorder, RoundedCornerShape(8.dp))
                                 .padding(4.dp),
                             contentAlignment = Alignment.Center
                         ) {

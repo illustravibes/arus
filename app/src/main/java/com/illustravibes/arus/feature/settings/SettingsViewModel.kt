@@ -15,7 +15,6 @@ data class SettingsUiState(
     val isLoading: Boolean = true,
     val wallets: List<WalletEntity> = emptyList(),
     val categories: List<CategoryEntity> = emptyList(),
-    val isSecurityLockEnabled: Boolean = false,
     val isBackupLoading: Boolean = false,
     val backupMessage: String? = null,
     val isBackupSuccess: Boolean = false,
@@ -60,10 +59,6 @@ class SettingsViewModel(
                 )
             }
         }.launchIn(viewModelScope)
-    }
-
-    fun onSecurityToggleChange(enabled: Boolean) {
-        _uiState.update { it.copy(isSecurityLockEnabled = enabled) }
     }
 
     fun exportBackup(uri: Uri, password: String) {

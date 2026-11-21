@@ -21,6 +21,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -51,6 +53,9 @@ import com.illustravibes.arus.feature.transaction.TransactionHistoryScreen
 import com.illustravibes.arus.feature.transaction.TransactionHistoryViewModel
 import com.illustravibes.arus.feature.wallet.WalletScreen
 import com.illustravibes.arus.feature.wallet.WalletViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import kotlinx.coroutines.launch
 
 sealed class ArusScreen {
@@ -62,6 +67,36 @@ sealed class ArusScreen {
     data object CategoryManagement : ArusScreen()
     data class TransactionEntry(val initialTypeIndex: Int = 1) : ArusScreen()
 }
+
+/**
+ * V2-P0-1: layar bertahan saat rotasi (dan saat proses dibuat ulang
+ * sistem). ArusScreen bukan Parcelable, jadi disimpan sebagai String.
+ */
+private val ArusScreenSaver = Saver<ArusScreen, String>(
+    save = { screen ->
+        when (screen) {
+            is ArusScreen.Home -> "home"
+            is ArusScreen.TransactionHistory -> "history"
+            is ArusScreen.Report -> "report"
+            is ArusScreen.Settings -> "settings"
+            is ArusScreen.WalletManagement -> "wallet"
+            is ArusScreen.CategoryManagement -> "category"
+            is ArusScreen.TransactionEntry -> "entry:${screen.initialTypeIndex}"
+        }
+    },
+    restore = { value ->
+        when {
+            value == "home" -> ArusScreen.Home
+            value == "history" -> ArusScreen.TransactionHistory
+            value == "report" -> ArusScreen.Report
+            value == "settings" -> ArusScreen.Settings
+            value == "wallet" -> ArusScreen.WalletManagement
+            value == "category" -> ArusScreen.CategoryManagement
+            value.startsWith("entry:") -> ArusScreen.TransactionEntry(value.removePrefix("entry:").toIntOrNull() ?: 1)
+            else -> ArusScreen.Home
+        }
+    }
+)
 
 @Composable
 fun ArusAppShell() {
@@ -81,10 +116,19 @@ fun ArusAppShell() {
     // P0-4: ViewModel + scroll state layar tab di-hoist ke scope shell supaya
     // tidak reset tiap pindah tab (pencarian/filter Riwayat, periode Laporan,
     // posisi scroll). Entry tetap di-branch (form baru tiap dibuka).
-    val homeViewModel = remember { HomeViewModel(walletRepository, categoryRepository, transactionRepository) }
-    val historyViewModel = remember { TransactionHistoryViewModel(walletRepository, categoryRepository, transactionRepository) }
-    val reportViewModel = remember { ReportViewModel(walletRepository, transactionRepository) }
-    val settingsViewModel = remember { SettingsViewModel(walletRepository, categoryRepository, backupRepository) }
+    // V2-P0-1: ViewModel AndroidX bertahan saat rotasi (remember tidak).
+    val homeViewModel: HomeViewModel = viewModel(
+        factory = viewModelFactory { initializer { HomeViewModel(walletRepository, categoryRepository, transactionRepository) } }
+    )
+    val historyViewModel: TransactionHistoryViewModel = viewModel(
+        factory = viewModelFactory { initializer { TransactionHistoryViewModel(walletRepository, categoryRepository, transactionRepository) } }
+    )
+    val reportViewModel: ReportViewModel = viewModel(
+        factory = viewModelFactory { initializer { ReportViewModel(walletRepository, transactionRepository) } }
+    )
+    val settingsViewModel: SettingsViewModel = viewModel(
+        factory = viewModelFactory { initializer { SettingsViewModel(walletRepository, categoryRepository, backupRepository) } }
+    )
     val homeListState = rememberLazyListState()
     val historyListState = rememberLazyListState()
     val reportScrollState = rememberScrollState()
@@ -104,8 +148,15 @@ fun ArusAppShell() {
         }
     }
 
-    var currentScreen by remember { mutableStateOf<ArusScreen>(ArusScreen.Home) }
-    var selectedTab by remember { mutableStateOf(ArusTab.BERANDA) }
+    // V2-P0-1: layar + tab bertahan saat rotasi.
+    var currentScreen by rememberSaveable(stateSaver = ArusScreenSaver) { mutableStateOf<ArusScreen>(ArusScreen.Home) }
+    var selectedTab by rememberSaveable { mutableStateOf(ArusTab.BERANDA) }
+
+    // V2-P0-1: sesi tiap buka subpage — ViewModel branch baru tiap dibuka
+    // (form baru), tapi tetap bertahan saat rotasi (counter-nya saveable).
+    var walletSession by rememberSaveable { mutableStateOf(0) }
+    var categorySession by rememberSaveable { mutableStateOf(0) }
+    var entrySession by rememberSaveable { mutableStateOf(0) }
 
     val isNotHome = currentScreen != ArusScreen.Home
     BackHandler(enabled = isNotHome) {
@@ -166,6 +217,7 @@ fun ArusAppShell() {
                         HomeScreen(
                             viewModel = homeViewModel,
                             onNavigateToEntry = { typeIndex ->
+                                entrySession++
                                 currentScreen = ArusScreen.TransactionEntry(typeIndex)
                             },
                             onNavigateToTransactionHistory = {
@@ -173,6 +225,7 @@ fun ArusAppShell() {
                                 currentScreen = ArusScreen.TransactionHistory
                             },
                             onNavigateToWalletManagement = {
+                                walletSession++
                                 currentScreen = ArusScreen.WalletManagement
                             },
                             listState = homeListState
@@ -197,9 +250,11 @@ fun ArusAppShell() {
                         SettingsScreen(
                             viewModel = settingsViewModel,
                             onNavigateToWalletManagement = {
+                                walletSession++
                                 currentScreen = ArusScreen.WalletManagement
                             },
                             onNavigateToCategoryManagement = {
+                                categorySession++
                                 currentScreen = ArusScreen.CategoryManagement
                             },
                             scrollState = settingsScrollState
@@ -207,7 +262,10 @@ fun ArusAppShell() {
                     }
 
                     is ArusScreen.WalletManagement -> {
-                        val walletViewModel = remember { WalletViewModel(walletRepository, transactionRepository) }
+                        val walletViewModel: WalletViewModel = viewModel(
+                            key = "wallet-$walletSession",
+                            factory = viewModelFactory { initializer { WalletViewModel(walletRepository, transactionRepository) } }
+                        )
                         WalletScreen(
                             viewModel = walletViewModel,
                             onBackClick = {
@@ -217,7 +275,10 @@ fun ArusAppShell() {
                     }
 
                     is ArusScreen.CategoryManagement -> {
-                        val categoryViewModel = remember { CategoryViewModel(categoryRepository) }
+                        val categoryViewModel: CategoryViewModel = viewModel(
+                            key = "category-$categorySession",
+                            factory = viewModelFactory { initializer { CategoryViewModel(categoryRepository) } }
+                        )
                         CategoryScreen(
                             viewModel = categoryViewModel,
                             onBackClick = {
@@ -227,9 +288,10 @@ fun ArusAppShell() {
                     }
 
                     is ArusScreen.TransactionEntry -> {
-                        val entryViewModel = remember(screen.initialTypeIndex) {
-                            TransactionEntryViewModel(walletRepository, categoryRepository, transactionRepository, screen.initialTypeIndex)
-                        }
+                        val entryViewModel: TransactionEntryViewModel = viewModel(
+                            key = "entry-$entrySession",
+                            factory = viewModelFactory { initializer { TransactionEntryViewModel(walletRepository, categoryRepository, transactionRepository, screen.initialTypeIndex) } }
+                        )
                         TransactionEntryScreen(
                             viewModel = entryViewModel,
                             onBackClick = {
@@ -274,6 +336,7 @@ fun ArusAppShell() {
                     },
                     onAddClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        entrySession++
                         currentScreen = ArusScreen.TransactionEntry(1)
                     },
                     modifier = Modifier.align(Alignment.BottomCenter)

@@ -193,15 +193,10 @@ fun SettingsScreen(
 
             // 3. Security & Application Info Section
             ArusSectionHeader(title = "Keamanan & Aplikasi")
-            ArusToggleRow(
-                title = "Kunci PIN / Biometrik",
-                subtitle = "Minta verifikasi keamanan saat membuka Arus",
-                checked = uiState.isSecurityLockEnabled,
-                onCheckedChange = { enabled -> viewModel.onSecurityToggleChange(enabled) },
-                iconResId = R.drawable.fa_sliders,
-                tileColor = NotionLavenderSoft,
-                iconTint = NotionLavender
-            )
+            // V2-P0-2: baris "Kunci PIN / Biometrik" dihapus — toggle-nya
+            // hanya flag in-memory tanpa efek apa pun (tidak ada gate,
+            // tidak tersimpan); kontrol keamanan palsu tidak boleh tampil.
+            // Gate asli adalah item Review #1 yang ditunda.
 
             ArusCard {
                 Text(

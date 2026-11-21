@@ -81,9 +81,9 @@ fun WalletScreen(
 
                             // Baris dompet: ketuk barisnya untuk buka menu
                             // Edit/Hapus (tombol ••• dihapus, keputusan user
-                            // 2026-11-21). Nominal dominan di atas, nama
-                            // dompet di bawahnya — sama seperti kartu dompet
-                            // di Beranda.
+                            // 2026-11-21). Nama dompet dominan di atas,
+                            // nominal di bawahnya — ini daftar dompet, bukan
+                            // daftar saldo (koreksi user 2026-11-21).
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -101,7 +101,7 @@ fun WalletScreen(
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = calculatedBalance.formatRupiah(),
+                                        text = wallet.name,
                                         style = ArusTypography.titleLarge,
                                         color = ArusTextPrimary,
                                         maxLines = 1,
@@ -109,8 +109,8 @@ fun WalletScreen(
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = wallet.name,
-                                        style = ArusTypography.labelMedium,
+                                        text = calculatedBalance.formatRupiah(),
+                                        style = ArusTypography.bodyMedium,
                                         color = ArusTextSecondary,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis

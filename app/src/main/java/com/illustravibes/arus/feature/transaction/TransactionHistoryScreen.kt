@@ -9,7 +9,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.R
@@ -61,44 +63,50 @@ fun TransactionHistoryScreen(
                 placeholder = "Cari nama kategori, catatan, nominal..."
             )
 
-            // 2. Type & Wallet Filter Chips
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            // 2. Filter Chips — B2 (audit awam): dua dimensi filter (jenis
+            // dan dompet) dipisah jadi dua baris berlabel. Sebelumnya satu
+            // baris tanpa label: chip dompet tersembunyi di luar layar dan
+            // tidak bisa dibedakan dari chip jenis.
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                ArusChip(
-                    text = "Semua",
-                    selected = uiState.selectedTypeFilter == null && uiState.selectedWalletFilterId == null,
-                    onClick = {
-                        viewModel.onTypeFilterSelect(null)
-                        viewModel.onWalletFilterSelect(null)
-                    }
-                )
-                ArusChip(
-                    text = "Pemasukan",
-                    selected = uiState.selectedTypeFilter == "INCOME",
-                    onClick = { viewModel.onTypeFilterSelect(if (uiState.selectedTypeFilter == "INCOME") null else "INCOME") }
-                )
-                ArusChip(
-                    text = "Pengeluaran",
-                    selected = uiState.selectedTypeFilter == "EXPENSE",
-                    onClick = { viewModel.onTypeFilterSelect(if (uiState.selectedTypeFilter == "EXPENSE") null else "EXPENSE") }
-                )
-                ArusChip(
-                    text = "Transfer",
-                    selected = uiState.selectedTypeFilter == "TRANSFER",
-                    onClick = { viewModel.onTypeFilterSelect(if (uiState.selectedTypeFilter == "TRANSFER") null else "TRANSFER") }
-                )
-
-                uiState.wallets.forEach { wallet ->
-                    val isSelected = uiState.selectedWalletFilterId == wallet.id
+                FilterRow(label = "Jenis") {
                     ArusChip(
-                        text = wallet.name,
-                        selected = isSelected,
-                        onClick = { viewModel.onWalletFilterSelect(if (isSelected) null else wallet.id) }
+                        text = "Semua",
+                        selected = uiState.selectedTypeFilter == null,
+                        onClick = { viewModel.onTypeFilterSelect(null) }
                     )
+                    ArusChip(
+                        text = "Pemasukan",
+                        selected = uiState.selectedTypeFilter == "INCOME",
+                        onClick = { viewModel.onTypeFilterSelect(if (uiState.selectedTypeFilter == "INCOME") null else "INCOME") }
+                    )
+                    ArusChip(
+                        text = "Pengeluaran",
+                        selected = uiState.selectedTypeFilter == "EXPENSE",
+                        onClick = { viewModel.onTypeFilterSelect(if (uiState.selectedTypeFilter == "EXPENSE") null else "EXPENSE") }
+                    )
+                    ArusChip(
+                        text = "Transfer",
+                        selected = uiState.selectedTypeFilter == "TRANSFER",
+                        onClick = { viewModel.onTypeFilterSelect(if (uiState.selectedTypeFilter == "TRANSFER") null else "TRANSFER") }
+                    )
+                }
+                FilterRow(label = "Dompet") {
+                    ArusChip(
+                        text = "Semua",
+                        selected = uiState.selectedWalletFilterId == null,
+                        onClick = { viewModel.onWalletFilterSelect(null) }
+                    )
+                    uiState.wallets.forEach { wallet ->
+                        val isSelected = uiState.selectedWalletFilterId == wallet.id
+                        ArusChip(
+                            text = wallet.name,
+                            selected = isSelected,
+                            onClick = { viewModel.onWalletFilterSelect(if (isSelected) null else wallet.id) }
+                        )
+                    }
                 }
             }
 
@@ -150,10 +158,17 @@ fun TransactionHistoryScreen(
                                     }
 
                                     val wallet = uiState.wallets.find { it.id == tx.walletId }
+                                    val targetWallet = uiState.wallets.find { it.id == tx.targetWalletId }
                                     val timeString = SimpleDateFormat("HH:mm", Locale.forLanguageTag("id-ID")).format(Date(tx.dateMillis))
+                                    // B1 (audit awam): baris transfer menampilkan tujuan.
+                                    val rowSubtitle = if (txType == TransactionType.TRANSFER) {
+                                        "${wallet?.name ?: "Dompet"} ❯ ${targetWallet?.name ?: "Dompet"} • $timeString"
+                                    } else {
+                                        "${wallet?.name ?: "Dompet"} • ${category?.name ?: "Transaksi"} • $timeString"
+                                    }
                                     ArusTransactionRow(
                                         title = tx.note.orEmpty().ifBlank { category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer Antardompet" else "Transaksi" },
-                                        subtitle = "${wallet?.name ?: "Dompet"} • ${category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer" else "Transaksi"} • $timeString",
+                                        subtitle = rowSubtitle,
                                         amount = tx.amount,
                                         type = txType,
                                         iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),
@@ -239,5 +254,33 @@ private fun groupTransactionsByDate(transactions: List<TransactionEntity>): Map<
     val formatter = SimpleDateFormat("EEEE, d MMMM yyyy", Locale.forLanguageTag("id-ID"))
     return transactions.groupBy { tx ->
         formatter.format(Date(tx.dateMillis))
+    }
+}
+
+// B2 (audit awam): satu baris filter = label + chip yang bisa digeser.
+// Dipakai Riwayat untuk memisah filter Jenis dan Dompet.
+@Composable
+private fun FilterRow(
+    label: String,
+    content: @Composable RowScope.() -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = label,
+            style = ArusTypography.labelMedium,
+            color = ArusTextSecondary,
+            modifier = Modifier.width(56.dp)
+        )
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            content = content
+        )
     }
 }

@@ -1,5 +1,6 @@
 package com.illustravibes.arus.feature.settings
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,6 +19,9 @@ data class SettingsUiState(
     val isBackupLoading: Boolean = false,
     val backupMessage: String? = null,
     val isBackupSuccess: Boolean = false,
+    // B7 (audit awam): waktu backup terakhir yang berhasil (millis sejak
+    // epoch, null bila belum pernah) — tersimpan di SharedPreferences.
+    val lastBackupMillis: Long? = null,
     // True hanya sesudah restore berhasil: database sudah diganti dan
     // aplikasi wajib dimulai ulang (lihat SettingsScreen).
     val restoreCompleted: Boolean = false
@@ -26,13 +30,21 @@ data class SettingsUiState(
 class SettingsViewModel(
     private val walletRepository: WalletRepository,
     private val categoryRepository: CategoryRepository,
-    private val backupRepository: BackupRepository
+    private val backupRepository: BackupRepository,
+    context: Context
 ) : ViewModel() {
+
+    private val prefs = context.applicationContext.getSharedPreferences("arus_prefs", Context.MODE_PRIVATE)
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     init {
+        // B7 (audit awam): baca waktu backup terakhir sebelum loadData —
+        // onEach di loadData() mempertahankan nilai ini.
+        _uiState.update {
+            it.copy(lastBackupMillis = prefs.getLong("last_backup_millis", -1L).takeIf { millis -> millis >= 0L })
+        }
         loadData()
     }
 
@@ -55,6 +67,7 @@ class SettingsViewModel(
                     isBackupLoading = current.isBackupLoading,
                     backupMessage = current.backupMessage,
                     isBackupSuccess = current.isBackupSuccess,
+                    lastBackupMillis = current.lastBackupMillis,
                     restoreCompleted = current.restoreCompleted
                 )
             }
@@ -66,7 +79,10 @@ class SettingsViewModel(
             _uiState.update { it.copy(isBackupLoading = true, backupMessage = null) }
             val result = backupRepository.exportBackup(uri, password)
             result.onSuccess {
-                _uiState.update { it.copy(isBackupLoading = false, backupMessage = "Backup terenkripsi berhasil disimpan!", isBackupSuccess = true) }
+                // B7 (audit awam): catat waktu backup berhasil.
+                val now = System.currentTimeMillis()
+                prefs.edit().putLong("last_backup_millis", now).apply()
+                _uiState.update { it.copy(isBackupLoading = false, backupMessage = "Backup terenkripsi berhasil disimpan!", isBackupSuccess = true, lastBackupMillis = now) }
             }.onFailure { err ->
                 _uiState.update { it.copy(isBackupLoading = false, backupMessage = "Gagal backup: ${err.localizedMessage}") }
             }

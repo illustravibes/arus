@@ -20,6 +20,11 @@ data class TransactionEntryUiState(
     val selectedTargetWallet: WalletEntity? = null,
     val selectedCategory: CategoryEntity? = null,
     val dateMillis: Long = System.currentTimeMillis(),
+    // A1 (audit awam): true bila tanggal/jam dipilih manual lewat sheet
+    // atau berasal dari transaksi yang diedit — saat itu jam disimpan apa
+    // adanya; bila false, jam diambil saat Simpan ditekan, bukan saat
+    // form dibuka.
+    val dateManuallyPicked: Boolean = false,
     val note: String = "",
     val wallets: List<WalletEntity> = emptyList(),
     val categories: List<CategoryEntity> = emptyList(),
@@ -67,6 +72,7 @@ class TransactionEntryViewModel(
                         },
                         amountInput = tx.amount.toString(),
                         dateMillis = tx.dateMillis,
+                        dateManuallyPicked = true,
                         note = tx.note ?: ""
                     )
                 }
@@ -141,14 +147,14 @@ class TransactionEntryViewModel(
     // Sheet tanggal & jam mengembalikan timestamp lokal lengkap (tanggal +
     // jam yang dipilih) — langsung dipakai apa adanya, tanpa merge.
     fun onDatePicked(dateTimeMillis: Long) {
-        _uiState.update { it.copy(dateMillis = dateTimeMillis) }
+        _uiState.update { it.copy(dateMillis = dateTimeMillis, dateManuallyPicked = true) }
     }
 
     fun onNoteChange(note: String) {
         _uiState.update { it.copy(note = note) }
     }
 
-    private fun buildUpdatedTransaction(state: TransactionEntryUiState, amount: Long): TransactionEntity {
+    private fun buildUpdatedTransaction(state: TransactionEntryUiState, amount: Long, dateMillis: Long): TransactionEntity {
         val type = when (state.typeIndex) {
             0 -> "INCOME"
             1 -> "EXPENSE"
@@ -158,7 +164,7 @@ class TransactionEntryViewModel(
             id = state.editTransactionId!!,
             type = type,
             amount = amount,
-            dateMillis = state.dateMillis,
+            dateMillis = dateMillis,
             walletId = state.selectedWallet!!.id,
             targetWalletId = if (state.typeIndex == 2) state.selectedTargetWallet?.id else null,
             categoryId = if (state.typeIndex == 2) null else state.selectedCategory?.id,
@@ -203,13 +209,18 @@ class TransactionEntryViewModel(
                 }
             }
 
+            // A1 (audit awam): jam transaksi = jam Simpan ditekan, kecuali
+            // pengguna memilih tanggal/jam sendiri atau sedang mengedit
+            // (saat itu tanggal asli dipertahankan).
+            val effectiveDateMillis = if (state.editTransactionId != null || state.dateManuallyPicked) state.dateMillis else System.currentTimeMillis()
+
             if (state.editTransactionId != null) {
-                transactionRepository.updateTransaction(buildUpdatedTransaction(state, amount))
+                transactionRepository.updateTransaction(buildUpdatedTransaction(state, amount, effectiveDateMillis))
             } else when (state.typeIndex) {
                 0 -> { // Pemasukan
                     transactionRepository.addIncome(
                         amount = amount,
-                        dateMillis = state.dateMillis,
+                        dateMillis = effectiveDateMillis,
                         walletId = state.selectedWallet.id,
                         categoryId = state.selectedCategory!!.id,
                         note = state.note
@@ -218,7 +229,7 @@ class TransactionEntryViewModel(
                 1 -> { // Pengeluaran
                     transactionRepository.addExpense(
                         amount = amount,
-                        dateMillis = state.dateMillis,
+                        dateMillis = effectiveDateMillis,
                         walletId = state.selectedWallet.id,
                         categoryId = state.selectedCategory!!.id,
                         note = state.note
@@ -227,7 +238,7 @@ class TransactionEntryViewModel(
                 2 -> { // Transfer
                     transactionRepository.addTransfer(
                         amount = amount,
-                        dateMillis = state.dateMillis,
+                        dateMillis = effectiveDateMillis,
                         sourceWalletId = state.selectedWallet.id,
                         targetWalletId = state.selectedTargetWallet!!.id,
                         note = state.note

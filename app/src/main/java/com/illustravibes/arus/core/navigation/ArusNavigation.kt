@@ -135,7 +135,7 @@ fun ArusAppShell() {
         factory = viewModelFactory { initializer { ReportViewModel(walletRepository, transactionRepository) } }
     )
     val settingsViewModel: SettingsViewModel = viewModel(
-        factory = viewModelFactory { initializer { SettingsViewModel(walletRepository, categoryRepository, backupRepository) } }
+        factory = viewModelFactory { initializer { SettingsViewModel(walletRepository, categoryRepository, backupRepository, context) } }
     )
     val homeListState = rememberLazyListState()
     val historyListState = rememberLazyListState()

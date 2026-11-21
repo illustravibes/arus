@@ -16,6 +16,10 @@ import com.illustravibes.arus.feature.home.parseHexColor
 import java.text.SimpleDateFormat
 import java.util.*
 
+// B11 (audit awam): nominal sebesar ini ke atas meminta konfirmasi dulu
+// sebelum disimpan — salah ketik nol berlebih langsung merusak total.
+private const val LARGE_AMOUNT_THRESHOLD = 100_000_000L
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionEntryScreen(
@@ -30,6 +34,7 @@ fun TransactionEntryScreen(
     var showTargetWalletSheet by remember { mutableStateOf(false) }
     var showCategorySheet by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showLargeAmountConfirm by remember { mutableStateOf(false) }
 
     // Nominal pakai keyboard sistem (numerik). Keypad in-app
     // (ArusKeypadView) disimpan untuk input yang memang fokus nominal,
@@ -195,7 +200,12 @@ fun TransactionEntryScreen(
                 else uiState.selectedCategory != null
             ArusPrimaryButton(
                 text = if (uiState.editTransactionId != null) "Simpan Perubahan" else "Simpan Transaksi",
-                onClick = { viewModel.saveTransaction() },
+                onClick = {
+                    // B11 (audit awam): nominal besar minta konfirmasi dulu.
+                    val amount = uiState.amountInput.toLongOrNull() ?: 0L
+                    if (amount >= LARGE_AMOUNT_THRESHOLD) showLargeAmountConfirm = true
+                    else viewModel.saveTransaction()
+                },
                 enabled = isFormValid
             )
 
@@ -280,6 +290,21 @@ fun TransactionEntryScreen(
                     showDatePicker = false
                 },
                 onDismiss = { showDatePicker = false }
+            )
+        }
+
+        // B11 (audit awam): konfirmasi nominal besar.
+        if (showLargeAmountConfirm) {
+            val amount = uiState.amountInput.toLongOrNull() ?: 0L
+            ArusConfirmationSheet(
+                title = "Nominal besar",
+                message = "Anda mencatat ${amount.formatRupiah()} — pastikan nominalnya sudah benar sebelum disimpan.",
+                confirmButtonText = "Ya, Simpan",
+                onConfirm = {
+                    showLargeAmountConfirm = false
+                    viewModel.saveTransaction()
+                },
+                onDismiss = { showLargeAmountConfirm = false }
             )
         }
     }

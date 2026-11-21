@@ -72,6 +72,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import kotlin.math.roundToInt
 
 // ============================================================================
 // 1. CURRENCY FORMATTER UTILITY
@@ -1110,6 +1111,17 @@ data class BarChartEntry(
 )
 
 // K7 (Fase 2): angka sumbu-Y chart yang ringkas ("3 jt", "250 rb", "0").
+// Langkah sumbu-Y yang "cantik" (audit awam A3): kelipatan 1 / 2 / 2,5 /
+// 5 / 10 × 10^n, selalu >= rawStep supaya label atas tidak memotong
+// batang tertinggi — label tidak lagi "333 rb"/"166 rb".
+private fun niceChartStep(rawStep: Long): Long {
+    if (rawStep <= 0L) return 1L
+    var magnitude = 1L
+    while (magnitude <= Long.MAX_VALUE / 10L && magnitude * 10L <= rawStep) magnitude *= 10L
+    val candidates = listOf(magnitude, magnitude * 2L, magnitude * 5L / 2L, magnitude * 5L, magnitude * 10L)
+    return candidates.firstOrNull { it >= rawStep } ?: magnitude * 10L
+}
+
 private fun formatCompactRupiah(value: Long): String {
     return when {
         value >= 1_000_000L -> {
@@ -1164,8 +1176,12 @@ fun ArusBarChart(
             }
         } else {
             val maxVal = entries.maxOf { maxOf(it.incomeAmount, it.expenseAmount) }.coerceAtLeast(1L)
+            // A3 (audit awam): sumbu atas = 3 × langkah cantik, supaya
+            // label sumbu-Y selalu angka bulat (600 rb / 400 rb / 200 rb).
+            val axisStep = niceChartStep(maxVal / 3)
+            val axisMax = axisStep * 3
             // K7 (Fase 2): label sumbu-Y di kanan, mengikuti Bevel.
-            val yLabels = listOf(maxVal, maxVal * 2 / 3, maxVal / 3, 0L)
+            val yLabels = listOf(axisMax, axisStep * 2, axisStep, 0L)
 
             Row(
                 modifier = Modifier
@@ -1198,7 +1214,7 @@ fun ArusBarChart(
                             verticalAlignment = Alignment.Bottom,
                             modifier = Modifier.weight(1f)
                         ) {
-                            val incomeRatio = (entry.incomeAmount.toFloat() / maxVal).coerceIn(0f, 1f)
+                            val incomeRatio = (entry.incomeAmount.toFloat() / axisMax).coerceIn(0f, 1f)
                             Box(
                                 modifier = Modifier
                                     .width(12.dp)
@@ -1206,7 +1222,7 @@ fun ArusBarChart(
                                     .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
                                     .background(ArusIncome)
                             )
-                            val expenseRatio = (entry.expenseAmount.toFloat() / maxVal).coerceIn(0f, 1f)
+                            val expenseRatio = (entry.expenseAmount.toFloat() / axisMax).coerceIn(0f, 1f)
                             Box(
                                 modifier = Modifier
                                     .width(12.dp)
@@ -3348,7 +3364,7 @@ fun ArusProgressCard(
     val progress = if (totalAmount > 0) {
         (currentAmount.toFloat() / totalAmount.toFloat()).coerceIn(0f, 1f)
     } else 0f
-    val percentage = (progress * 100).toInt()
+    val percentage = (progress * 100).roundToInt()
 
     ArusCard(modifier = modifier) {
         Row(
@@ -3386,15 +3402,24 @@ fun ArusProgressCard(
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        LinearProgressIndicator(
-            progress = { progress },
+        // B10 (audit awam): bar kustom, bukan M3 LinearProgressIndicator —
+        // M3 menggambar titik "stop" 4dp di ujung kanan track (warna
+        // indikator) yang tidak dijelaskan dan membingungkan.
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp)
-                .clip(PillShape),
-            color = progressColor,
-            trackColor = ArusBrandSoft
-        )
+                .clip(PillShape)
+                .background(ArusBrandSoft)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(progress)
+                    .fillMaxHeight()
+                    .clip(PillShape)
+                    .background(progressColor)
+            )
+        }
         if (subtitle != null) {
             Spacer(modifier = Modifier.height(6.dp))
             Text(

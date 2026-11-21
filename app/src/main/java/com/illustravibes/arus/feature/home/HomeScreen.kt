@@ -121,7 +121,7 @@ fun HomeContent(
         ArusStatCard(
             title = "Total Saldo",
             amount = uiState.totalBalance,
-            subtitle = "Semua dompet aktif · Terkini",
+            subtitle = "Total dari ${uiState.wallets.size} dompet",
             showEyeButton = true,
             isBalanceHidden = uiState.isBalanceHidden,
             onToggleHideBalance = onToggleHideBalance
@@ -271,9 +271,10 @@ fun HomeContent(
                                 TransactionType.TRANSFER -> NotionSkySoft to NotionSky
                             }
                             val wallet = uiState.wallets.find { it.id == tx.walletId }
+                            val targetWallet = uiState.wallets.find { it.id == tx.targetWalletId }
                             ArusTransactionRow(
                                 title = tx.note.orEmpty().ifBlank { category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer Antardompet" else "Transaksi" },
-                                subtitle = formatTransactionSubtitle(tx.dateMillis, wallet?.name, category?.name, txType),
+                                subtitle = formatTransactionSubtitle(tx.dateMillis, wallet?.name, category?.name, txType, targetWallet?.name),
                                 amount = tx.amount,
                                 type = txType,
                                 iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),
@@ -462,9 +463,15 @@ private fun formatTransactionSubtitle(
     dateMillis: Long,
     walletName: String?,
     categoryName: String?,
-    txType: TransactionType
+    txType: TransactionType,
+    targetWalletName: String? = null
 ): String {
     val timeString = SimpleDateFormat("HH:mm", Locale.forLanguageTag("id-ID")).format(Date(dateMillis))
+    // B1 (audit awam): baris transfer menampilkan tujuan — tanpa ini semua
+    // transfer terlihat sama di list ("Dompet Tunai • Transfer • jam").
+    if (txType == TransactionType.TRANSFER && targetWalletName != null) {
+        return "${walletName ?: "Dompet"} ❯ $targetWalletName • $timeString"
+    }
     val categoryText = categoryName ?: if (txType == TransactionType.TRANSFER) "Transfer" else "Transaksi"
     return "${walletName ?: "Dompet"} • $categoryText • $timeString"
 }

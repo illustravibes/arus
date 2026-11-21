@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.BuildConfig
 import com.illustravibes.arus.R
 import com.illustravibes.arus.core.designsystem.*
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun SettingsScreen(
@@ -106,7 +109,7 @@ fun SettingsScreen(
                 ArusPropertySelectorRow(
                     label = "Kelola Dompet",
                     selectedValue = "",
-                    badgeText = "${uiState.wallets.size}",
+                    badgeText = "${uiState.wallets.size} dompet",
                     onClick = onNavigateToWalletManagement,
                     iconResId = R.drawable.fa_wallet,
                     tileColor = NotionSkySoft,
@@ -117,7 +120,7 @@ fun SettingsScreen(
                 ArusPropertySelectorRow(
                     label = "Kelola Kategori",
                     selectedValue = "",
-                    badgeText = "${uiState.categories.size}",
+                    badgeText = "${uiState.categories.size} kategori",
                     onClick = onNavigateToCategoryManagement,
                     iconResId = R.drawable.fa_tags,
                     tileColor = NotionMintSoft,
@@ -130,8 +133,16 @@ fun SettingsScreen(
             ArusSectionHeader(title = "Backup & Restore Terenkripsi")
             ArusCard {
                 Text(
-                    text = "Simpan cadangan data terenkripsi AES-GCM ke penyimpanan HP Anda, atau pulihkan data dari file backup.",
+                    text = "Simpan cadangan data terenkripsi ke penyimpanan HP Anda, atau pulihkan data dari file backup.",
                     style = ArusTypography.bodyMedium,
+                    color = ArusTextSecondary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                // B7 (audit awam): status backup persisten — pengguna harus
+                // bisa tahu kapan terakhir backup tanpa harus melakukan backup.
+                Text(
+                    text = uiState.lastBackupMillis?.let { "Terakhir backup: ${formatBackupTime(it)}" } ?: "Belum pernah backup",
+                    style = ArusTypography.labelSmall,
                     color = ArusTextSecondary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -209,7 +220,7 @@ fun SettingsScreen(
 
             ArusCard {
                 Text(
-                    text = "Arus Android MVP v${BuildConfig.VERSION_NAME}",
+                    text = "Arus Android v${BuildConfig.VERSION_NAME}",
                     style = ArusTypography.titleMedium,
                     color = ArusTextPrimary
                 )
@@ -285,4 +296,8 @@ fun SettingsScreen(
             )
         }
     }
+}
+
+private fun formatBackupTime(millis: Long): String {
+    return SimpleDateFormat("d MMM yyyy, HH:mm", Locale.forLanguageTag("id-ID")).format(Date(millis))
 }

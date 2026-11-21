@@ -23,10 +23,15 @@ Hasil audit 587 screenshot referensi lokal (`design/bevel` + `design/notion`) da
 - **Satu kartu per kelompok:** setiap daftar berkelompok = satu `ArusCard` + divider antar baris — kecuali form Catat: satu pill per field + label di atasnya, 56dp sama dengan field Catatan (keputusan user 2026-11-21).
 - **Hitam-putih murni (2026-11-21):** latar `#FFFFFF`, kartu `#FFFFFF` (pemisah = border 1dp `#E5E5E5`), teks `#1A1A1A`/`#616161`, abu pendukung `#F0F0F0`; tidak ada tint biru di latar/kartu/border. Tile ikon warna (palet Notion) tetap sebagai aksen kategori.
 - **Chip:** terpilih = pill hitam; tidak terpilih = latar `ArusBrandSoft` tanpa border.
-- **Baris transaksi:** judul = catatan (dominan), subtitle = `dompet • kategori • jam` (pemisah dot).
+- **Baris transaksi:** judul = catatan (dominan), subtitle = `dompet • kategori • jam` (pemisah dot); transfer: `dompet asal ❯ dompet tujuan • jam` — tujuan wajib tampil di list (audit awam 2026-11-21).
+- **Filter Riwayat:** dua baris berlabel — "Jenis" (Semua/Pemasukan/Pengeluaran/Transfer) dan "Dompet" (Semua + tiap dompet); jangan campur dua dimensi filter dalam satu baris tanpa label (audit awam 2026-11-21).
 - **Baris dompet (Kelola Dompet):** nama dompet dominan di atas (`titleLarge`), nominal di bawahnya (`bodyMedium` abu-abu); tanpa tombol ••• — ketuk barisnya untuk buka menu Edit/Hapus.
 - **Baris kategori (Kelola Kategori):** sama seperti baris dompet — nama dominan (`titleLarge`), tanpa tombol •••, ketuk barisnya untuk buka menu Edit/Arsipkan/Hapus (terarsip: Edit/Pulihkan/Hapus; nama abu-abu). Hapus kategori menjaga transaksi lama (tetap tersimpan, tanpa label kategori).
-- **Chart Laporan:** batang hijau/merah (semantik uang); label sumbu-Y di kanan (format ringkas "3 jt"/"250 rb"); batang terpilih opacity penuh, yang lain 0.45.
+- **Chart Laporan:** batang hijau/merah (semantik uang); label sumbu-Y di kanan (format ringkas "3 jt"/"250 rb") dengan langkah "cantik" (1/2/2,5/5/10 × 10^n, sumbu atas = 3 × langkah — tidak ada label "333 rb"); batang terpilih opacity penuh, yang lain 0.45.
+- **Jam transaksi:** stempel waktu diambil saat Simpan ditekan, kecuali pengguna memilih tanggal/jam sendiri lewat picker atau sedang mengedit (saat itu tanggal asli dipertahankan) — audit awam 2026-11-21.
+- **Rasio Pengeluaran:** kartu selalu tampil; saat pemasukan Rp0, tampilkan penjelasan "Belum ada pemasukan bulan ini, jadi rasio belum bisa dihitung" — jangan sembunyikan kartu (audit awam 2026-11-21).
+- **Status backup:** Pengaturan selalu menampilkan "Terakhir backup: …" atau "Belum pernah backup" (waktu backup terakhir tersimpan di SharedPreferences) — audit awam 2026-11-21.
+- **Konfirmasi nominal besar:** Simpan nominal ≥ Rp100.000.000 meminta konfirmasi dulu ("Nominal besar — pastikan nominalnya sudah benar") — audit awam 2026-11-21.
 - **Snackbar:** `ArusSnackbar` — pill hitam + centang putih + aksi "Lihat" putih Bold, di atas bottom nav (bottom 160dp).
 - **Detail sheet transaksi:** "Ubah" hitam penuh + "Hapus" teks merah di bawahnya; "Tutup" via drag/scrim/back (tanpa tombol).
 - **Sheet chrome (semua `ModalBottomSheet`):** `skipPartiallyExpanded = true`, radius atas 28dp, `ArusSurface`, drag handle pill.

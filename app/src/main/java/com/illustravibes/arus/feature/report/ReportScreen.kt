@@ -6,6 +6,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -98,7 +99,7 @@ fun ReportScreen(
             }
 
             ArusStatCard(
-                title = "Selisih (Cash Flow)",
+                title = "Selisih",
                 amount = uiState.netDifference,
                 isIncome = if (uiState.netDifference >= 0L) true else false,
                 // V2-P2-1: saat keduanya nol, tidak ada yang "lebih besar".
@@ -117,8 +118,25 @@ fun ReportScreen(
                     currentAmount = uiState.totalExpense,
                     totalAmount = uiState.totalIncome,
                     progressColor = ArusExpense,
-                    subtitle = if (uiState.totalExpense <= uiState.totalIncome) "Pengeluaran masih dalam batas aman" else "Pengeluaran melebihi total pemasukan"
+                    subtitle = if (uiState.totalExpense <= uiState.totalIncome) "Pengeluaran masih dalam batas aman (tidak melebihi pemasukan)" else "Pengeluaran melebihi total pemasukan"
                 )
+            } else {
+                // A4 (audit awam): kartu Rasio tidak boleh hilang saat
+                // pemasukan Rp0 — tampilkan dengan penjelasan kenapa belum
+                // bisa dihitung.
+                ArusCard {
+                    Text(
+                        text = "Rasio Pengeluaran",
+                        style = ArusTypography.labelMedium,
+                        color = ArusTextSecondary
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "Belum ada pemasukan bulan ini, jadi rasio belum bisa dihitung.",
+                        style = ArusTypography.bodyMedium,
+                        color = ArusTextPrimary
+                    )
+                }
             }
 
             // 5. Dual Bar Chart

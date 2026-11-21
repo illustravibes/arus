@@ -2545,34 +2545,40 @@ fun ArusDatePickerSheet(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(40.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (isSelected) ArusBrandPrimary else Color.Transparent
-                                )
-                                .then(
-                                    if (isToday && !isSelected) {
-                                        Modifier.border(1.dp, ArusBrandPrimary, CircleShape)
-                                    } else {
-                                        Modifier
-                                    }
-                                )
                                 .clickable(enabled = dayMillis != null && !isFuture) {
                                     if (dayMillis != null) selectedDayMillis = dayMillis
                                 },
                             contentAlignment = Alignment.Center
                         ) {
                             if (day in 1..daysInMonth) {
-                                Text(
-                                    text = day.toString(),
-                                    style = ArusTypography.bodyMedium.copy(
-                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
-                                    ),
-                                    color = when {
-                                        isSelected -> Color.White
-                                        isFuture -> ArusTextSecondary
-                                        else -> ArusTextPrimary
-                                    }
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (isSelected) ArusBrandPrimary else Color.Transparent
+                                        )
+                                        .then(
+                                            if (isToday && !isSelected) {
+                                                Modifier.border(1.dp, ArusBrandPrimary, CircleShape)
+                                            } else {
+                                                Modifier
+                                            }
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = day.toString(),
+                                        style = ArusTypography.bodyMedium.copy(
+                                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                                        ),
+                                        color = when {
+                                            isSelected -> Color.White
+                                            isFuture -> ArusTextSecondary
+                                            else -> ArusTextPrimary
+                                        }
+                                    )
+                                }
                             }
                         }
                     }

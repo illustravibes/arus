@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -172,7 +173,7 @@ fun ArusSecondaryButton(
         enabled = enabled,
         shape = PillShape,
         border = ButtonDefaults.outlinedButtonBorder.copy(
-            brush = androidx.compose.ui.graphics.SolidColor(ArusBorder)
+            brush = androidx.compose.ui.graphics.SolidColor(Color(0xFFD3D9E4))
         ),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = ArusSurface,
@@ -189,6 +190,52 @@ fun ArusSecondaryButton(
                 color = ArusTextPrimary
             )
         )
+    }
+}
+
+@Composable
+fun ArusDestructiveButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    iconResId: Int? = null
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        shape = PillShape,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = ArusExpense,
+            contentColor = Color.White,
+            disabledContainerColor = ArusBorder,
+            disabledContentColor = ArusTextSecondary
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(54.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (iconResId != null) {
+                Icon(
+                    painter = painterResource(id = iconResId),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            Text(
+                text = text,
+                style = ArusTypography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            )
+        }
     }
 }
 
@@ -1558,26 +1605,23 @@ fun ArusConfirmationSheet(
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f)
                 )
-                Button(
-                    onClick = {
-                        onConfirm()
-                        onDismiss()
-                    },
-                    shape = PillShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isDestructive) ArusExpense else ArusBrandPrimary,
-                        contentColor = Color.White
-                    ),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(54.dp)
-                ) {
-                    Text(
+                if (isDestructive) {
+                    ArusDestructiveButton(
                         text = confirmButtonText,
-                        style = ArusTypography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
+                        onClick = {
+                            onConfirm()
+                            onDismiss()
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    ArusPrimaryButton(
+                        text = confirmButtonText,
+                        onClick = {
+                            onConfirm()
+                            onDismiss()
+                        },
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
@@ -1595,7 +1639,9 @@ fun ArusActionPill(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    style: ArusActionPillStyle = ArusActionPillStyle.NEUTRAL
+    style: ArusActionPillStyle = ArusActionPillStyle.NEUTRAL,
+    iconResId: Int? = null,
+    enabled: Boolean = true
 ) {
     val backgroundColor = when (style) {
         ArusActionPillStyle.NEUTRAL -> ArusBrandSoft
@@ -1605,18 +1651,35 @@ fun ArusActionPill(
         ArusActionPillStyle.NEUTRAL -> ArusBrandPrimary
         ArusActionPillStyle.DESTRUCTIVE -> ArusExpense
     }
-    Box(
+    // Border tegas supaya tepi kapsul terbaca di atas kartu putih (gaya SwiftUI).
+    val borderColor = when (style) {
+        ArusActionPillStyle.NEUTRAL -> ArusBorder
+        ArusActionPillStyle.DESTRUCTIVE -> Color(0xFFF6C9D4)
+    }
+    Row(
         modifier = modifier
             .heightIn(min = 48.dp)
             .clip(PillShape)
             .background(backgroundColor)
-            .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        contentAlignment = Alignment.Center
+            .border(1.dp, borderColor, PillShape)
+            .clickable(enabled = enabled) { onClick() }
+            .alpha(if (enabled) 1f else 0.4f)
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
+        if (iconResId != null) {
+            Icon(
+                painter = painterResource(id = iconResId),
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+        }
         Text(
             text = text,
-            style = ArusTypography.labelSmall,
+            style = ArusTypography.labelLarge,
             color = contentColor
         )
     }
@@ -2274,28 +2337,15 @@ fun ArusTransactionDetailSheet(
                     modifier = Modifier.weight(1f)
                 )
                 // P1-8: aksi destruktif memakai merah, bukan CTA primer hitam.
-                Button(
+                ArusDestructiveButton(
+                    text = "Hapus",
                     onClick = {
                         onDeleteClick()
                         onDismiss()
                     },
-                    shape = PillShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ArusExpense,
-                        contentColor = Color.White
-                    ),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(54.dp)
-                ) {
-                    Text(
-                        text = "Hapus",
-                        style = ArusTypography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    )
-                }
+                    modifier = Modifier.weight(1f),
+                    iconResId = R.drawable.fa_trash_can
+                )
             }
         }
     }

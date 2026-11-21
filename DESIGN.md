@@ -14,13 +14,14 @@ Hasil audit 587 screenshot referensi lokal (`design/bevel` + `design/notion`) da
 
 1. **Struktur ikut Bevel.** Satu kartu putih = satu blok konten; kartu-kartu terpisah dengan gap (bukan hairline antar kartu). Radius kartu 16dp, tanpa bayangan berat.
 2. **Pengelompokan di dalam kartu ikut Notion.** Di dalam satu kartu, baris-baris dipisah hairline tipis (`HorizontalDivider`, `ArusBorder`, 1dp): satu kartu per hari, satu kartu form, "Kelola Data", Kelola Dompet/Kategori, action sheet.
-3. **CTA ikut Bevel, warna hitam.** Primary = pill hitam penuh `#1F2029`, teks putih Bold. Biru Notion tidak dipakai sebagai warna aksi.
+3. **CTA ikut Bevel, warna hitam.** Primary = pill hitam penuh `#1A1A1A`, teks putih Bold. Biru Notion tidak dipakai sebagai warna aksi.
 4. **Warna isi ikut palet Notion.** Kategori, tile ikon, dan status memakai palet Notion; semantik uang tetap hijau `#00A86B` (masuk) / merah `#E53935` (keluar).
 5. **Sheet & menu ikut Notion, tombol sheet ikut Bevel.** Bottom sheet: judul tengah + opsi dalam kartu + drag handle pill 36×4dp. Tombol di bawah sheet: primary hitam penuh + tombol teks di bawahnya.
 
 ## Aturan pola (jangan buat pola baru)
 
 - **Satu kartu per kelompok:** setiap daftar berkelompok = satu `ArusCard` + divider antar baris, tanpa pengecualian.
+- **Hitam-putih murni (2026-11-21):** latar `#FFFFFF`, kartu `#FFFFFF` (pemisah = border 1dp `#E5E5E5`), teks `#1A1A1A`/`#616161`, abu pendukung `#F0F0F0`; tidak ada tint biru di latar/kartu/border. Tile ikon warna (palet Notion) tetap sebagai aksen kategori.
 - **Chip:** terpilih = pill hitam; tidak terpilih = latar `ArusBrandSoft` tanpa border.
 - **Baris transaksi:** judul = catatan (dominan), subtitle = `dompet • kategori • jam` (pemisah dot).
 - **Chart Laporan:** batang hijau/merah (semantik uang); label sumbu-Y di kanan (format ringkas "3 jt"/"250 rb"); batang terpilih opacity penuh, yang lain 0.45.
@@ -34,17 +35,17 @@ Hasil audit 587 screenshot referensi lokal (`design/bevel` + `design/notion`) da
 
 | Token | Nilai | Penggunaan |
 |---|---|---|
-| Background | `#F6F8FE` | Latar layar biru-abu terang |
+| Background | `#FFFFFF` | Latar layar putih murni |
 | Surface | `#FFFFFF` | Kartu, sheet, dan permukaan konten |
-| Text primary | `#1F2029` | Judul, nominal, dan konten utama |
-| Text secondary | `#60657A` | Label dan keterangan pendukung |
-| Border | `#E5E9F2` | Pemisah dan batas kartu yang halus |
-| Brand primary | `#1F2029` | Aksi utama (CTA hitam); biru `#0009FF` ditolak user 2026-11-18 |
-| Brand soft | `#F0F2F7` | Latar field search, chip tak terpilih |
+| Text primary | `#1A1A1A` | Judul, nominal, dan konten utama |
+| Text secondary | `#616161` | Label dan keterangan pendukung |
+| Border | `#E5E5E5` | Pemisah dan batas kartu yang halus |
+| Brand primary | `#1A1A1A` | Aksi utama (CTA hitam netral); biru `#0009FF` ditolak user 2026-11-18 |
+| Brand soft | `#F0F0F0` | Latar field search, chip tak terpilih |
 | Pemasukan | `#00A86B` | Semantik uang masuk (soft `#E3F8EE`) |
 | Pengeluaran | `#E53935` | Semantik uang keluar (soft `#FDEAF0`) |
 
-Primer hitam `#1F2029` adalah keputusan final user (2026-11-18, "Tetap hitam"); biru terang `#0009FF` ditolak dan tidak dipakai sebagai warna aksi di mana pun. Biru Notion hanya hidup sebagai warna kategori/ikon (Notion Sky). Gunakan warna semantik yang konsisten untuk pemasukan, pengeluaran, error, dan sukses; jenis dan status juga harus disampaikan lewat teks atau ikon, bukan warna saja.
+Primer hitam netral `#1A1A1A` adalah keputusan final user (2026-11-18, "Tetap hitam"); biru terang `#0009FF` ditolak dan tidak dipakai sebagai warna aksi di mana pun. Latar `#FFFFFF` putih murni (keputusan user 2026-11-21 — tanpa tint biru, menggantikan `#F6F8FE`); kartu putih dibedakan dari latar oleh border 1dp `#E5E5E5`. Biru Notion hanya hidup sebagai warna kategori/ikon (Notion Sky). Gunakan warna semantik yang konsisten untuk pemasukan, pengeluaran, error, dan sukses; jenis dan status juga harus disampaikan lewat teks atau ikon, bukan warna saja.
 
 ### Palet kategori
 

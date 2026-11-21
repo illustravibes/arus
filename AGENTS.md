@@ -53,7 +53,7 @@ Tidak ada pengguna/data produksi pada saat rebuild: Room boleh dimulai dari **sc
 
 - **Baca `DESIGN.md`** sebelum membuat/mengubah layar atau komponen; `docs/references/ui-inspiration.png` adalah sumber inspirasi tampilan, bukan asset produksi.
 - Gunakan **Material 3 + Custom Arus Theme**, jangan memakai WebView / HTML / CSS / Tailwind.
-- Token utama: background `#F6F8FE`, kartu `#FFFFFF`, teks `#1F2029`, teks sekunder `#60657A`, border `#E5E9F2`; brand/CTA primer hitam `#1F2029` (keputusan final user 2026-11-18; biru `#0009FF` ditolak).
+- Token utama: background `#FFFFFF` (putih murni, keputusan user 2026-11-21 — tanpa tint biru), kartu `#FFFFFF`, teks `#1A1A1A`, teks sekunder `#616161`, border `#E5E5E5`; brand/CTA primer hitam netral `#1A1A1A` (keputusan final user 2026-11-18; biru `#0009FF` ditolak).
 - Palet semantik finansial memakai token di design system; pemasukan/keluar tidak dibedakan hanya lewat warna.
 - Arah UI: **kartu putih rounded, ikon soft tile, judul tebal, CTA pill, list tenang, whitespace terstruktur**. Jangan tiru hero foto, banner promo, katalog kursus, atau footer web dari referensi.
 - Inter, pengganti SF Pro pada referensi Bevel (fallback sans-serif); nominal tabular bila perlu. Padding layar 12dp (compact rapat, keputusan user 2026-11-21); gap antar section 16dp; spacer bawah layar tab 110dp; target sentuh minimum 48dp. Label sentence case (bukan ALL-CAPS).
@@ -115,7 +115,7 @@ OCR, group order, utang-piutang, rekonsiliasi/checkpoint lanjutan, split transak
 
 Hasil audit 587 screenshot referensi lokal dan semua keputusan user 2026-11-21; detail lengkap di `DESIGN.md` § "Lima prinsip design system". Ringkasnya:
 
-- **Lima prinsip:** struktur ikut Bevel (satu kartu = satu blok, gap antar kartu); pengelompokan di dalam kartu ikut Notion (hairline antar baris); CTA hitam `#1F2029`; warna isi palet Notion; sheet ikut Notion + tombol sheet ikut Bevel.
+- **Lima prinsip:** struktur ikut Bevel (satu kartu = satu blok, gap antar kartu); pengelompokan di dalam kartu ikut Notion (hairline antar baris); CTA hitam `#1A1A1A`; warna isi palet Notion; sheet ikut Notion + tombol sheet ikut Bevel.
 - **Aturan pola:** satu kartu per kelompok + divider; chip tak terpilih latar `ArusBrandSoft` tanpa border; baris transaksi judul = catatan, subtitle = `dompet • kategori • jam`; chart = label sumbu-Y kanan + batang terpilih opacity penuh; snackbar = `ArusSnackbar` pill hitam; detail sheet = "Ubah" hitam penuh + "Hapus" teks merah (tanpa "Tutup").
-- **Yang tidak berubah:** primer hitam, field pill (kecuali search 12dp), padding 12dp/16dp/110dp, tanpa mode gelap, tanpa fitur baru di luar MVP.
+- **Yang tidak berubah:** primer hitam netral `#1A1A1A`, latar putih murni `#FFFFFF`, field pill (kecuali search 12dp), padding 12dp/16dp/110dp, tanpa mode gelap, tanpa fitur baru di luar MVP.
 - Jangan menambah pola sekali-pakai baru: cek komponen `Arus*` yang sudah ada dulu; kalau pola yang dibutuhkan belum ada, tambahkan sebagai komponen reusable + tampilkan di `DesignSystemShowcase`.

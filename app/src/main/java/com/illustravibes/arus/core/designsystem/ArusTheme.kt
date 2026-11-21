@@ -23,14 +23,14 @@ import androidx.compose.ui.unit.sp
 // 1. COLOR TOKENS (Bevel B&W Base + Notion Accents)
 // ============================================================================
 
-val ArusBackground = Color(0xFFF6F8FE)       // Soft Blue-Gray Page Background
+val ArusBackground = Color(0xFFFFFFFF)       // Pure White Page Background
 val ArusSurface = Color(0xFFFFFFFF)          // Pure White Card Surface
-val ArusTextPrimary = Color(0xFF1F2029)      // High Contrast Dark Text
-val ArusTextSecondary = Color(0xFF60657A)    // Muted Slate Label/Caption Text
-val ArusBorder = Color(0xFFE5E9F2)           // Clean Subtle Border
+val ArusTextPrimary = Color(0xFF1A1A1A)      // Pure Neutral Black Text
+val ArusTextSecondary = Color(0xFF616161)    // Neutral Grey Label/Caption Text
+val ArusBorder = Color(0xFFE5E5E5)           // Neutral Subtle Border
 
-val ArusBrandPrimary = Color(0xFF1F2029)     // Bevel Dark Black Primary CTA (#1F2029)
-val ArusBrandSoft = Color(0xFFF0F2F7)        // Soft Neutral Accent
+val ArusBrandPrimary = Color(0xFF1A1A1A)     // Pure Neutral Black Primary CTA (#1A1A1A)
+val ArusBrandSoft = Color(0xFFF0F0F0)        // Pure Neutral Soft Accent
 val ArusBrandPressed = Color(0xFF000000)
 
 val ArusIncome = Color(0xFF00A86B)           // Emerald Green

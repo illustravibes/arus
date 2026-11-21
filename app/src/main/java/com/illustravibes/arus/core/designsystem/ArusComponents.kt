@@ -1991,17 +1991,15 @@ fun ArusWalletBrandPicker(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         } else {
-            FlowRow(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                maxItemsInEachRow = 3
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 filteredBrands.forEach { brand ->
                     val isSelected = brand.slug == selectedSlug
-                    Column(
+                    Row(
                         modifier = Modifier
-                            .width(96.dp)
+                            .fillMaxWidth()
                             .clip(SoftTileShape)
                             .background(if (isSelected) ArusBrandSoft else ArusSurface)
                             .border(
@@ -2010,25 +2008,44 @@ fun ArusWalletBrandPicker(
                                 SoftTileShape
                             )
                             .clickable { onBrandSelected(brand) }
-                            .padding(vertical = 10.dp, horizontal = 8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Image(
-                            painter = painterResource(id = brand.logoResId),
-                            contentDescription = brand.name,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.width(72.dp).height(32.dp)
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(width = 64.dp, height = 32.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(ArusSurface)
+                                .border(1.dp, ArusBorder, RoundedCornerShape(8.dp))
+                                .padding(4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = brand.logoResId),
+                                contentDescription = brand.name,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
                         Text(
                             text = brand.name,
-                            style = ArusTypography.labelSmall.copy(
+                            style = ArusTypography.bodyLarge.copy(
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                             ),
                             color = ArusTextPrimary,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
                         )
+                        if (isSelected) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_check),
+                                contentDescription = "Terpilih",
+                                tint = ArusBrandPrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }

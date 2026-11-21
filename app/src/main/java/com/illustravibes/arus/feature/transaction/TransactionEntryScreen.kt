@@ -162,7 +162,7 @@ fun TransactionEntryScreen(
                     ArusPropertySelectorRow(
                         label = "Tanggal",
                         valueOnLeft = true,
-                        selectedValue = SimpleDateFormat("EEEE, d MMM yyyy", Locale("id", "ID")).format(Date(uiState.dateMillis)),
+                        selectedValue = SimpleDateFormat("EEEE, d MMM yyyy · HH:mm", Locale("id", "ID")).format(Date(uiState.dateMillis)),
                         onClick = { showDatePicker = true },
                         iconResId = R.drawable.fa_calendar,
                         tileColor = NotionSkySoft,
@@ -268,20 +268,10 @@ fun TransactionEntryScreen(
         // DatePicker bekerja dalam UTC, jadi tanggal lokal dikonversi ke
         // tengah malam UTC sebelum diserahkan ke picker.
         if (showDatePicker) {
-            val initialPickerMillis = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-                val local = Calendar.getInstance().apply { timeInMillis = uiState.dateMillis }
-                set(Calendar.YEAR, local.get(Calendar.YEAR))
-                set(Calendar.MONTH, local.get(Calendar.MONTH))
-                set(Calendar.DAY_OF_MONTH, local.get(Calendar.DAY_OF_MONTH))
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }.timeInMillis
             ArusDatePickerSheet(
-                initialDateMillis = initialPickerMillis,
-                onDateSelected = { utcMillis ->
-                    viewModel.onDatePicked(utcMillis)
+                initialDateMillis = uiState.dateMillis,
+                onDateSelected = { dateTimeMillis ->
+                    viewModel.onDatePicked(dateTimeMillis)
                     showDatePicker = false
                 },
                 onDismiss = { showDatePicker = false }

@@ -138,17 +138,10 @@ class TransactionEntryViewModel(
         _uiState.update { it.copy(dateMillis = millis) }
     }
 
-    fun onDatePicked(utcDateMillis: Long) {
-        val utcCal = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-            timeInMillis = utcDateMillis
-        }
-        val localCal = Calendar.getInstance().apply {
-            timeInMillis = _uiState.value.dateMillis
-        }
-        localCal.set(Calendar.YEAR, utcCal.get(Calendar.YEAR))
-        localCal.set(Calendar.MONTH, utcCal.get(Calendar.MONTH))
-        localCal.set(Calendar.DAY_OF_MONTH, utcCal.get(Calendar.DAY_OF_MONTH))
-        _uiState.update { it.copy(dateMillis = localCal.timeInMillis) }
+    // Sheet tanggal & jam mengembalikan timestamp lokal lengkap (tanggal +
+    // jam yang dipilih) — langsung dipakai apa adanya, tanpa merge.
+    fun onDatePicked(dateTimeMillis: Long) {
+        _uiState.update { it.copy(dateMillis = dateTimeMillis) }
     }
 
     fun onNoteChange(note: String) {

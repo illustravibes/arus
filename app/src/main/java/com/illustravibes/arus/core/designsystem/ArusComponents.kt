@@ -14,6 +14,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
@@ -25,13 +28,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -59,6 +65,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.illustravibes.arus.R
+import kotlinx.coroutines.flow.distinctUntilChanged
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -2253,54 +2260,157 @@ data class SelectionItem(
 )
 
 // ============================================================================
-// ARUS DATE PICKER SHEET (Bottom Sheet Kalender, locale id-ID)
-// Menggantikan DatePickerDialog (modal tengah, headline bahasa Inggris):
-// kalender yang sama dipindah ke ModalBottomSheet ala Bevel — sudut atas
-// membulat, drag handle, header "Pilih Tanggal" + chip "Hari ini", tombol
-// pill hitam "Pilih Tanggal" + teks "Batal". Locale id-ID dipaksa lewat
-// DatePickerState(locale = ...) supaya bulan/hari/headline berbahasa
-// Indonesia walau locale sistem HP bahasa Inggris.
+// ARUS WHEEL PICKER (roda angka ala Bevel — dipakai untuk Jam & Menit)
+// LazyColumn 3 baris + snap fling; baris tengah disorot dan nilainya yang
+// dilaporkan lewat onSelected. Dipakai di ArusDatePickerSheet.
+// ============================================================================
+@Composable
+fun ArusWheelPicker(
+    values: List<String>,
+    selectedIndex: Int,
+    onSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    itemHeight: Dp = 48.dp
+) {
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = selectedIndex)
+    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
+    var centeredIndex by remember { mutableIntStateOf(selectedIndex) }
+
+    // Indeks item yang posisinya paling dekat dengan tengah viewport.
+    fun centeredIndexFromLayout(): Int {
+        val info = listState.layoutInfo
+        if (info.visibleItemsInfo.isEmpty()) return centeredIndex
+        val center = (info.viewportStartOffset + info.viewportEndOffset) / 2
+        return info.visibleItemsInfo.minByOrNull { item ->
+            kotlin.math.abs((item.offset + item.size / 2) - center)
+        }?.index ?: centeredIndex
+    }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { centeredIndexFromLayout() }
+            .distinctUntilChanged()
+            .collect { index ->
+                centeredIndex = index
+                onSelected(index)
+            }
+    }
+
+    Box(modifier = modifier.height(itemHeight * 3)) {
+        // Sorotan baris tengah (di belakang daftar).
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                .height(itemHeight)
+                .clip(RoundedCornerShape(12.dp))
+                .background(ArusBrandSoft)
+        )
+        LazyColumn(
+            state = listState,
+            flingBehavior = flingBehavior,
+            contentPadding = PaddingValues(vertical = itemHeight),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(values.size) { index ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(itemHeight),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = values[index],
+                        style = if (index == centeredIndex) {
+                            ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
+                        } else {
+                            ArusTypography.bodyMedium
+                        },
+                        color = if (index == centeredIndex) ArusTextPrimary else ArusTextSecondary
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ============================================================================
+// ARUS DATE PICKER SHEET (Bottom Sheet Kalender + Jam, locale id-ID)
+// Kalender custom ala Notion (bukan DatePicker M3 — panel lavender-nya
+// bentrok dengan kartu putih Arus): putih semua, bulan + panah < >,
+// huruf hari M S S R K J S, angka polos; hari terpilih = lingkaran hitam,
+// hari ini = ring, tanggal depan abu-abu nonaktif. Di bawah grid ada baris
+// Jam (roda jam/menit ala Bevel) — transaksi butuh tanggal DAN jam.
+// Tombol pill hitam "Pilih Tanggal & Jam" + teks "Batal".
 // ============================================================================
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArusDatePickerSheet(
     initialDateMillis: Long,
-    onDateSelected: (utcDateMillis: Long) -> Unit,
+    onDateSelected: (dateTimeMillis: Long) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Tengah malam UTC hari ini (dipakai chip "Hari ini").
-    val todayUtcMillis = remember {
-        Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-            val now = Calendar.getInstance()
-            set(Calendar.YEAR, now.get(Calendar.YEAR))
-            set(Calendar.MONTH, now.get(Calendar.MONTH))
-            set(Calendar.DAY_OF_MONTH, now.get(Calendar.DAY_OF_MONTH))
+    val initialCal = remember(initialDateMillis) {
+        Calendar.getInstance().apply { timeInMillis = initialDateMillis }
+    }
+    // Hari terpilih (tengah malam lokal) + jam/menit terpilih.
+    var selectedDayMillis by remember {
+        mutableStateOf(
+            Calendar.getInstance().apply {
+                set(Calendar.YEAR, initialCal.get(Calendar.YEAR))
+                set(Calendar.MONTH, initialCal.get(Calendar.MONTH))
+                set(Calendar.DAY_OF_MONTH, initialCal.get(Calendar.DAY_OF_MONTH))
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+        )
+    }
+    var selectedHour by remember { mutableIntStateOf(initialCal.get(Calendar.HOUR_OF_DAY)) }
+    var selectedMinute by remember { mutableIntStateOf(initialCal.get(Calendar.MINUTE)) }
+    var displayedYear by remember { mutableIntStateOf(initialCal.get(Calendar.YEAR)) }
+    var displayedMonth by remember { mutableIntStateOf(initialCal.get(Calendar.MONTH)) }
+    var showTimeWheels by remember { mutableStateOf(false) }
+
+    val todayMillis = remember {
+        Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
         }.timeInMillis
     }
-    val datePickerState = remember(initialDateMillis) {
-        DatePickerState(
-            locale = Locale("id", "ID"),
-            initialSelectedDateMillis = initialDateMillis,
-            selectableDates = object : SelectableDates {
-                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                    val endOfToday = Calendar.getInstance().apply {
-                        set(Calendar.HOUR_OF_DAY, 23)
-                        set(Calendar.MINUTE, 59)
-                        set(Calendar.SECOND, 59)
-                        set(Calendar.MILLISECOND, 999)
-                    }.timeInMillis
-                    return utcTimeMillis <= endOfToday
-                }
-            }
+    val todayCal = remember { Calendar.getInstance() }
+    val isTodaySelected = selectedDayMillis == todayMillis
+
+    // Grid bulan yang ditampilkan (minggu pertama = Minggu, id-ID).
+    val firstDayOffset = remember(displayedYear, displayedMonth) {
+        Calendar.getInstance().apply {
+            set(Calendar.YEAR, displayedYear)
+            set(Calendar.MONTH, displayedMonth)
+            set(Calendar.DAY_OF_MONTH, 1)
+        }.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
+    }
+    val daysInMonth = remember(displayedYear, displayedMonth) {
+        Calendar.getInstance().apply {
+            set(Calendar.YEAR, displayedYear)
+            set(Calendar.MONTH, displayedMonth)
+        }.getActualMaximum(Calendar.DAY_OF_MONTH)
+    }
+    val monthTitle = remember(displayedYear, displayedMonth) {
+        SimpleDateFormat("MMMM yyyy", Locale("id", "ID")).format(
+            Calendar.getInstance().apply {
+                set(Calendar.YEAR, displayedYear)
+                set(Calendar.MONTH, displayedMonth)
+                set(Calendar.DAY_OF_MONTH, 1)
+            }.time
         )
     }
-    val isTodaySelected = datePickerState.selectedDateMillis == todayUtcMillis
+    val isCurrentMonth = displayedYear == todayCal.get(Calendar.YEAR) &&
+        displayedMonth == todayCal.get(Calendar.MONTH)
+
     ModalBottomSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = onDismiss,
@@ -2330,7 +2440,7 @@ fun ArusDatePickerSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Pilih Tanggal",
+                    text = "Pilih Tanggal & Jam",
                     style = ArusTypography.titleLarge,
                     color = ArusTextPrimary
                 )
@@ -2339,38 +2449,205 @@ fun ArusDatePickerSheet(
                     text = "Hari ini",
                     selected = isTodaySelected,
                     onClick = {
-                        datePickerState.selectedDateMillis = todayUtcMillis
-                        datePickerState.displayedMonthMillis = todayUtcMillis
+                        selectedDayMillis = todayMillis
+                        displayedYear = todayCal.get(Calendar.YEAR)
+                        displayedMonth = todayCal.get(Calendar.MONTH)
                     }
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            DatePicker(
-                state = datePickerState,
-                title = null,
-                showModeToggle = false,
-                headline = {
-                    // Headline bawaan M3 memakai defaultLocale() (locale sistem
-                    // HP) — bukan state.locale — jadi tetap Inggris. Format
-                    // sendiri dengan id-ID: "Sab, 21 Nov 2026".
-                    val formatted = datePickerState.selectedDateMillis?.let {
-                        SimpleDateFormat("EEE, d MMM yyyy", Locale("id", "ID")).format(Date(it))
-                    } ?: "Pilih tanggal"
-                    Text(
-                        text = formatted,
-                        style = ArusTypography.displayMedium,
-                        color = ArusTextPrimary,
-                        modifier = Modifier.padding(horizontal = 24.dp)
+            Spacer(modifier = Modifier.height(16.dp))
+            // Navigasi bulan: < November 2026 >
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = {
+                        if (displayedMonth == Calendar.JANUARY) {
+                            displayedYear -= 1
+                            displayedMonth = Calendar.DECEMBER
+                        } else {
+                            displayedMonth -= 1
+                        }
+                    }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_chevron_left_thin),
+                        contentDescription = "Bulan sebelumnya",
+                        tint = ArusTextPrimary,
+                        modifier = Modifier.size(16.dp)
                     )
                 }
-            )
+                Text(
+                    text = monthTitle,
+                    style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = ArusTextPrimary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(
+                    onClick = {
+                        if (displayedMonth == Calendar.DECEMBER) {
+                            displayedYear += 1
+                            displayedMonth = Calendar.JANUARY
+                        } else {
+                            displayedMonth += 1
+                        }
+                    },
+                    enabled = !isCurrentMonth
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_chevron_right_thin),
+                        contentDescription = "Bulan berikutnya",
+                        tint = if (isCurrentMonth) ArusTextSecondary else ArusTextPrimary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            // Huruf hari (Minggu dulu, id-ID).
+            Row(modifier = Modifier.fillMaxWidth()) {
+                listOf("M", "S", "S", "R", "K", "J", "S").forEach { letter ->
+                    Box(
+                        modifier = Modifier.weight(1f).height(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = letter,
+                            style = ArusTypography.bodyMedium,
+                            color = ArusTextSecondary
+                        )
+                    }
+                }
+            }
+            // Grid 6 minggu x 7 hari.
+            for (week in 0 until 6) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    for (col in 0 until 7) {
+                        val day = week * 7 + col - firstDayOffset + 1
+                        val dayMillis = if (day in 1..daysInMonth) {
+                            Calendar.getInstance().apply {
+                                set(Calendar.YEAR, displayedYear)
+                                set(Calendar.MONTH, displayedMonth)
+                                set(Calendar.DAY_OF_MONTH, day)
+                                set(Calendar.HOUR_OF_DAY, 0)
+                                set(Calendar.MINUTE, 0)
+                                set(Calendar.SECOND, 0)
+                                set(Calendar.MILLISECOND, 0)
+                            }.timeInMillis
+                        } else {
+                            null
+                        }
+                        val isFuture = dayMillis != null && dayMillis > todayMillis
+                        val isSelected = dayMillis != null && dayMillis == selectedDayMillis
+                        val isToday = dayMillis != null && dayMillis == todayMillis
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (isSelected) ArusBrandPrimary else Color.Transparent
+                                )
+                                .then(
+                                    if (isToday && !isSelected) {
+                                        Modifier.border(1.dp, ArusBrandPrimary, CircleShape)
+                                    } else {
+                                        Modifier
+                                    }
+                                )
+                                .clickable(enabled = dayMillis != null && !isFuture) {
+                                    if (dayMillis != null) selectedDayMillis = dayMillis
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (day in 1..daysInMonth) {
+                                Text(
+                                    text = day.toString(),
+                                    style = ArusTypography.bodyMedium.copy(
+                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                                    ),
+                                    color = when {
+                                        isSelected -> Color.White
+                                        isFuture -> ArusTextSecondary
+                                        else -> ArusTextPrimary
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            // Baris Jam (ketuk untuk membuka roda jam/menit).
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(PillShape)
+                    .clickable { showTimeWheels = !showTimeWheels }
+                    .padding(vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Jam",
+                    style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = ArusTextPrimary
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "%02d:%02d".format(selectedHour, selectedMinute),
+                    style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = ArusTextPrimary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_chevron_right_thin),
+                    contentDescription = null,
+                    tint = ArusTextSecondary,
+                    modifier = Modifier
+                        .size(12.dp)
+                        .rotate(if (showTimeWheels) 90f else 0f)
+                )
+            }
+            AnimatedVisibility(visible = showTimeWheels) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ArusWheelPicker(
+                        values = (0..23).map { "%02d".format(it) },
+                        selectedIndex = selectedHour,
+                        onSelected = { selectedHour = it },
+                        modifier = Modifier.width(88.dp)
+                    )
+                    Text(
+                        text = ":",
+                        style = ArusTypography.displayMedium,
+                        color = ArusTextPrimary,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
+                    ArusWheelPicker(
+                        values = (0..59).map { "%02d".format(it) },
+                        selectedIndex = selectedMinute,
+                        onSelected = { selectedMinute = it },
+                        modifier = Modifier.width(88.dp)
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(16.dp))
             ArusPrimaryButton(
-                text = "Pilih Tanggal",
+                text = "Pilih Tanggal & Jam",
                 onClick = {
-                    datePickerState.selectedDateMillis?.let { onDateSelected(it) }
-                },
-                enabled = datePickerState.selectedDateMillis != null
+                    val result = Calendar.getInstance().apply {
+                        timeInMillis = selectedDayMillis
+                        set(Calendar.HOUR_OF_DAY, selectedHour)
+                        set(Calendar.MINUTE, selectedMinute)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }.timeInMillis
+                    onDateSelected(result)
+                }
             )
             TextButton(
                 onClick = onDismiss,

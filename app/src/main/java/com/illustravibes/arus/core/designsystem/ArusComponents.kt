@@ -2012,10 +2012,12 @@ fun ArusActionSheet(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Full rounded + mengambang, sama seperti ArusSelectionSheet (menu opsi
+    // juga sheet pemilih). Keputusan user 2026-11-21.
     ModalBottomSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = onDismissRequest,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        shape = RoundedCornerShape(28.dp),
         containerColor = ArusSurface,
         dragHandle = {
             Box(
@@ -2027,7 +2029,7 @@ fun ArusActionSheet(
                     .background(ArusBorder)
             )
         },
-        modifier = modifier
+        modifier = modifier.padding(bottom = 16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -2643,10 +2645,12 @@ fun ArusDatePickerSheet(
     val isCurrentMonth = displayedYear == todayCal.get(Calendar.YEAR) &&
         displayedMonth == todayCal.get(Calendar.MONTH)
 
+    // Full rounded + mengambang, sama seperti ArusSelectionSheet (sheet
+    // pemilih tanggal+jam). Keputusan user 2026-11-21.
     ModalBottomSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        shape = RoundedCornerShape(28.dp),
         containerColor = ArusSurface,
         dragHandle = {
             Box(
@@ -2658,7 +2662,7 @@ fun ArusDatePickerSheet(
                     .background(ArusBorder)
             )
         },
-        modifier = modifier
+        modifier = modifier.padding(bottom = 16.dp)
     ) {
         Column(
             modifier = Modifier

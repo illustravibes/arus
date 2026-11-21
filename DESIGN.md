@@ -29,7 +29,7 @@ Hasil audit 587 screenshot referensi lokal (`design/bevel` + `design/notion`) da
 - **Detail sheet transaksi:** "Ubah" hitam penuh + "Hapus" teks merah di bawahnya; "Tutup" via drag/scrim/back (tanpa tombol).
 - **Sheet chrome (semua `ModalBottomSheet`):** `skipPartiallyExpanded = true`, radius atas 28dp, `ArusSurface`, drag handle pill.
 - **Action sheet (menu •••):** bottom sheet ala Notion — judul = nama item (tengah), opsi dalam satu kartu + hairline, ikon kiri + teks, destruktif merah.
-- **Selection sheet (dropdown pilih dompet/kategori):** full rounded — keempat sudut 28dp + mengambang 16dp dari bawah (keputusan user 2026-11-21); sheet lain tetap sudut atas 28dp menempel bawah.
+- **Sheet pemilih (dropdown/picker):** full rounded — keempat sudut 28dp + mengambang 16dp dari bawah: selection sheet (pilih dompet/kategori), date picker sheet (pilih tanggal+jam), action sheet (menu opsi •••) — keputusan user 2026-11-21. Sheet lain (form, password, konfirmasi, detail transaksi) tetap sudut atas 28dp menempel bawah.
 - **Selector row:** nilai yang dipilih di kiri, chevron tipis 12dp di kanan; baris navigasi (Kelola Data) memakai pola normal (label kiri + nilai + chevron).
 
 ## Warna

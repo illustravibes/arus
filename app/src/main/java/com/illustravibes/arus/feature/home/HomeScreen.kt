@@ -218,7 +218,8 @@ fun HomeContent(
                         iconResId = mapDrawableIcon(wallet.icon),
                         tileColor = tileColor,
                         iconTint = iconTint,
-                        onClick = onNavigateToWalletManagement
+                        onClick = onNavigateToWalletManagement,
+                        logoResId = WalletMasterData.logoResIdForSlug(wallet.logoSlug)
                     )
                 }
             }

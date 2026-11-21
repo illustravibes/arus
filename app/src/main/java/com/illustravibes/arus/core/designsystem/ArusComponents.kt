@@ -10,6 +10,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,6 +35,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -327,7 +329,8 @@ fun ArusPropertySelectorRow(
     iconResId: Int? = null,
     tileColor: Color = NotionSkySoft,
     iconTint: Color = NotionSky,
-    placeholder: String = "Pilih"
+    placeholder: String = "Pilih",
+    logoResId: Int? = null
 ) {
     Row(
         modifier = modifier
@@ -344,9 +347,10 @@ fun ArusPropertySelectorRow(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.weight(1f)
         ) {
-            if (iconResId != null) {
-                ArusCategoryTile(
-                    iconResId = iconResId,
+            if (iconResId != null || logoResId != null) {
+                ArusWalletTile(
+                    logoResId = logoResId,
+                    iconResId = iconResId ?: R.drawable.fa_wallet,
                     tileColor = tileColor,
                     iconTint = iconTint,
                     size = 36.dp
@@ -503,6 +507,44 @@ fun ArusCategoryTile(
             contentDescription = null,
             tint = iconTint,
             modifier = Modifier.size(size * 0.5f)
+        )
+    }
+}
+
+// Logo dompet (idn-finlogos, PNG @3x): bila ada logo, tampilkan gambarnya
+// di tile putih berbingkai; bila tidak, fallback ke ikon fa + warna.
+@Composable
+fun ArusWalletTile(
+    logoResId: Int?,
+    iconResId: Int,
+    tileColor: Color,
+    modifier: Modifier = Modifier,
+    iconTint: Color = ArusTextPrimary,
+    size: Dp = 44.dp
+) {
+    if (logoResId != null) {
+        Box(
+            modifier = modifier
+                .size(size)
+                .clip(SoftTileShape)
+                .background(ArusSurface)
+                .border(1.dp, ArusBorder, SoftTileShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = logoResId),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(size * 0.72f)
+            )
+        }
+    } else {
+        ArusCategoryTile(
+            iconResId = iconResId,
+            tileColor = tileColor,
+            modifier = modifier,
+            iconTint = iconTint,
+            size = size
         )
     }
 }
@@ -668,7 +710,8 @@ fun ArusWalletCard(
     iconResId: Int = R.drawable.fa_wallet,
     tileColor: Color = NotionSkySoft,
     iconTint: Color = NotionSky,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    logoResId: Int? = null
 ) {
     // V2-P1-4: saldo sangat panjang mengecil otomatis (kartu dompet 180dp).
     val balanceText = balance.formatRupiah()
@@ -687,7 +730,8 @@ fun ArusWalletCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            ArusCategoryTile(
+            ArusWalletTile(
+                logoResId = logoResId,
                 iconResId = iconResId,
                 tileColor = tileColor,
                 iconTint = iconTint,
@@ -1731,6 +1775,59 @@ fun ArusColorPicker(
     }
 }
 
+// Pemilih merek dompet dari master data (logo + nama). Dipakai di form
+// dompet saat jenisnya Bank / E-Wallet.
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ArusWalletBrandPicker(
+    brands: List<WalletBrand>,
+    selectedSlug: String?,
+    onBrandSelected: (WalletBrand) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FlowRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        maxItemsInEachRow = 3
+    ) {
+        brands.forEach { brand ->
+            val isSelected = brand.slug == selectedSlug
+            Column(
+                modifier = Modifier
+                    .width(96.dp)
+                    .clip(SoftTileShape)
+                    .background(if (isSelected) ArusBrandSoft else ArusSurface)
+                    .border(
+                        if (isSelected) 2.dp else 1.dp,
+                        if (isSelected) ArusBrandPrimary else ArusBorder,
+                        SoftTileShape
+                    )
+                    .clickable { onBrandSelected(brand) }
+                    .padding(vertical = 10.dp, horizontal = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = brand.logoResId),
+                    contentDescription = brand.name,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.height(28.dp).fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = brand.name,
+                    style = ArusTypography.labelSmall.copy(
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                    ),
+                    color = ArusTextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
 // 13b. ARUS PASSWORD SHEET (Bottom Sheet dengan Field Kata Sandi)
 // Dipakai dialog Backup/Restore: ArusConfirmationSheet tidak punya slot input,
 // jadi kata sandi tidak pernah bisa dimasukkan (alur backup putus di UI).
@@ -1899,7 +1996,8 @@ data class SelectionItem(
     val subtitle: String? = null,
     val iconResId: Int? = null,
     val tileColor: Color = NotionSkySoft,
-    val iconTint: Color = NotionSky
+    val iconTint: Color = NotionSky,
+    val logoResId: Int? = null
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1973,9 +2071,10 @@ fun ArusSelectionSheet(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.weight(1f)
                         ) {
-                            if (item.iconResId != null) {
-                                ArusCategoryTile(
-                                    iconResId = item.iconResId,
+                            if (item.iconResId != null || item.logoResId != null) {
+                                ArusWalletTile(
+                                    logoResId = item.logoResId,
+                                    iconResId = item.iconResId ?: R.drawable.fa_wallet,
                                     tileColor = item.tileColor,
                                     iconTint = item.iconTint,
                                     size = 40.dp

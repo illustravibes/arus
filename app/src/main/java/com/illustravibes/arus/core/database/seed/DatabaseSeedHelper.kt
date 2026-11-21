@@ -3,6 +3,7 @@ package com.illustravibes.arus.core.database.seed
 import com.illustravibes.arus.core.database.ArusDatabase
 import com.illustravibes.arus.core.database.entity.CategoryEntity
 import com.illustravibes.arus.core.database.entity.WalletEntity
+import com.illustravibes.arus.core.database.entity.WalletType
 import kotlinx.coroutines.flow.first
 
 object DatabaseSeedHelper {
@@ -15,7 +16,8 @@ object DatabaseSeedHelper {
                     name = "Dompet Tunai",
                     icon = "fa_money_bill",
                     colorHex = "#FFB110",
-                    initialBalance = 1000000L
+                    initialBalance = 1000000L,
+                    type = WalletType.CASH.name
                 )
             )
             db.walletDao().insertWallet(
@@ -23,7 +25,9 @@ object DatabaseSeedHelper {
                     name = "Bank BCA",
                     icon = "fa_building_columns",
                     colorHex = "#62AEF0",
-                    initialBalance = 2000000L
+                    initialBalance = 2000000L,
+                    type = WalletType.BANK.name,
+                    logoSlug = "bca"
                 )
             )
         }

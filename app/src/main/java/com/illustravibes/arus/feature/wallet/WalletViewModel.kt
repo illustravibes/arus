@@ -3,6 +3,9 @@ package com.illustravibes.arus.feature.wallet
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.illustravibes.arus.core.database.entity.WalletEntity
+import com.illustravibes.arus.core.database.entity.WalletType
+import com.illustravibes.arus.core.designsystem.WalletBrand
+import com.illustravibes.arus.core.designsystem.WalletMasterData
 import com.illustravibes.arus.data.repository.TransactionRepository
 import com.illustravibes.arus.data.repository.WalletRepository
 import kotlinx.coroutines.flow.*
@@ -18,6 +21,9 @@ data class WalletUiState(
     val initialBalanceInput: String = "",
     val selectedIcon: String = "fa_wallet",
     val selectedColorHex: String = "#62AEF0",
+    val selectedType: WalletType = WalletType.CASH,
+    val selectedTypeIndex: Int = 2,
+    val selectedLogoSlug: String? = null,
     val errorMessage: String? = null
 )
 
@@ -66,6 +72,9 @@ class WalletViewModel(
                 initialBalanceInput = "0",
                 selectedIcon = "fa_wallet",
                 selectedColorHex = "#62AEF0",
+                selectedType = WalletType.CASH,
+                selectedTypeIndex = 2,
+                selectedLogoSlug = null,
                 errorMessage = null
             )
         }
@@ -80,6 +89,13 @@ class WalletViewModel(
                 initialBalanceInput = wallet.initialBalance.toString(),
                 selectedIcon = wallet.icon,
                 selectedColorHex = wallet.colorHex,
+                selectedType = runCatching { WalletType.valueOf(wallet.type) }.getOrDefault(WalletType.CASH),
+                selectedTypeIndex = when (runCatching { WalletType.valueOf(wallet.type) }.getOrDefault(WalletType.CASH)) {
+                    WalletType.BANK -> 0
+                    WalletType.EWALLET -> 1
+                    WalletType.CASH -> 2
+                },
+                selectedLogoSlug = wallet.logoSlug,
                 errorMessage = null
             )
         }
@@ -104,6 +120,41 @@ class WalletViewModel(
 
     fun onColorChange(colorHex: String) {
         _uiState.update { it.copy(selectedColorHex = colorHex) }
+    }
+
+    fun onTypeChange(index: Int) {
+        val type = when (index) {
+            0 -> WalletType.BANK
+            1 -> WalletType.EWALLET
+            else -> WalletType.CASH
+        }
+        _uiState.update { state ->
+            // Logo hanya dipertahankan bila mereknya sejenis dengan tipe baru.
+            val keepLogo = state.selectedLogoSlug?.let {
+                WalletMasterData.brandForSlug(it)?.type == type
+            } == true
+            state.copy(
+                selectedType = type,
+                selectedTypeIndex = index,
+                selectedLogoSlug = if (keepLogo) state.selectedLogoSlug else null
+            )
+        }
+    }
+
+    fun onBrandSelect(brand: WalletBrand) {
+        _uiState.update { state ->
+            // Nama terisi otomatis dari merek, kecuali user sudah mengetik
+            // nama sendiri (bukan nama merek sebelumnya).
+            val prevBrandName = state.selectedLogoSlug?.let {
+                WalletMasterData.brandForSlug(it)?.name
+            }
+            val newName = if (state.nameInput.isBlank() || state.nameInput == prevBrandName) {
+                brand.name
+            } else {
+                state.nameInput
+            }
+            state.copy(selectedLogoSlug = brand.slug, nameInput = newName, errorMessage = null)
+        }
     }
 
     fun saveWallet() {
@@ -131,7 +182,9 @@ class WalletViewModel(
                     name = state.nameInput,
                     initialBalance = initialBalance,
                     icon = state.selectedIcon,
-                    colorHex = state.selectedColorHex
+                    colorHex = state.selectedColorHex,
+                    type = state.selectedType.name,
+                    logoSlug = state.selectedLogoSlug
                 )
             } else {
                 walletRepository.updateWallet(
@@ -139,7 +192,9 @@ class WalletViewModel(
                         name = state.nameInput.trim(),
                         initialBalance = initialBalance,
                         icon = state.selectedIcon,
-                        colorHex = state.selectedColorHex
+                        colorHex = state.selectedColorHex,
+                        type = state.selectedType.name,
+                        logoSlug = state.selectedLogoSlug
                     )
                 )
             }

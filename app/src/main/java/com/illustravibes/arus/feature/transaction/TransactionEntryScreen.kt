@@ -1,10 +1,5 @@
 package com.illustravibes.arus.feature.transaction
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -32,8 +27,9 @@ fun TransactionEntryScreen(
     var showTargetWalletSheet by remember { mutableStateOf(false) }
     var showCategorySheet by remember { mutableStateOf(false) }
 
-    // P0-2: keypad in-app tampil saat field nominal fokus.
-    var keypadVisible by remember { mutableStateOf(false) }
+    // Nominal pakai keyboard sistem (numerik). Keypad in-app
+    // (ArusKeypadView) disimpan untuk input yang memang fokus nominal,
+    // mis. PIN.
 
     LaunchedEffect(uiState.isSuccess) {
         if (uiState.isSuccess) {
@@ -89,29 +85,7 @@ fun TransactionEntryScreen(
                     1 -> ArusExpense
                     else -> ArusTextPrimary
                 },
-                readOnly = true,
-                onFocusChange = { keypadVisible = it }
             )
-
-            // Keypad in-app (P0-2): muncul saat field nominal fokus; keyboard
-            // sistem tetap dipakai untuk field Catatan.
-            AnimatedVisibility(
-                visible = keypadVisible,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
-            ) {
-                ArusKeypadView(
-                    onKeyPress = { key ->
-                        // P2-12: maks 15 digit, selaras dengan formatInputRupiah.
-                        if (uiState.amountInput.length + key.length <= 15) {
-                            viewModel.onAmountChange(uiState.amountInput + key)
-                        }
-                    },
-                    onDeletePress = {
-                        viewModel.onAmountChange(uiState.amountInput.dropLast(1))
-                    }
-                )
-            }
 
             // 3. Property Selector Rows
             if (uiState.typeIndex == 2) {
@@ -125,7 +99,8 @@ fun TransactionEntryScreen(
                     onClick = { showWalletSheet = true },
                     iconResId = mapDrawableIcon(uiState.selectedWallet?.icon ?: "fa_wallet"),
                     tileColor = walletTint.copy(alpha = 0.15f),
-                    iconTint = walletTint
+                    iconTint = walletTint,
+                    logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug)
                 )
 
                 ArusPropertySelectorRow(
@@ -134,7 +109,8 @@ fun TransactionEntryScreen(
                     onClick = { showTargetWalletSheet = true },
                     iconResId = mapDrawableIcon(uiState.selectedTargetWallet?.icon ?: "fa_wallet"),
                     tileColor = targetWalletTint.copy(alpha = 0.15f),
-                    iconTint = targetWalletTint
+                    iconTint = targetWalletTint,
+                    logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedTargetWallet?.logoSlug)
                 )
             } else {
                 val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
@@ -147,7 +123,8 @@ fun TransactionEntryScreen(
                     onClick = { showWalletSheet = true },
                     iconResId = mapDrawableIcon(uiState.selectedWallet?.icon ?: "fa_wallet"),
                     tileColor = walletTint.copy(alpha = 0.15f),
-                    iconTint = walletTint
+                    iconTint = walletTint,
+                    logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug)
                 )
 
                 ArusPropertySelectorRow(
@@ -194,7 +171,8 @@ fun TransactionEntryScreen(
                         title = wallet.name,
                         iconResId = mapDrawableIcon(wallet.icon),
                         tileColor = parseHexColor(wallet.colorHex, NotionSkySoft).copy(alpha = 0.15f),
-                        iconTint = parseHexColor(wallet.colorHex, NotionSky)
+                        iconTint = parseHexColor(wallet.colorHex, NotionSky),
+                        logoResId = WalletMasterData.logoResIdForSlug(wallet.logoSlug)
                     )
                 },
                 selectedItemId = uiState.selectedWallet?.id?.toString(),
@@ -215,7 +193,8 @@ fun TransactionEntryScreen(
                         title = wallet.name,
                         iconResId = mapDrawableIcon(wallet.icon),
                         tileColor = parseHexColor(wallet.colorHex, NotionMintSoft).copy(alpha = 0.15f),
-                        iconTint = parseHexColor(wallet.colorHex, NotionMint)
+                        iconTint = parseHexColor(wallet.colorHex, NotionMint),
+                        logoResId = WalletMasterData.logoResIdForSlug(wallet.logoSlug)
                     )
                 },
                 selectedItemId = uiState.selectedTargetWallet?.id?.toString(),

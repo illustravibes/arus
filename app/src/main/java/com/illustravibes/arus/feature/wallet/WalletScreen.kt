@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.R
 import com.illustravibes.arus.core.database.entity.WalletEntity
+import com.illustravibes.arus.core.database.entity.WalletType
 import com.illustravibes.arus.core.designsystem.*
 import com.illustravibes.arus.feature.home.mapDrawableIcon
 import com.illustravibes.arus.feature.home.parseHexColor
@@ -80,7 +81,8 @@ fun WalletScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.weight(1f)
                             ) {
-                                ArusCategoryTile(
+                                ArusWalletTile(
+                                    logoResId = WalletMasterData.logoResIdForSlug(wallet.logoSlug),
                                     iconResId = mapDrawableIcon(wallet.icon),
                                     tileColor = tileColor,
                                     iconTint = iconTint,
@@ -177,25 +179,54 @@ fun WalletScreen(
                     }
 
                     Text(
-                        text = "Ikon",
+                        text = "Jenis Dompet",
                         style = ArusTypography.labelLarge,
                         color = ArusTextPrimary
                     )
-                    ArusIconPicker(
-                        selectedIcon = uiState.selectedIcon,
-                        onIconChange = { icon -> viewModel.onIconChange(icon) },
-                        selectedColorHex = uiState.selectedColorHex
+                    ArusSegmentedControl(
+                        options = listOf("Bank", "E-Wallet", "Tunai"),
+                        selectedIndex = uiState.selectedTypeIndex,
+                        onOptionSelected = { index -> viewModel.onTypeChange(index) }
                     )
 
-                    Text(
-                        text = "Warna",
-                        style = ArusTypography.labelLarge,
-                        color = ArusTextPrimary
-                    )
-                    ArusColorPicker(
-                        selectedColorHex = uiState.selectedColorHex,
-                        onColorChange = { hex -> viewModel.onColorChange(hex) }
-                    )
+                    // Logo dari master data (idn-finlogos): pilih bank /
+                    // e-wallet, nama terisi otomatis. Tunai tetap pakai
+                    // ikon + warna seperti sebelumnya.
+                    if (uiState.selectedType != WalletType.CASH) {
+                        Text(
+                            text = if (uiState.selectedType == WalletType.BANK) "Pilih Bank" else "Pilih E-Wallet",
+                            style = ArusTypography.labelLarge,
+                            color = ArusTextPrimary
+                        )
+                        ArusWalletBrandPicker(
+                            brands = WalletMasterData.brandsFor(uiState.selectedType),
+                            selectedSlug = uiState.selectedLogoSlug,
+                            onBrandSelected = { brand -> viewModel.onBrandSelect(brand) }
+                        )
+                    }
+
+                    if (uiState.selectedType == WalletType.CASH) {
+                        Text(
+                            text = "Ikon",
+                            style = ArusTypography.labelLarge,
+                            color = ArusTextPrimary
+                        )
+                        ArusIconPicker(
+                            selectedIcon = uiState.selectedIcon,
+                            onIconChange = { icon -> viewModel.onIconChange(icon) },
+                            selectedColorHex = uiState.selectedColorHex
+                        )
+
+                        Text(
+                            text = "Warna",
+                            style = ArusTypography.labelLarge,
+                            color = ArusTextPrimary
+                        )
+                        ArusColorPicker(
+                            selectedColorHex = uiState.selectedColorHex,
+                            onColorChange = { hex -> viewModel.onColorChange(hex) }
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 

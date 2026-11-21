@@ -82,10 +82,10 @@ fun TransactionEntryScreen(
                 ArusAmountHeroInput(
                     value = uiState.amountInput,
                     onValueChange = { input -> viewModel.onAmountChange(input) },
-                    label = "NOMINAL " + when (uiState.typeIndex) {
-                        0 -> "PEMASUKAN"
-                        1 -> "PENGELUARAN"
-                        else -> "TRANSFER"
+                    label = "Nominal " + when (uiState.typeIndex) {
+                        0 -> "pemasukan"
+                        1 -> "pengeluaran"
+                        else -> "transfer"
                     },
                     errorMessage = uiState.errorMessage,
                     amountColor = when (uiState.typeIndex) {

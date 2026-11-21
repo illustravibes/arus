@@ -33,6 +33,7 @@ import com.illustravibes.arus.core.database.ArusDatabase
 import com.illustravibes.arus.core.database.seed.DatabaseSeedHelper
 import com.illustravibes.arus.core.designsystem.ArusBackground
 import com.illustravibes.arus.core.designsystem.ArusBottomNavigation
+import com.illustravibes.arus.core.designsystem.ArusSnackbar
 import com.illustravibes.arus.core.designsystem.ArusTab
 import com.illustravibes.arus.core.designsystem.formatRupiah
 import com.illustravibes.arus.data.repository.BackupRepository
@@ -392,11 +393,20 @@ fun ArusAppShell() {
             }
 
             // P0-1: Snackbar sukses simpan, melayang di atas pill bottom nav.
+            // Fb1 (Fase 2): tampilan custom ArusSnackbar (pill hitam).
             SnackbarHost(
                 hostState = snackbarHostState,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 160.dp)
+                    .padding(bottom = 160.dp),
+                snackbar = { data ->
+                    ArusSnackbar(
+                        message = data.visuals.message,
+                        actionLabel = data.visuals.actionLabel,
+                        onAction = { data.performAction() },
+                        onDismiss = { data.dismiss() }
+                    )
+                }
             )
         }
     }

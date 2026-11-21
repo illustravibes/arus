@@ -278,7 +278,7 @@ fun ArusAmountHeroInput(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    label: String = "NOMINAL TRANSAKSI",
+    label: String = "Nominal transaksi",
     placeholder: String = "0",
     errorMessage: String? = null,
     amountColor: Color = ArusTextPrimary,
@@ -314,7 +314,7 @@ fun ArusAmountHeroInput(
         cornerRadius = 16.dp
     ) {
         Text(
-            text = label.uppercase(),
+            text = label,
             style = ArusTypography.labelMedium,
             color = ArusTextSecondary
         )
@@ -1082,6 +1082,23 @@ data class BarChartEntry(
 )
 
 @Composable
+// K7 (Fase 2): angka sumbu-Y chart yang ringkas ("3 jt", "250 rb", "0").
+private fun formatCompactRupiah(value: Long): String {
+    return when {
+        value >= 1_000_000L -> {
+            val juta = value / 1_000_000.0
+            val angka = if (juta == juta.toLong().toDouble()) {
+                juta.toLong().toString()
+            } else {
+                String.format(Locale("id", "ID"), "%.1f", juta)
+            }
+            "$angka jt"
+        }
+        value >= 1_000L -> "${value / 1_000} rb"
+        else -> value.toString()
+    }
+}
+
 fun ArusBarChart(
     entries: List<BarChartEntry>,
     modifier: Modifier = Modifier
@@ -1119,23 +1136,35 @@ fun ArusBarChart(
             }
         } else {
             val maxVal = entries.maxOf { maxOf(it.incomeAmount, it.expenseAmount) }.coerceAtLeast(1L)
+            // K7 (Fase 2): label sumbu-Y di kanan, mengikuti Bevel.
+            val yLabels = listOf(maxVal, maxVal * 2 / 3, maxVal / 3, 0L)
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.Bottom
             ) {
-                entries.forEach { entry ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Bottom,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clickable { selectedEntry = if (selectedEntry == entry) null else entry }
-                    ) {
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    entries.forEach { entry ->
+                        // K7 (Fase 2): batang tak terpilih meredup (opacity
+                        // 0.45), yang terpilih tetap penuh — pola Bevel.
+                        val isDimmed = selectedEntry != null && selectedEntry != entry
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Bottom,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .alpha(if (isDimmed) 0.45f else 1f)
+                                .clickable { selectedEntry = if (selectedEntry == entry) null else entry }
+                        ) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                             verticalAlignment = Alignment.Bottom,
@@ -1166,6 +1195,30 @@ fun ArusBarChart(
                             maxLines = 1
                         )
                     }
+                }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Column(
+                    modifier = Modifier.fillMaxHeight(),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        yLabels.forEach { value ->
+                            Text(
+                                text = formatCompactRupiah(value),
+                                style = ArusTypography.labelSmall,
+                                color = ArusTextSecondary,
+                                textAlign = TextAlign.End
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    // Penjaga tinggi: samakan dengan baris label sumbu-X.
+                    Text(text = "", style = ArusTypography.labelSmall)
                 }
             }
 
@@ -1215,6 +1268,53 @@ fun ArusBarChart(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+        }
+    }
+}
+
+// ============================================================================
+// ARUS SNACKBAR (Fase 2, Fb1 + plan §6.2) — pill hitam + aksi "Lihat"
+// putih Bold. Dipakai lewat slot `snackbar` SnackbarHost di
+// ArusNavigation.kt; perilaku (pesan, aksi, durasi Short) tidak berubah.
+// ============================================================================
+
+@Composable
+fun ArusSnackbar(
+    message: String,
+    actionLabel: String?,
+    onAction: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .clip(PillShape)
+            .background(ArusBrandPrimary)
+            .clickable { onDismiss() }
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_check),
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text = message,
+            style = ArusTypography.labelLarge,
+            color = Color.White,
+            modifier = Modifier.weight(1f, fill = false)
+        )
+        if (actionLabel != null) {
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = actionLabel,
+                style = ArusTypography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                color = Color.White,
+                modifier = Modifier.clickable { onAction() }
+            )
         }
     }
 }
@@ -3042,37 +3142,25 @@ fun ArusTransactionDetailSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 4. Action Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            // 4. Action Buttons — D5 opsi B (Bevel): "Ubah" hitam penuh +
+            // "Hapus" teks merah di bawahnya; "Tutup" via drag/scrim/back.
+            ArusPrimaryButton(
+                text = "Ubah",
+                onClick = {
+                    onEditClick()
+                    onDismiss()
+                }
+            )
+            TextButton(
+                onClick = {
+                    onDeleteClick()
+                    onDismiss()
+                }
             ) {
-                ArusSecondaryButton(
-                    text = "Tutup",
-                    onClick = onDismiss,
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(horizontal = 12.dp)
-                )
-                ArusSecondaryButton(
-                    text = "Ubah",
-                    onClick = {
-                        onEditClick()
-                        onDismiss()
-                    },
-                    modifier = Modifier.weight(1f),
-                    iconResId = R.drawable.fa_pen,
-                    contentPadding = PaddingValues(horizontal = 12.dp)
-                )
-                // P1-8: aksi destruktif memakai merah, bukan CTA primer hitam.
-                ArusDestructiveButton(
+                Text(
                     text = "Hapus",
-                    onClick = {
-                        onDeleteClick()
-                        onDismiss()
-                    },
-                    modifier = Modifier.weight(1f),
-                    iconResId = R.drawable.fa_trash_can,
-                    contentPadding = PaddingValues(horizontal = 12.dp)
+                    style = ArusTypography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                    color = ArusExpense
                 )
             }
         }

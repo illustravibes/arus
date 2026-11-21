@@ -1636,7 +1636,7 @@ enum class ArusActionPillStyle { NEUTRAL, DESTRUCTIVE }
 
 @Composable
 fun ArusActionPill(
-    text: String,
+    text: String? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     style: ArusActionPillStyle = ArusActionPillStyle.NEUTRAL,
@@ -1651,37 +1651,56 @@ fun ArusActionPill(
         ArusActionPillStyle.NEUTRAL -> ArusBrandPrimary
         ArusActionPillStyle.DESTRUCTIVE -> ArusExpense
     }
-    // Border tegas supaya tepi kapsul terbaca di atas kartu putih (gaya SwiftUI).
+    // Border tegas supaya tepi tombol terbaca di atas kartu putih (gaya SwiftUI).
     val borderColor = when (style) {
         ArusActionPillStyle.NEUTRAL -> ArusBorder
         ArusActionPillStyle.DESTRUCTIVE -> Color(0xFFF6C9D4)
     }
-    Row(
-        modifier = modifier
-            .heightIn(min = 48.dp)
-            .clip(PillShape)
-            .background(backgroundColor)
-            .border(1.dp, borderColor, PillShape)
-            .clickable(enabled = enabled) { onClick() }
-            .alpha(if (enabled) 1f else 0.4f)
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        if (iconResId != null) {
-            Icon(
-                painter = painterResource(id = iconResId),
-                contentDescription = null,
-                tint = contentColor,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(6.dp))
+    val shape = if (text == null) CircleShape else PillShape
+    val buttonModifier = modifier
+        .clip(shape)
+        .background(backgroundColor)
+        .border(1.dp, borderColor, shape)
+        .clickable(enabled = enabled) { onClick() }
+        .alpha(if (enabled) 1f else 0.4f)
+    if (text == null) {
+        // Ikon saja: tombol bulat 48dp ala SwiftUI (tanpa label).
+        Box(
+            modifier = buttonModifier.size(48.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (iconResId != null) {
+                Icon(
+                    painter = painterResource(id = iconResId),
+                    contentDescription = null,
+                    tint = contentColor,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
-        Text(
-            text = text,
-            style = ArusTypography.labelLarge,
-            color = contentColor
-        )
+    } else {
+        Row(
+            modifier = buttonModifier
+                .heightIn(min = 48.dp)
+                .padding(horizontal = 16.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (iconResId != null) {
+                Icon(
+                    painter = painterResource(id = iconResId),
+                    contentDescription = null,
+                    tint = contentColor,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+            }
+            Text(
+                text = text,
+                style = ArusTypography.labelLarge,
+                color = contentColor
+            )
+        }
     }
 }
 

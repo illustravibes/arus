@@ -185,11 +185,7 @@ fun HomeContent(
 
         // 5. Wallet Carousel Section
         item {
-            ArusSectionHeader(
-                title = "Daftar Dompet",
-                actionText = "Kelola",
-                onActionClick = onNavigateToWalletManagement
-            )
+            ArusSectionHeader(title = "Daftar Dompet")
         }
         item {
         if (uiState.wallets.isEmpty()) {

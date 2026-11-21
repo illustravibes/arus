@@ -106,14 +106,12 @@ fun WalletScreen(
 
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 ArusActionPill(
-                                    text = "Edit",
                                     onClick = { viewModel.openEditDialog(wallet) },
                                     iconResId = R.drawable.fa_pen
                                 )
 
                                 if (uiState.wallets.size > 1) {
                                     ArusActionPill(
-                                        text = "Hapus",
                                         onClick = { walletToDelete = wallet },
                                         style = ArusActionPillStyle.DESTRUCTIVE,
                                         iconResId = R.drawable.fa_trash_can

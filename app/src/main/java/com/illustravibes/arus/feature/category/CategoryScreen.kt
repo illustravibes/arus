@@ -104,7 +104,6 @@ fun CategoryScreen(
                             }
 
                             ArusActionPill(
-                                text = "Arsipkan",
                                 onClick = { categoryToArchive = category },
                                 style = ArusActionPillStyle.NEUTRAL,
                                 iconResId = R.drawable.fa_box_archive
@@ -147,7 +146,6 @@ fun CategoryScreen(
                                     )
                                 }
                                 ArusActionPill(
-                                    text = "Pulihkan",
                                     onClick = { viewModel.unarchiveCategory(category) },
                                     iconResId = R.drawable.fa_arrow_rotate_left
                                 )

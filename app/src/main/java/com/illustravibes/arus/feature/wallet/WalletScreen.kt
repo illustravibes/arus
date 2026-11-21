@@ -113,22 +113,27 @@ fun WalletScreen(
                                 }
                             }
 
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                ArusActionPill(
-                                    text = "Edit",
-                                    onClick = { viewModel.openEditDialog(wallet) },
-                                    iconResId = R.drawable.fa_pen
-                                )
-
-                                if (uiState.wallets.size > 1) {
-                                    ArusActionPill(
-                                        text = "Hapus",
-                                        onClick = { walletToDelete = wallet },
-                                        style = ArusActionPillStyle.DESTRUCTIVE,
-                                        iconResId = R.drawable.fa_trash_can
+                            ArusOverflowMenu(
+                                items = buildList {
+                                    add(
+                                        ArusOverflowMenuItem(
+                                            label = "Edit",
+                                            iconResId = R.drawable.fa_pen,
+                                            onClick = { viewModel.openEditDialog(wallet) }
+                                        )
                                     )
+                                    if (uiState.wallets.size > 1) {
+                                        add(
+                                            ArusOverflowMenuItem(
+                                                label = "Hapus",
+                                                iconResId = R.drawable.fa_trash_can,
+                                                destructive = true,
+                                                onClick = { walletToDelete = wallet }
+                                            )
+                                        )
+                                    }
                                 }
-                            }
+                            )
                         }
                     }
                 }

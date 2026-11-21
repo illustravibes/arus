@@ -1802,6 +1802,72 @@ fun ArusActionPill(
         }
     }
 }
+// Item menu popover (titik tiga).
+class ArusOverflowMenuItem(
+    val label: String,
+    val iconResId: Int,
+    val destructive: Boolean = false,
+    val onClick: () -> Unit
+)
+
+// ============================================================================
+// ARUS OVERFLOW MENU (tombol titik tiga + popover)
+// Dipakai untuk aksi per baris di Kelola Dompet & Kelola Kategori: satu
+// tombol ⋮, popover berisi Edit/Hapus atau Arsipkan/Pulihkan. Menggantikan
+// pill aksi di baris (terlalu ramai); ArusActionPill tetap ada sebagai
+// komponen design system.
+// ============================================================================
+@Composable
+fun ArusOverflowMenu(
+    items: List<ArusOverflowMenuItem>,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = modifier) {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                painter = painterResource(id = R.drawable.fa_ellipsis_vertical),
+                contentDescription = "Opsi lainnya",
+                tint = ArusTextSecondary,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = ArusSurface
+        ) {
+            items.forEachIndexed { index, item ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = item.label,
+                            style = ArusTypography.titleMedium,
+                            color = if (item.destructive) ArusExpense else ArusTextPrimary
+                        )
+                    },
+                    onClick = {
+                        expanded = false
+                        item.onClick()
+                    },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = item.iconResId),
+                            contentDescription = null,
+                            tint = if (item.destructive) ArusExpense else ArusTextPrimary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                )
+                if (index < items.size - 1) {
+                    HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                }
+            }
+        }
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

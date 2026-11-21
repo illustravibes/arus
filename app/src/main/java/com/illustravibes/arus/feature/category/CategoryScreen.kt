@@ -112,11 +112,14 @@ fun CategoryScreen(
                                 )
                             }
 
-                            ArusActionPill(
-                                text = "Arsipkan",
-                                onClick = { categoryToArchive = category },
-                                style = ArusActionPillStyle.NEUTRAL,
-                                iconResId = R.drawable.fa_box_archive
+                            ArusOverflowMenu(
+                                items = listOf(
+                                    ArusOverflowMenuItem(
+                                        label = "Arsipkan",
+                                        iconResId = R.drawable.fa_box_archive,
+                                        onClick = { categoryToArchive = category }
+                                    )
+                                )
                             )
                         }
                     }
@@ -162,10 +165,14 @@ fun CategoryScreen(
                                         overflow = TextOverflow.Ellipsis
                                     )
                                 }
-                                ArusActionPill(
-                                    text = "Pulihkan",
-                                    onClick = { viewModel.unarchiveCategory(category) },
-                                    iconResId = R.drawable.fa_arrow_rotate_left
+                                ArusOverflowMenu(
+                                    items = listOf(
+                                        ArusOverflowMenuItem(
+                                            label = "Pulihkan",
+                                            iconResId = R.drawable.fa_arrow_rotate_left,
+                                            onClick = { viewModel.unarchiveCategory(category) }
+                                        )
+                                    )
                                 )
                             }
                         }

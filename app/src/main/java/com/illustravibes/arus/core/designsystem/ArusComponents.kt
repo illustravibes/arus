@@ -408,7 +408,8 @@ fun ArusPropertySelectorRow(
     placeholder: String = "Pilih",
     logoResId: Int? = null,
     inCard: Boolean = false,
-    valueOnLeft: Boolean = false
+    valueOnLeft: Boolean = false,
+    badgeText: String? = null
 ) {
     Row(
         modifier = modifier
@@ -465,6 +466,21 @@ fun ArusPropertySelectorRow(
                 tint = ArusTextSecondary,
                 modifier = Modifier.size(12.dp)
             )
+        } else if (badgeText != null) {
+            // Badge jumlah (tanpa chevron): pill abu netral berisi angka.
+            Box(
+                modifier = Modifier
+                    .clip(PillShape)
+                    .background(ArusBrandSoft)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = badgeText,
+                    style = ArusTypography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                    color = ArusTextPrimary
+                )
+            }
         } else {
             Row(
                 verticalAlignment = Alignment.CenterVertically

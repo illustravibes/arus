@@ -152,6 +152,15 @@ fun DesignSystemShowcaseScreen() {
                     tileColor = NotionCoralSoft,
                     iconTint = NotionCoral
                 )
+                ArusPropertySelectorRow(
+                    label = "Kelola Dompet",
+                    selectedValue = "",
+                    badgeText = "3",
+                    onClick = { showSelectionSheet = true },
+                    iconResId = R.drawable.fa_wallet,
+                    tileColor = NotionSkySoft,
+                    iconTint = NotionSky
+                )
 
                 // Section 4: Segmented Control & Bar Chart
                 Text(text = "Laporan & Grafik (Canvas Dual Bar Chart)", style = ArusTypography.titleLarge)

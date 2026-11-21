@@ -105,7 +105,8 @@ fun SettingsScreen(
             ArusCard {
                 ArusPropertySelectorRow(
                     label = "Kelola Dompet",
-                    selectedValue = "${uiState.wallets.size} Dompet",
+                    selectedValue = "",
+                    badgeText = "${uiState.wallets.size}",
                     onClick = onNavigateToWalletManagement,
                     iconResId = R.drawable.fa_wallet,
                     tileColor = NotionSkySoft,
@@ -115,7 +116,8 @@ fun SettingsScreen(
                 HorizontalDivider(color = ArusBorder, thickness = 1.dp)
                 ArusPropertySelectorRow(
                     label = "Kelola Kategori",
-                    selectedValue = "${uiState.categories.size} Kategori",
+                    selectedValue = "",
+                    badgeText = "${uiState.categories.size}",
                     onClick = onNavigateToCategoryManagement,
                     iconResId = R.drawable.fa_tags,
                     tileColor = NotionMintSoft,

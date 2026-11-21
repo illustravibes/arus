@@ -166,12 +166,15 @@ fun ArusSecondaryButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    iconResId: Int? = null,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding
 ) {
     OutlinedButton(
         onClick = onClick,
         enabled = enabled,
         shape = PillShape,
+        contentPadding = contentPadding,
         border = ButtonDefaults.outlinedButtonBorder.copy(
             brush = androidx.compose.ui.graphics.SolidColor(Color(0xFFD3D9E4))
         ),
@@ -183,13 +186,27 @@ fun ArusSecondaryButton(
             .fillMaxWidth()
             .height(48.dp)
     ) {
-        Text(
-            text = text,
-            style = ArusTypography.titleMedium.copy(
-                fontWeight = FontWeight.SemiBold,
-                color = ArusTextPrimary
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (iconResId != null) {
+                Icon(
+                    painter = painterResource(id = iconResId),
+                    contentDescription = null,
+                    tint = ArusTextPrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            Text(
+                text = text,
+                style = ArusTypography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = ArusTextPrimary
+                )
             )
-        )
+        }
     }
 }
 
@@ -199,12 +216,14 @@ fun ArusDestructiveButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    iconResId: Int? = null
+    iconResId: Int? = null,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding
 ) {
     Button(
         onClick = onClick,
         enabled = enabled,
         shape = PillShape,
+        contentPadding = contentPadding,
         colors = ButtonDefaults.buttonColors(
             containerColor = ArusExpense,
             contentColor = Color.White,
@@ -2220,6 +2239,7 @@ data class TransactionDetailData(
 fun ArusTransactionDetailSheet(
     data: TransactionDetailData,
     onDeleteClick: () -> Unit,
+    onEditClick: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -2353,7 +2373,18 @@ fun ArusTransactionDetailSheet(
                 ArusSecondaryButton(
                     text = "Tutup",
                     onClick = onDismiss,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 12.dp)
+                )
+                ArusSecondaryButton(
+                    text = "Ubah",
+                    onClick = {
+                        onEditClick()
+                        onDismiss()
+                    },
+                    modifier = Modifier.weight(1f),
+                    iconResId = R.drawable.fa_pen,
+                    contentPadding = PaddingValues(horizontal = 12.dp)
                 )
                 // P1-8: aksi destruktif memakai merah, bukan CTA primer hitam.
                 ArusDestructiveButton(
@@ -2363,7 +2394,8 @@ fun ArusTransactionDetailSheet(
                         onDismiss()
                     },
                     modifier = Modifier.weight(1f),
-                    iconResId = R.drawable.fa_trash_can
+                    iconResId = R.drawable.fa_trash_can,
+                    contentPadding = PaddingValues(horizontal = 12.dp)
                 )
             }
         }

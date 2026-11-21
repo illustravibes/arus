@@ -40,6 +40,7 @@ fun HomeScreen(
     onNavigateToEntry: (typeIndex: Int) -> Unit,
     onNavigateToTransactionHistory: () -> Unit,
     onNavigateToWalletManagement: () -> Unit,
+    onEditTransaction: (TransactionEntity) -> Unit,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
 ) {
@@ -60,6 +61,7 @@ fun HomeScreen(
         onDeleteRequest = { viewModel.onDeleteRequest(it) },
         onConfirmDelete = { viewModel.confirmDelete() },
         onCancelDelete = { viewModel.cancelDelete() },
+        onEditTransaction = onEditTransaction,
         modifier = modifier,
         listState = listState
     )
@@ -76,6 +78,7 @@ fun HomeContent(
     onDeleteRequest: (TransactionEntity) -> Unit = {},
     onConfirmDelete: () -> Unit = {},
     onCancelDelete: () -> Unit = {},
+    onEditTransaction: (TransactionEntity) -> Unit = {},
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
 ) {
@@ -305,6 +308,10 @@ fun HomeContent(
             onDeleteClick = {
                 selectedDetailTx = null
                 onDeleteRequest(tx)
+            },
+            onEditClick = {
+                selectedDetailTx = null
+                onEditTransaction(tx)
             },
             onDismiss = { selectedDetailTx = null }
         )

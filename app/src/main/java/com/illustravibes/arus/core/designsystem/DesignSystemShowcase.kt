@@ -262,6 +262,7 @@ fun DesignSystemShowcaseScreen() {
                             iconTint = NotionCoral
                         ),
                         onDeleteClick = { showDetailSheet = false },
+                        onEditClick = { },
                         onDismiss = { showDetailSheet = false }
                     )
                 }

@@ -21,6 +21,7 @@ import java.util.*
 @Composable
 fun TransactionHistoryScreen(
     viewModel: TransactionHistoryViewModel,
+    onEditTransaction: (TransactionEntity) -> Unit,
     onBackClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
@@ -206,6 +207,10 @@ fun TransactionHistoryScreen(
                 onDeleteClick = {
                     selectedDetailTx = null
                     viewModel.onDeleteRequest(tx)
+                },
+                onEditClick = {
+                    selectedDetailTx = null
+                    onEditTransaction(tx)
                 },
                 onDismiss = { selectedDetailTx = null }
             )

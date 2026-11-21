@@ -15,6 +15,10 @@ class TransactionRepository(private val db: ArusDatabase) {
         return db.transactionDao().getTransactionById(id)
     }
 
+    suspend fun updateTransaction(transaction: TransactionEntity) {
+        db.transactionDao().updateTransaction(transaction)
+    }
+
     suspend fun addIncome(
         amount: Long,
         dateMillis: Long,

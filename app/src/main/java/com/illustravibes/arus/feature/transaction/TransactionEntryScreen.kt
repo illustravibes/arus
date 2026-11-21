@@ -3,7 +3,14 @@ package com.illustravibes.arus.feature.transaction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -14,6 +21,7 @@ import com.illustravibes.arus.feature.home.parseHexColor
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionEntryScreen(
     viewModel: TransactionEntryViewModel,
@@ -26,6 +34,7 @@ fun TransactionEntryScreen(
     var showWalletSheet by remember { mutableStateOf(false) }
     var showTargetWalletSheet by remember { mutableStateOf(false) }
     var showCategorySheet by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
 
     // Nominal pakai keyboard sistem (numerik). Keypad in-app
     // (ArusKeypadView) disimpan untuk input yang memang fokus nominal,
@@ -40,10 +49,10 @@ fun TransactionEntryScreen(
     Scaffold(
         topBar = {
             ArusTopAppBar(
-                title = when (uiState.typeIndex) {
-                    0 -> "Catat Pemasukan"
-                    1 -> "Catat Pengeluaran"
-                    else -> "Catat Transfer"
+                title = (if (uiState.editTransactionId != null) "Ubah " else "Catat ") + when (uiState.typeIndex) {
+                    0 -> "Pemasukan"
+                    1 -> "Pengeluaran"
+                    else -> "Transfer"
                 },
                 showBackButton = true,
                 onBackClick = onBackClick
@@ -137,6 +146,16 @@ fun TransactionEntryScreen(
                 )
             }
 
+            // 3b. Tanggal transaksi (bisa diubah; maks. hari ini).
+            ArusPropertySelectorRow(
+                label = "Tanggal",
+                selectedValue = SimpleDateFormat("EEEE, d MMMM yyyy", Locale("id", "ID")).format(Date(uiState.dateMillis)),
+                onClick = { showDatePicker = true },
+                iconResId = R.drawable.fa_calendar,
+                tileColor = NotionSkySoft.copy(alpha = 0.15f),
+                iconTint = NotionSky
+            )
+
             // 4. Note Field
             ArusTextField(
                 value = uiState.note,
@@ -153,7 +172,7 @@ fun TransactionEntryScreen(
                 if (uiState.typeIndex == 2) uiState.selectedTargetWallet != null
                 else uiState.selectedCategory != null
             ArusPrimaryButton(
-                text = "Simpan Transaksi",
+                text = if (uiState.editTransactionId != null) "Simpan Perubahan" else "Simpan Transaksi",
                 onClick = { viewModel.saveTransaction() },
                 enabled = isFormValid
             )
@@ -225,6 +244,50 @@ fun TransactionEntryScreen(
                 },
                 onDismiss = { showCategorySheet = false }
             )
+        }
+
+        // Pemilih tanggal (maks. hari ini — transaksi masa depan tidak
+        // masuk saldo). DatePicker bekerja dalam UTC, jadi tanggal lokal
+        // dikonversi ke tengah malam UTC sebelum diserahkan ke picker.
+        if (showDatePicker) {
+            val initialPickerMillis = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+                val local = Calendar.getInstance().apply { timeInMillis = uiState.dateMillis }
+                set(Calendar.YEAR, local.get(Calendar.YEAR))
+                set(Calendar.MONTH, local.get(Calendar.MONTH))
+                set(Calendar.DAY_OF_MONTH, local.get(Calendar.DAY_OF_MONTH))
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+            val datePickerState = rememberDatePickerState(
+                initialSelectedDateMillis = initialPickerMillis,
+                selectableDates = object : SelectableDates {
+                    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                        val endOfToday = Calendar.getInstance().apply {
+                            set(Calendar.HOUR_OF_DAY, 23)
+                            set(Calendar.MINUTE, 59)
+                            set(Calendar.SECOND, 59)
+                            set(Calendar.MILLISECOND, 999)
+                        }.timeInMillis
+                        return utcTimeMillis <= endOfToday
+                    }
+                }
+            )
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        datePickerState.selectedDateMillis?.let { viewModel.onDatePicked(it) }
+                        showDatePicker = false
+                    }) { Text("Pilih") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) { Text("Batal") }
+                }
+            ) {
+                DatePicker(state = datePickerState)
+            }
         }
     }
 }

@@ -65,7 +65,7 @@ sealed class ArusScreen {
     data object Settings : ArusScreen()
     data object WalletManagement : ArusScreen()
     data object CategoryManagement : ArusScreen()
-    data class TransactionEntry(val initialTypeIndex: Int = 1) : ArusScreen()
+    data class TransactionEntry(val initialTypeIndex: Int = 1, val editTransactionId: Long? = null, val returnToHistory: Boolean = false) : ArusScreen()
 }
 
 /**
@@ -81,7 +81,7 @@ private val ArusScreenSaver = Saver<ArusScreen, String>(
             is ArusScreen.Settings -> "settings"
             is ArusScreen.WalletManagement -> "wallet"
             is ArusScreen.CategoryManagement -> "category"
-            is ArusScreen.TransactionEntry -> "entry:${screen.initialTypeIndex}"
+            is ArusScreen.TransactionEntry -> "entry:${screen.initialTypeIndex}:${screen.editTransactionId ?: "-"}${if (screen.returnToHistory) ":h" else ""}"
         }
     },
     restore = { value ->
@@ -92,7 +92,14 @@ private val ArusScreenSaver = Saver<ArusScreen, String>(
             value == "settings" -> ArusScreen.Settings
             value == "wallet" -> ArusScreen.WalletManagement
             value == "category" -> ArusScreen.CategoryManagement
-            value.startsWith("entry:") -> ArusScreen.TransactionEntry(value.removePrefix("entry:").toIntOrNull() ?: 1)
+            value.startsWith("entry:") -> {
+                val parts = value.removePrefix("entry:").split(":")
+                ArusScreen.TransactionEntry(
+                    initialTypeIndex = parts.getOrNull(0)?.toIntOrNull() ?: 1,
+                    editTransactionId = parts.getOrNull(1)?.toLongOrNull(),
+                    returnToHistory = parts.getOrNull(2) == "h"
+                )
+            }
             else -> ArusScreen.Home
         }
     }
@@ -175,7 +182,13 @@ fun ArusAppShell() {
                 currentScreen = ArusScreen.Settings
             }
             is ArusScreen.TransactionEntry -> {
-                currentScreen = ArusScreen.Home
+                val entry = currentScreen as ArusScreen.TransactionEntry
+                if (entry.returnToHistory) {
+                    selectedTab = ArusTab.TRANSAKSI
+                    currentScreen = ArusScreen.TransactionHistory
+                } else {
+                    currentScreen = ArusScreen.Home
+                }
             }
             else -> {
                 selectedTab = ArusTab.BERANDA
@@ -239,6 +252,10 @@ fun ArusAppShell() {
                                 walletOpenedFromHome = true
                                 currentScreen = ArusScreen.WalletManagement
                             },
+                            onEditTransaction = { tx ->
+                                entrySession++
+                                currentScreen = ArusScreen.TransactionEntry(typeIndexOf(tx.type), editTransactionId = tx.id)
+                            },
                             listState = homeListState
                         )
                     }
@@ -246,6 +263,10 @@ fun ArusAppShell() {
                     is ArusScreen.TransactionHistory -> {
                         TransactionHistoryScreen(
                             viewModel = historyViewModel,
+                            onEditTransaction = { tx ->
+                                entrySession++
+                                currentScreen = ArusScreen.TransactionEntry(typeIndexOf(tx.type), editTransactionId = tx.id, returnToHistory = true)
+                            },
                             listState = historyListState
                         )
                     }
@@ -307,21 +328,31 @@ fun ArusAppShell() {
                     is ArusScreen.TransactionEntry -> {
                         val entryViewModel: TransactionEntryViewModel = viewModel(
                             key = "entry-$entrySession",
-                            factory = viewModelFactory { initializer { TransactionEntryViewModel(walletRepository, categoryRepository, transactionRepository, screen.initialTypeIndex) } }
+                            factory = viewModelFactory { initializer { TransactionEntryViewModel(walletRepository, categoryRepository, transactionRepository, screen.initialTypeIndex, screen.editTransactionId) } }
                         )
                         TransactionEntryScreen(
                             viewModel = entryViewModel,
                             onBackClick = {
-                                currentScreen = ArusScreen.Home
+                                if (screen.returnToHistory) {
+                                    selectedTab = ArusTab.TRANSAKSI
+                                    currentScreen = ArusScreen.TransactionHistory
+                                } else {
+                                    currentScreen = ArusScreen.Home
+                                }
                             },
                             onSaveSuccess = { savedAmount ->
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                selectedTab = ArusTab.BERANDA
-                                currentScreen = ArusScreen.Home
+                                if (screen.returnToHistory) {
+                                    selectedTab = ArusTab.TRANSAKSI
+                                    currentScreen = ArusScreen.TransactionHistory
+                                } else {
+                                    selectedTab = ArusTab.BERANDA
+                                    currentScreen = ArusScreen.Home
+                                }
                                 coroutineScope.launch {
                                     snackbarHostState.currentSnackbarData?.dismiss()
                                     val result = snackbarHostState.showSnackbar(
-                                        message = "Transaksi ${savedAmount.formatRupiah()} tersimpan",
+                                        message = "Transaksi ${savedAmount.formatRupiah()} " + if (screen.editTransactionId != null) "diperbarui" else "tersimpan",
                                         actionLabel = "Lihat",
                                         duration = SnackbarDuration.Short
                                     )
@@ -369,6 +400,12 @@ fun ArusAppShell() {
             )
         }
     }
+}
+
+private fun typeIndexOf(type: String): Int = when (type) {
+    "INCOME" -> 0
+    "TRANSFER" -> 2
+    else -> 1
 }
 
 /** Layar subpage (punya back, tanpa bottom bar) vs layar tab utama. */

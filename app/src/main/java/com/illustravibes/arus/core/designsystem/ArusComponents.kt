@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -340,7 +342,8 @@ fun ArusTextField(
     placeholder: String = "",
     isCurrency: Boolean = false,
     errorMessage: String? = null,
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
+    showClearButton: Boolean = false
 ) {
     val displayValue = if (isCurrency) {
         androidx.compose.runtime.remember(value) { formatInputRupiah(value) }
@@ -389,6 +392,21 @@ fun ArusTextField(
                 KeyboardOptions(keyboardType = KeyboardType.Number)
             } else KeyboardOptions.Default,
             singleLine = singleLine,
+            trailingIcon = if (showClearButton && value.isNotEmpty()) {
+                {
+                    IconButton(
+                        onClick = { onValueChange("") },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_close),
+                            contentDescription = "Hapus pencarian",
+                            tint = ArusTextSecondary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            } else null,
             isError = errorMessage != null,
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
@@ -457,7 +475,7 @@ fun ArusChip(
 
     Box(
         modifier = modifier
-            .heightIn(min = 42.dp)
+            .heightIn(min = 48.dp)
             .clip(PillShape)
             .background(backgroundColor)
             .border(1.dp, borderColor, PillShape)
@@ -510,20 +528,28 @@ fun ArusStatCard(
                 color = ArusTextSecondary
             )
             if (showEyeButton && onToggleHideBalance != null) {
+                // P1-1: area sentuh 48dp, lingkaran visual tetap 32dp.
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(48.dp)
                         .clip(CircleShape)
-                        .background(ArusBrandSoft)
                         .clickable { onToggleHideBalance() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        painter = painterResource(id = if (isBalanceHidden) R.drawable.fa_eye_slash else R.drawable.fa_eye),
-                        contentDescription = if (isBalanceHidden) "Tampilkan Saldo" else "Sembunyikan Saldo",
-                        tint = ArusBrandPrimary,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(ArusBrandSoft),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = if (isBalanceHidden) R.drawable.fa_eye_slash else R.drawable.fa_eye),
+                            contentDescription = if (isBalanceHidden) "Tampilkan Saldo" else "Sembunyikan Saldo",
+                            tint = ArusBrandPrimary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
         }
@@ -751,17 +777,25 @@ fun ArusBarChart(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (entries.isEmpty()) {
-            Box(
+        if (entries.isEmpty() || entries.all { it.incomeAmount == 0L && it.expenseAmount == 0L }) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(160.dp),
-                contentAlignment = Alignment.Center
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = "Belum ada data laporan",
+                    style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = ArusTextPrimary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Catat transaksi pertamamu untuk melihat grafik di sini.",
                     style = ArusTypography.bodyMedium,
-                    color = ArusTextSecondary
+                    color = ArusTextSecondary,
+                    textAlign = TextAlign.Center
                 )
             }
         } else {
@@ -787,7 +821,7 @@ fun ArusBarChart(
                             verticalAlignment = Alignment.Bottom,
                             modifier = Modifier.weight(1f)
                         ) {
-                            val incomeRatio = (entry.incomeAmount.toFloat() / maxVal).coerceIn(0.05f, 1f)
+                            val incomeRatio = (entry.incomeAmount.toFloat() / maxVal).coerceIn(0f, 1f)
                             Box(
                                 modifier = Modifier
                                     .width(12.dp)
@@ -795,7 +829,7 @@ fun ArusBarChart(
                                     .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
                                     .background(ArusIncome)
                             )
-                            val expenseRatio = (entry.expenseAmount.toFloat() / maxVal).coerceIn(0.05f, 1f)
+                            val expenseRatio = (entry.expenseAmount.toFloat() / maxVal).coerceIn(0f, 1f)
                             Box(
                                 modifier = Modifier
                                     .width(12.dp)
@@ -868,22 +902,30 @@ fun ArusTopAppBar(
         },
         navigationIcon = {
             if (showBackButton && onBackClick != null) {
+                // P1-1: area sentuh 48dp, tombol visual tetap 40dp.
                 Box(
                     modifier = Modifier
-                        .padding(start = 12.dp)
-                        .size(40.dp)
+                        .padding(start = 4.dp)
+                        .size(48.dp)
                         .clip(CircleShape)
-                        .background(ArusSurface)
-                        .border(1.dp, ArusBorder, CircleShape)
                         .clickable { onBackClick() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_arrow_left),
-                        contentDescription = "Kembali",
-                        tint = ArusTextPrimary,
-                        modifier = Modifier.size(18.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(ArusSurface)
+                            .border(1.dp, ArusBorder, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_arrow_left),
+                            contentDescription = "Kembali",
+                            tint = ArusTextPrimary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
         },
@@ -1132,14 +1174,23 @@ fun ArusSectionHeader(
             color = ArusTextPrimary
         )
         if (actionText != null && onActionClick != null) {
-            Text(
-                text = actionText,
-                style = ArusTypography.labelLarge.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    color = ArusBrandPrimary
-                ),
-                modifier = Modifier.clickable { onActionClick() }
-            )
+            // P1-1: area sentuh 48dp untuk aksi header.
+            Box(
+                modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .clip(PillShape)
+                    .clickable { onActionClick() }
+                    .padding(horizontal = 8.dp, vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = actionText,
+                    style = ArusTypography.labelLarge.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        color = ArusBrandPrimary
+                    )
+                )
+            }
         }
     }
 }
@@ -1206,7 +1257,8 @@ fun ArusConfirmationSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp),
+                .padding(bottom = 24.dp)
+                .imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (iconResId != null) {
@@ -1290,6 +1342,7 @@ fun ArusActionPill(
     }
     Box(
         modifier = modifier
+            .heightIn(min = 48.dp)
             .clip(PillShape)
             .background(backgroundColor)
             .clickable { onClick() }
@@ -1332,7 +1385,9 @@ fun ArusFormSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp),
+                .padding(bottom = 32.dp)
+                .imePadding()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
@@ -1341,6 +1396,112 @@ fun ArusFormSheet(
                 color = ArusTextPrimary
             )
             content()
+        }
+    }
+}
+
+// ============================================================================
+// P1-5: PEMILIH IKON & WARNA (form tambah dompet/kategori)
+// ============================================================================
+
+val ArusIconOptions: List<Pair<String, Int>> = listOf(
+    "fa_wallet" to R.drawable.fa_wallet,
+    "fa_building_columns" to R.drawable.fa_building_columns,
+    "fa_credit_card" to R.drawable.fa_credit_card,
+    "fa_money_bill" to R.drawable.fa_money_bill,
+    "fa_basket_shopping" to R.drawable.fa_basket_shopping,
+    "fa_utensils" to R.drawable.fa_utensils,
+    "fa_car" to R.drawable.fa_car,
+    "fa_gift" to R.drawable.fa_gift,
+    "fa_heart_pulse" to R.drawable.fa_heart_pulse,
+    "fa_gamepad" to R.drawable.fa_gamepad,
+    "fa_briefcase" to R.drawable.fa_briefcase,
+    "fa_store" to R.drawable.fa_store,
+    "fa_tags" to R.drawable.fa_tags,
+    "fa_receipt" to R.drawable.fa_receipt
+)
+
+val ArusColorOptions: List<String> = listOf(
+    "#FFB110", "#F64932", "#B18164", "#097FE8",
+    "#62AEF0", "#02093A", "#00A86B", "#8B5CF6"
+)
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ArusIconPicker(
+    selectedIcon: String,
+    onIconChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FlowRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        maxItemsInEachRow = 6
+    ) {
+        ArusIconOptions.forEach { (iconName, iconResId) ->
+            val isSelected = iconName == selectedIcon
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(SoftTileShape)
+                    .background(if (isSelected) ArusBrandPrimary else ArusBrandSoft)
+                    .border(1.dp, if (isSelected) ArusBrandPrimary else ArusBorder, SoftTileShape)
+                    .clickable { onIconChange(iconName) },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = iconResId),
+                    contentDescription = iconName,
+                    tint = if (isSelected) Color.White else ArusTextPrimary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+    }
+}
+
+private fun arusColorFromHex(hex: String, fallback: Color): Color =
+    runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrDefault(fallback)
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ArusColorPicker(
+    selectedColorHex: String,
+    onColorChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FlowRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        maxItemsInEachRow = 8
+    ) {
+        ArusColorOptions.forEach { hex ->
+            val color = arusColorFromHex(hex, NotionSky)
+            val isSelected = hex.equals(selectedColorHex, ignoreCase = true)
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(color)
+                    .border(
+                        2.dp,
+                        if (isSelected) ArusBrandPrimary else Color.Transparent,
+                        CircleShape
+                    )
+                    .clickable { onColorChange(hex) },
+                contentAlignment = Alignment.Center
+            ) {
+                if (isSelected) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_check),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -1387,7 +1548,8 @@ fun ArusPasswordSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp),
+                .padding(bottom = 24.dp)
+                .imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -1545,6 +1707,7 @@ fun ArusSelectionSheet(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 24.dp)
+                .imePadding(),
         ) {
             Text(
                 text = title,
@@ -1686,7 +1849,8 @@ fun ArusTransactionDetailSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp),
+                .padding(bottom = 32.dp)
+                .imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // 1. Notion Soft Tile Icon Badge
@@ -1744,14 +1908,29 @@ fun ArusTransactionDetailSheet(
                     onClick = onDismiss,
                     modifier = Modifier.weight(1f)
                 )
-                ArusPrimaryButton(
-                    text = "Hapus",
+                // P1-8: aksi destruktif memakai merah, bukan CTA primer hitam.
+                Button(
                     onClick = {
                         onDeleteClick()
                         onDismiss()
                     },
-                    modifier = Modifier.weight(1f)
-                )
+                    shape = PillShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ArusExpense,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(54.dp)
+                ) {
+                    Text(
+                        text = "Hapus",
+                        style = ArusTypography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    )
+                }
             }
         }
     }

@@ -4,15 +4,22 @@ import android.net.Uri
 import android.os.Process
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.R
 import com.illustravibes.arus.core.designsystem.*
@@ -135,15 +142,51 @@ fun SettingsScreen(
                 }
             }
 
-            // Pesan hasil backup/restore — sebelumnya tidak pernah ditampilkan.
+            // Pesan hasil backup/restore — ikon status + tombol tutup (P1-11).
             val backupStatusMessage = uiState.backupMessage
             if (backupStatusMessage != null) {
                 ArusCard {
-                    Text(
-                        text = backupStatusMessage,
-                        style = ArusTypography.bodyMedium,
-                        color = if (uiState.isBackupSuccess) ArusIncome else ArusExpense
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (uiState.isBackupSuccess) ArusIncomeSoft else ArusExpenseSoft
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    id = if (uiState.isBackupSuccess) R.drawable.ic_check else R.drawable.ic_alert
+                                ),
+                                contentDescription = null,
+                                tint = if (uiState.isBackupSuccess) ArusIncome else ArusExpense,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = backupStatusMessage,
+                            style = ArusTypography.bodyMedium,
+                            color = if (uiState.isBackupSuccess) ArusIncome else ArusExpense,
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(
+                            onClick = { viewModel.clearBackupMessage() },
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_close),
+                                contentDescription = "Tutup pesan",
+                                tint = ArusTextSecondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
                 }
             }
 

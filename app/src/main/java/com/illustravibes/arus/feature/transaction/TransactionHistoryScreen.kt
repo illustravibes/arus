@@ -57,7 +57,8 @@ fun TransactionHistoryScreen(
                 value = uiState.searchQuery,
                 onValueChange = { query -> viewModel.onSearchChange(query) },
                 label = "Cari Transaksi",
-                placeholder = "Cari nama kategori, catatan, nominal..."
+                placeholder = "Cari nama kategori, catatan, nominal...",
+                showClearButton = true
             )
 
             // 2. Type & Wallet Filter Chips

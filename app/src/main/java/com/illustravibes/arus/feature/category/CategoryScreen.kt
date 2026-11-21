@@ -103,7 +103,7 @@ fun CategoryScreen(
                             ArusActionPill(
                                 text = "Arsipkan",
                                 onClick = { categoryToArchive = category },
-                                style = ArusActionPillStyle.DESTRUCTIVE
+                                style = ArusActionPillStyle.NEUTRAL
                             )
                         }
                     }
@@ -127,7 +127,7 @@ fun CategoryScreen(
                     categoryToArchive = null
                 },
                 onDismiss = { categoryToArchive = null },
-                isDestructive = true
+                isDestructive = false
             )
         }
 
@@ -144,6 +144,26 @@ fun CategoryScreen(
                         label = "Nama Kategori",
                         placeholder = "mis. Kopi & Camilan, Tagihan Listrik",
                         errorMessage = uiState.errorMessage
+                    )
+
+                    Text(
+                        text = "Ikon",
+                        style = ArusTypography.labelLarge,
+                        color = ArusTextPrimary
+                    )
+                    ArusIconPicker(
+                        selectedIcon = uiState.selectedIcon,
+                        onIconChange = { icon -> viewModel.onIconChange(icon) }
+                    )
+
+                    Text(
+                        text = "Warna",
+                        style = ArusTypography.labelLarge,
+                        color = ArusTextPrimary
+                    )
+                    ArusColorPicker(
+                        selectedColorHex = uiState.selectedColorHex,
+                        onColorChange = { hex -> viewModel.onColorChange(hex) }
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))

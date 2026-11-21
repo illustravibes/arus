@@ -163,6 +163,26 @@ fun WalletScreen(
                         isCurrency = true
                     )
 
+                    Text(
+                        text = "Ikon",
+                        style = ArusTypography.labelLarge,
+                        color = ArusTextPrimary
+                    )
+                    ArusIconPicker(
+                        selectedIcon = uiState.selectedIcon,
+                        onIconChange = { icon -> viewModel.onIconChange(icon) }
+                    )
+
+                    Text(
+                        text = "Warna",
+                        style = ArusTypography.labelLarge,
+                        color = ArusTextPrimary
+                    )
+                    ArusColorPicker(
+                        selectedColorHex = uiState.selectedColorHex,
+                        onColorChange = { hex -> viewModel.onColorChange(hex) }
+                    )
+
                     Spacer(modifier = Modifier.height(8.dp))
 
                     ArusPrimaryButton(

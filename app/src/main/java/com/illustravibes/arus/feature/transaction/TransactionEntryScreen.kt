@@ -169,10 +169,15 @@ fun TransactionEntryScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // 5. Submit Button
+            // 5. Submit Button — P1-6: nonaktif sampai input valid.
+            val isFormValid = (uiState.amountInput.toLongOrNull() ?: 0L) > 0 &&
+                uiState.selectedWallet != null &&
+                if (uiState.typeIndex == 2) uiState.selectedTargetWallet != null
+                else uiState.selectedCategory != null
             ArusPrimaryButton(
                 text = "Simpan Transaksi",
-                onClick = { viewModel.saveTransaction() }
+                onClick = { viewModel.saveTransaction() },
+                enabled = isFormValid
             )
 
             Spacer(modifier = Modifier.height(48.dp))

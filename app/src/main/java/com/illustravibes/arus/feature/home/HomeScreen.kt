@@ -329,6 +329,18 @@ fun mapDrawableIcon(iconName: String): Int {
         "fa_heart_pulse" -> R.drawable.fa_heart_pulse
         "fa_gamepad" -> R.drawable.fa_gamepad
         "fa_right_left" -> R.drawable.fa_right_left
+        "fa_credit_card" -> R.drawable.fa_credit_card
+        "fa_store" -> R.drawable.fa_store
+        "fa_briefcase" -> R.drawable.fa_briefcase
+        "fa_graduation_cap" -> R.drawable.fa_graduation_cap
+        "fa_bolt" -> R.drawable.fa_bolt
+        "fa_money_bill_trend_up" -> R.drawable.fa_money_bill_trend_up
+        "fa_arrow_down_to_bracket" -> R.drawable.fa_arrow_down_to_bracket
+        "fa_arrow_up_from_bracket" -> R.drawable.fa_arrow_up_from_bracket
+        "fa_chevron_down" -> R.drawable.fa_chevron_down
+        "fa_eye" -> R.drawable.fa_eye
+        "fa_eye_slash" -> R.drawable.fa_eye_slash
+        "fa_magnifying_glass" -> R.drawable.fa_magnifying_glass
         else -> R.drawable.fa_tags
     }
 }

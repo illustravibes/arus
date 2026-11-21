@@ -65,6 +65,14 @@ class CategoryViewModel(
         _uiState.update { it.copy(nameInput = name, errorMessage = null) }
     }
 
+    fun onIconChange(icon: String) {
+        _uiState.update { it.copy(selectedIcon = icon) }
+    }
+
+    fun onColorChange(colorHex: String) {
+        _uiState.update { it.copy(selectedColorHex = colorHex) }
+    }
+
     fun saveCategory() {
         viewModelScope.launch {
             val state = _uiState.value

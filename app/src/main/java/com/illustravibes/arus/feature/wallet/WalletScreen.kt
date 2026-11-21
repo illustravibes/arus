@@ -1,17 +1,15 @@
 package com.illustravibes.arus.feature.wallet
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.R
@@ -81,16 +79,17 @@ fun WalletScreen(
                             val iconTint = parseHexColor(wallet.colorHex, NotionSky)
                             val tileColor = iconTint.copy(alpha = 0.15f)
 
+                            // Baris dompet: ketuk barisnya untuk buka menu
+                            // Edit/Hapus (tombol ••• dihapus, keputusan user
+                            // 2026-11-21). Nominal dominan di atas, nama
+                            // dompet di bawahnya — sama seperti kartu dompet
+                            // di Beranda.
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .clickable { menuWallet = wallet }
                                     .padding(vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.weight(1f)
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 ArusWalletTile(
                                     logoResId = WalletMasterData.logoResIdForSlug(wallet.logoSlug),
@@ -100,33 +99,23 @@ fun WalletScreen(
                                     size = 40.dp
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
-                                Column {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = wallet.name,
-                                        style = ArusTypography.titleMedium,
+                                        text = calculatedBalance.formatRupiah(),
+                                        style = ArusTypography.titleLarge,
                                         color = ArusTextPrimary,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
-                                        text = calculatedBalance.formatRupiah(),
-                                        style = ArusTypography.titleLarge,
-                                        color = ArusTextPrimary
+                                        text = wallet.name,
+                                        style = ArusTypography.labelMedium,
+                                        color = ArusTextSecondary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
-                            }
-
-IconButton(onClick = { menuWallet = wallet }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.fa_ellipsis_vertical),
-                                    contentDescription = "Opsi lainnya",
-                                    tint = ArusTextSecondary,
-                                    // Viewport ikon 128x512 (1:4) — ukuran ikut rasio supaya
-                                    // titik-titiknya tetap bulat, bukan oval.
-                                    modifier = Modifier.size(width = 6.dp, height = 24.dp)
-                                )
-                            }
                         }
                     }
                 }

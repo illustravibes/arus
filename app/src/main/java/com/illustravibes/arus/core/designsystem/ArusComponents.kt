@@ -60,7 +60,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.illustravibes.arus.R
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
@@ -2323,7 +2325,21 @@ fun ArusDatePickerSheet(
             DatePicker(
                 state = datePickerState,
                 title = null,
-                showModeToggle = false
+                showModeToggle = false,
+                headline = {
+                    // Headline bawaan M3 memakai defaultLocale() (locale sistem
+                    // HP) — bukan state.locale — jadi tetap Inggris. Format
+                    // sendiri dengan id-ID: "Sab, 21 Nov 2026".
+                    val formatted = datePickerState.selectedDateMillis?.let {
+                        SimpleDateFormat("EEE, d MMM yyyy", Locale("id", "ID")).format(Date(it))
+                    } ?: "Pilih tanggal"
+                    Text(
+                        text = formatted,
+                        style = ArusTypography.displayMedium,
+                        color = ArusTextPrimary,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                }
             )
             Spacer(modifier = Modifier.height(16.dp))
             ArusPrimaryButton(

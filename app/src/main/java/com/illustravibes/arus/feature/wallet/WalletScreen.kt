@@ -3,12 +3,15 @@ package com.illustravibes.arus.feature.wallet
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.R
@@ -27,6 +30,7 @@ fun WalletScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     var walletToDelete by remember { mutableStateOf<WalletEntity?>(null) }
+    var menuWallet by remember { mutableStateOf<WalletEntity?>(null) }
 
     Scaffold(
         topBar = {
@@ -113,27 +117,16 @@ fun WalletScreen(
                                 }
                             }
 
-                            ArusOverflowMenu(
-                                items = buildList {
-                                    add(
-                                        ArusOverflowMenuItem(
-                                            label = "Edit",
-                                            iconResId = R.drawable.fa_pen,
-                                            onClick = { viewModel.openEditDialog(wallet) }
-                                        )
-                                    )
-                                    if (uiState.wallets.size > 1) {
-                                        add(
-                                            ArusOverflowMenuItem(
-                                                label = "Hapus",
-                                                iconResId = R.drawable.fa_trash_can,
-                                                destructive = true,
-                                                onClick = { walletToDelete = wallet }
-                                            )
-                                        )
-                                    }
-                                }
-                            )
+IconButton(onClick = { menuWallet = wallet }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.fa_ellipsis_vertical),
+                                    contentDescription = "Opsi lainnya",
+                                    tint = ArusTextSecondary,
+                                    // Viewport ikon 128x512 (1:4) — ukuran ikut rasio supaya
+                                    // titik-titiknya tetap bulat, bukan oval.
+                                    modifier = Modifier.size(width = 6.dp, height = 24.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -157,6 +150,34 @@ fun WalletScreen(
                 },
                 onDismiss = { walletToDelete = null },
                 isDestructive = true
+            )
+        }
+
+        // Action Sheet (bottom sheet ala Notion) untuk satu dompet.
+        if (menuWallet != null) {
+            val targetWallet = menuWallet!!
+            ArusActionSheet(
+                title = targetWallet.name,
+                items = buildList {
+                    add(
+                        ArusActionSheetItem(
+                            label = "Edit",
+                            iconResId = R.drawable.fa_pen,
+                            onClick = { viewModel.openEditDialog(targetWallet) }
+                        )
+                    )
+                    if (uiState.wallets.size > 1) {
+                        add(
+                            ArusActionSheetItem(
+                                label = "Hapus",
+                                iconResId = R.drawable.fa_trash_can,
+                                destructive = true,
+                                onClick = { walletToDelete = targetWallet }
+                            )
+                        )
+                    }
+                },
+                onDismissRequest = { menuWallet = null }
             )
         }
 

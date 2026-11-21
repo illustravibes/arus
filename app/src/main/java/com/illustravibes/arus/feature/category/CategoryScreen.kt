@@ -3,12 +3,15 @@ package com.illustravibes.arus.feature.category
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.core.database.entity.CategoryEntity
@@ -26,6 +29,7 @@ fun CategoryScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     var categoryToArchive by remember { mutableStateOf<CategoryEntity?>(null) }
+    var menuCategory by remember { mutableStateOf<CategoryEntity?>(null) }
 
     Scaffold(
         topBar = {
@@ -112,15 +116,16 @@ fun CategoryScreen(
                                 )
                             }
 
-                            ArusOverflowMenu(
-                                items = listOf(
-                                    ArusOverflowMenuItem(
-                                        label = "Arsipkan",
-                                        iconResId = R.drawable.fa_box_archive,
-                                        onClick = { categoryToArchive = category }
+IconButton(onClick = { menuCategory = category }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.fa_ellipsis_vertical),
+                                        contentDescription = "Opsi lainnya",
+                                        tint = ArusTextSecondary,
+                                        // Viewport ikon 128x512 (1:4) — ukuran ikut rasio supaya
+                                        // titik-titiknya tetap bulat, bukan oval.
+                                        modifier = Modifier.size(width = 6.dp, height = 24.dp)
                                     )
-                                )
-                            )
+                                }
                         }
                     }
                 }
@@ -165,15 +170,16 @@ fun CategoryScreen(
                                         overflow = TextOverflow.Ellipsis
                                     )
                                 }
-                                ArusOverflowMenu(
-                                    items = listOf(
-                                        ArusOverflowMenuItem(
-                                            label = "Pulihkan",
-                                            iconResId = R.drawable.fa_arrow_rotate_left,
-                                            onClick = { viewModel.unarchiveCategory(category) }
-                                        )
+IconButton(onClick = { menuCategory = category }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.fa_ellipsis_vertical),
+                                        contentDescription = "Opsi lainnya",
+                                        tint = ArusTextSecondary,
+                                        // Viewport ikon 128x512 (1:4) — ukuran ikut rasio supaya
+                                        // titik-titiknya tetap bulat, bukan oval.
+                                        modifier = Modifier.size(width = 6.dp, height = 24.dp)
                                     )
-                                )
+                                }
                             }
                         }
                     }
@@ -182,6 +188,33 @@ fun CategoryScreen(
 
             Spacer(modifier = Modifier.height(80.dp))
         }
+        }
+
+        // Action Sheet (bottom sheet ala Notion) untuk satu kategori.
+        if (menuCategory != null) {
+            val targetCategory = menuCategory!!
+            val isArchived = uiState.archivedCategories.contains(targetCategory)
+            ArusActionSheet(
+                title = targetCategory.name,
+                items = if (isArchived) {
+                    listOf(
+                        ArusActionSheetItem(
+                            label = "Pulihkan",
+                            iconResId = R.drawable.fa_arrow_rotate_left,
+                            onClick = { viewModel.unarchiveCategory(targetCategory) }
+                        )
+                    )
+                } else {
+                    listOf(
+                        ArusActionSheetItem(
+                            label = "Arsipkan",
+                            iconResId = R.drawable.fa_box_archive,
+                            onClick = { categoryToArchive = targetCategory }
+                        )
+                    )
+                },
+                onDismissRequest = { menuCategory = null }
+            )
         }
 
         // Archive Confirmation Sheet

@@ -1802,8 +1802,8 @@ fun ArusActionPill(
         }
     }
 }
-// Item menu popover (titik tiga).
-class ArusOverflowMenuItem(
+// Item menu aksi (bottom sheet).
+class ArusActionSheetItem(
     val label: String,
     val iconResId: Int,
     val destructive: Boolean = false,
@@ -1811,59 +1811,84 @@ class ArusOverflowMenuItem(
 )
 
 // ============================================================================
-// ARUS OVERFLOW MENU (tombol titik tiga + popover)
-// Dipakai untuk aksi per baris di Kelola Dompet & Kelola Kategori: satu
-// tombol ⋮, popover berisi Edit/Hapus atau Arsipkan/Pulihkan. Menggantikan
-// pill aksi di baris (terlalu ramai); ArusActionPill tetap ada sebagai
-// komponen design system.
+// ARUS ACTION SHEET (bottom sheet aksi ala Notion)
+// Dipakai untuk aksi per baris di Kelola Dompet & Kelola Kategori: tombol ⋮
+// di baris membuka sheet ini. Judul = nama item yang ditindak; opsi-opsi
+// dalam satu ArusCard (pola satu kartu seperti form Catat & Kelola Data),
+// ikon 18dp + teks, Hapus merah. Menggantikan ArusOverflowMenu (popover
+// DropdownMenu M3 yang terasa generik).
 // ============================================================================
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ArusOverflowMenu(
-    items: List<ArusOverflowMenuItem>,
+fun ArusActionSheet(
+    title: String,
+    items: List<ArusActionSheetItem>,
+    onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    Box(modifier = modifier) {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                painter = painterResource(id = R.drawable.fa_ellipsis_vertical),
-                contentDescription = "Opsi lainnya",
-                tint = ArusTextSecondary,
-                // Viewport ikon 128x512 (1:4) — ukuran ikut rasio supaya
-                // titik-titiknya tetap bulat, bukan oval.
-                modifier = Modifier.size(width = 6.dp, height = 24.dp)
+    ModalBottomSheet(
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        onDismissRequest = onDismissRequest,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = ArusSurface,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 12.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(PillShape)
+                    .background(ArusBorder)
             )
-        }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            shape = RoundedCornerShape(16.dp),
-            containerColor = ArusSurface
+        },
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp)
         ) {
-            items.forEachIndexed { index, item ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = item.label,
-                            style = ArusTypography.titleMedium,
-                            color = if (item.destructive) ArusExpense else ArusTextPrimary
-                        )
-                    },
-                    onClick = {
-                        expanded = false
-                        item.onClick()
-                    },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = item.iconResId),
-                            contentDescription = null,
-                            tint = if (item.destructive) ArusExpense else ArusTextPrimary,
-                            modifier = Modifier.size(18.dp)
-                        )
+            Text(
+                text = title,
+                style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = ArusTextPrimary,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            ArusCard {
+                Column {
+                    items.forEachIndexed { index, item ->
+                        if (index > 0) {
+                            HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onDismissRequest()
+                                    item.onClick()
+                                }
+                                .padding(vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(id = item.iconResId),
+                                contentDescription = null,
+                                tint = if (item.destructive) ArusExpense else ArusTextPrimary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = item.label,
+                                style = ArusTypography.titleMedium,
+                                color = if (item.destructive) ArusExpense else ArusTextPrimary
+                            )
+                        }
                     }
-                )
-                if (index < items.size - 1) {
-                    HorizontalDivider(color = ArusBorder, thickness = 1.dp)
                 }
             }
         }

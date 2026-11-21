@@ -42,7 +42,7 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     if (uiState.isLoading) {
-        ArusLoadingState(modifier = modifier)
+        ArusSkeletonLoading(modifier = modifier)
         return
     }
 
@@ -171,7 +171,7 @@ fun HomeContent(
         item {
             ArusSectionHeader(
                 title = "Daftar Dompet",
-                actionText = "Kelola ›",
+                actionText = "Kelola",
                 onActionClick = onNavigateToWalletManagement
             )
         }
@@ -213,7 +213,7 @@ fun HomeContent(
         item {
             ArusSectionHeader(
                 title = "Aktivitas Terbaru",
-                actionText = if (uiState.recentTransactions.isNotEmpty()) "Lihat Semua ›" else null,
+                actionText = if (uiState.recentTransactions.isNotEmpty()) "Lihat Semua" else null,
                 onActionClick = onNavigateToTransactionHistory
             )
         }

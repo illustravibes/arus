@@ -102,7 +102,8 @@ fun TransactionEntryScreen(
             ) {
                 ArusKeypadView(
                     onKeyPress = { key ->
-                        if (uiState.amountInput.length + key.length <= 18) {
+                        // P2-12: maks 15 digit, selaras dengan formatInputRupiah.
+                        if (uiState.amountInput.length + key.length <= 15) {
                             viewModel.onAmountChange(uiState.amountInput + key)
                         }
                     },

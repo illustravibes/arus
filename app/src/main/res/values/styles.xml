@@ -2,7 +2,8 @@
 <resources>
     <style name="Theme.Arus" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">@font/inter_font_family</item>
-        <item name="android:colorAccent">#0009FF</item>
+        <item name="android:colorAccent">#1F2029</item>
+        <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:statusBarColor">#F6F8FE</item>
         <item name="android:navigationBarColor">#F6F8FE</item>

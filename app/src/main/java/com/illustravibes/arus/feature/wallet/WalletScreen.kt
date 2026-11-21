@@ -59,7 +59,8 @@ fun WalletScreen(
             if (uiState.wallets.isEmpty()) {
                 ArusEmptyState(
                     title = "Belum ada dompet",
-                    description = "Tambah dompet pertama Anda dengan tombol di atas."
+                    description = "Tambah dompet pertama Anda dengan tombol di atas.",
+                    iconResId = R.drawable.fa_wallet
                 )
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -129,7 +130,7 @@ fun WalletScreen(
             val targetWallet = walletToDelete!!
             ArusConfirmationSheet(
                 title = "Hapus Dompet Ini?",
-                message = "Seluruh catatan transaksi pada dompet \"${targetWallet.name}\" akan terpengaruh. Lanjutkan?",
+                message = "Dompet \"${targetWallet.name}\" akan dihapus. Transaksi yang memakai dompet ini tetap tersimpan, tetapi tidak lagi terhubung ke dompet mana pun. Lanjutkan?",
                 confirmButtonText = "Ya, Hapus Dompet",
                 onConfirm = {
                     viewModel.deleteWallet(targetWallet)

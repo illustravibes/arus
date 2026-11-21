@@ -119,11 +119,20 @@ class ReportViewModel(
                 calendar.set(Calendar.MINUTE, 0)
                 val startPeriod = calendar.timeInMillis
 
+                // P2-9: label minggu samar "M1"–"M4" diganti rentang tanggal.
+                val dayFormatter = SimpleDateFormat("d", Locale.forLanguageTag("id-ID"))
+                val monthFormatter = SimpleDateFormat("MMM", Locale.forLanguageTag("id-ID"))
                 for (i in 1..4) {
                     val weekStart = calendar.timeInMillis
-                    val label = "M$i"
+                    val weekStartDate = calendar.time
                     calendar.add(Calendar.WEEK_OF_YEAR, 1)
                     val weekEnd = calendar.timeInMillis - 1
+                    val weekEndDate = Date(weekEnd)
+                    val label = if (monthFormatter.format(weekStartDate) == monthFormatter.format(weekEndDate)) {
+                        "${dayFormatter.format(weekStartDate)}–${dayFormatter.format(weekEndDate)} ${monthFormatter.format(weekEndDate)}"
+                    } else {
+                        "${dayFormatter.format(weekStartDate)} ${monthFormatter.format(weekStartDate)}–${dayFormatter.format(weekEndDate)} ${monthFormatter.format(weekEndDate)}"
+                    }
 
                     val income = transactions.filter { it.type == "INCOME" && it.dateMillis in weekStart..weekEnd }.sumOf { it.amount }
                     val expense = transactions.filter { it.type == "EXPENSE" && it.dateMillis in weekStart..weekEnd }.sumOf { it.amount }

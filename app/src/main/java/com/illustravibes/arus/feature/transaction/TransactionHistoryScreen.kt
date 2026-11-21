@@ -40,7 +40,7 @@ fun TransactionHistoryScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         if (uiState.isLoading) {
-            ArusLoadingState()
+            ArusSkeletonLoading(showHero = false, modifier = Modifier.padding(paddingValues))
         } else {
         Column(
             modifier = modifier
@@ -106,7 +106,8 @@ fun TransactionHistoryScreen(
             if (uiState.transactions.isEmpty()) {
                 ArusEmptyState(
                     title = "Tidak ada riwayat",
-                    description = if (uiState.searchQuery.isNotBlank()) "Tidak ditemukan transaksi sesuai pencarian \"${uiState.searchQuery}\"." else "Belum ada riwayat transaksi tersimpan."
+                    description = if (uiState.searchQuery.isNotBlank()) "Tidak ditemukan transaksi sesuai pencarian \"${uiState.searchQuery}\"." else "Belum ada riwayat transaksi tersimpan.",
+                    iconResId = if (uiState.searchQuery.isNotBlank()) R.drawable.fa_magnifying_glass else R.drawable.fa_money_bill
                 )
             } else {
                 val groupedTransactions = groupTransactionsByDate(uiState.transactions)
@@ -147,9 +148,10 @@ fun TransactionHistoryScreen(
                                 TransactionType.TRANSFER -> NotionSkySoft to NotionSky
                             }
 
+                            val wallet = uiState.wallets.find { it.id == tx.walletId }
                             ArusTransactionRow(
                                 title = category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer Antardompet" else "Transaksi",
-                                subtitle = tx.note.orEmpty().ifBlank { "Detail Transaksi" },
+                                subtitle = tx.note.orEmpty().ifBlank { wallet?.name ?: "Dompet" },
                                 amount = tx.amount,
                                 type = txType,
                                 iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),
@@ -185,11 +187,8 @@ fun TransactionHistoryScreen(
             }
 
             val dateText = SimpleDateFormat("EEEE, d MMMM yyyy · HH:mm", Locale.forLanguageTag("id-ID")).format(Date(tx.dateMillis))
-            val walletText = if (txType == TransactionType.TRANSFER && targetWallet != null) {
-                "${wallet?.name ?: "Dompet"} ➔ ${targetWallet.name}"
-            } else {
-                wallet?.name ?: "Dompet"
-            }
+            val walletText = wallet?.name ?: "Dompet"
+            val targetWalletText = if (txType == TransactionType.TRANSFER) targetWallet?.name else null
 
             ArusTransactionDetailSheet(
                 data = TransactionDetailData(
@@ -198,6 +197,7 @@ fun TransactionHistoryScreen(
                     type = txType,
                     dateText = dateText,
                     walletText = walletText,
+                    targetWalletText = targetWalletText,
                     noteText = tx.note,
                     iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),
                     tileColor = tileColor,

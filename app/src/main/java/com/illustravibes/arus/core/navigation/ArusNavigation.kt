@@ -23,7 +23,9 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.core.database.ArusDatabase
 import com.illustravibes.arus.core.database.seed.DatabaseSeedHelper
@@ -65,6 +67,10 @@ sealed class ArusScreen {
 fun ArusAppShell() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    // P2-5: getar singkat pada aksi penting (FAB, ganti tab, sukses simpan).
+    // Keypad sudah punya haptic sejak P0-2. LocalHapticFeedback mengikuti
+    // pengaturan getar sistem (mati bila pengguna mematikan getar).
+    val haptic = LocalHapticFeedback.current
 
     val database = remember { ArusDatabase.getInstance(context) }
     val walletRepository = remember { WalletRepository(database) }
@@ -230,6 +236,7 @@ fun ArusAppShell() {
                                 currentScreen = ArusScreen.Home
                             },
                             onSaveSuccess = { savedAmount ->
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 selectedTab = ArusTab.BERANDA
                                 currentScreen = ArusScreen.Home
                                 coroutineScope.launch {
@@ -256,6 +263,7 @@ fun ArusAppShell() {
                 ArusBottomNavigation(
                     selectedTab = selectedTab,
                     onTabSelected = { tab ->
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         selectedTab = tab
                         currentScreen = when (tab) {
                             ArusTab.BERANDA -> ArusScreen.Home
@@ -265,6 +273,7 @@ fun ArusAppShell() {
                         }
                     },
                     onAddClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         currentScreen = ArusScreen.TransactionEntry(1)
                     },
                     modifier = Modifier.align(Alignment.BottomCenter)

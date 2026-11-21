@@ -1,6 +1,15 @@
 package com.illustravibes.arus.core.designsystem
 
+import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +22,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +36,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -57,7 +68,9 @@ fun Long.formatRupiah(): String {
 }
 
 fun formatInputRupiah(input: String): String {
-    val digits = input.filter { it.isDigit() }
+    // P2-12: batasi 15 digit (maks ~Rp999 triliun) — di atas 19 digit
+    // toLongOrNull() gagal dan tampilan tiba-tiba reset ke 0.
+    val digits = input.filter { it.isDigit() }.take(15)
     if (digits.isEmpty()) return ""
     val amount = digits.toLongOrNull() ?: 0L
     val formatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID"))
@@ -71,7 +84,7 @@ fun formatInputRupiah(input: String): String {
 @Composable
 fun ArusCard(
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 20.dp,
+    cornerRadius: Dp = 24.dp,
     backgroundColor: Color = ArusSurface,
     borderColor: Color = ArusBorder,
     onClick: (() -> Unit)? = null,
@@ -193,13 +206,24 @@ fun ArusAmountHeroInput(
         formatInputRupiah(value)
     }
 
-    var textFieldValueState by androidx.compose.runtime.remember(formattedDisplayValue) {
+    // P2-12: state tidak lagi dibuat ulang tiap `value` berubah (itu yang
+    // selalu melempar kursor ke akhir). Perubahan dari luar (keypad) tetap
+    // disinkronkan lewat LaunchedEffect di bawah, dengan kursor di akhir.
+    var textFieldValueState by androidx.compose.runtime.remember {
         androidx.compose.runtime.mutableStateOf(
             TextFieldValue(
                 text = formattedDisplayValue,
                 selection = TextRange(formattedDisplayValue.length)
             )
         )
+    }
+    androidx.compose.runtime.LaunchedEffect(formattedDisplayValue) {
+        if (textFieldValueState.text != formattedDisplayValue) {
+            textFieldValueState = TextFieldValue(
+                text = formattedDisplayValue,
+                selection = TextRange(formattedDisplayValue.length)
+            )
+        }
     }
 
     ArusCard(
@@ -227,8 +251,30 @@ fun ArusAmountHeroInput(
             BasicTextField(
                 value = textFieldValueState,
                 onValueChange = { newTv ->
-                    textFieldValueState = newTv
-                    val cleanDigits = newTv.text.filter { it.isDigit() }
+                    // P2-12: jaga posisi kursor relatif terhadap digit yang
+                    // diedit — hitung digit sebelum kursor di teks mentah,
+                    // lalu letakkan kursor setelah digit yang sama di teks
+                    // berformat ribuan.
+                    val cleanDigits = newTv.text.filter { it.isDigit() }.take(15)
+                    val formatted = formatInputRupiah(cleanDigits)
+                    val cursor = newTv.selection.start.coerceIn(0, newTv.text.length)
+                    val digitsBeforeCursor = newTv.text.take(cursor).count { it.isDigit() }
+                    var newCursor = formatted.length
+                    if (digitsBeforeCursor == 0) {
+                        newCursor = 0
+                    } else {
+                        var seen = 0
+                        for (i in formatted.indices) {
+                            if (formatted[i].isDigit()) {
+                                seen++
+                                if (seen == digitsBeforeCursor) {
+                                    newCursor = i + 1
+                                    break
+                                }
+                            }
+                        }
+                    }
+                    textFieldValueState = TextFieldValue(text = formatted, selection = TextRange(newCursor))
                     onValueChange(cleanDigits)
                 },
                 modifier = Modifier.fillMaxWidth().onFocusChanged { onFocusChange(it.isFocused) },
@@ -514,7 +560,27 @@ fun ArusStatCard(
         null -> ArusTextPrimary
     }
 
-    val displayAmount = if (isBalanceHidden) "Rp ••••••••" else amount.formatRupiah()
+    // P2-7: angka bergerak halus ke nilai baru saat saldo berubah
+    // (mis. setelah simpan/hapus); diam bila kurangi-animasi aktif.
+    val context = LocalContext.current
+    val animationsEnabled = remember {
+        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
+    }
+    // P2-7 (revisi): animasi lewat progres Float + interpolasi Long, bukan
+    // animateLongAsState (tidak ada di Compose 1.12). Nilai akhir selalu
+    // tepat sama dengan `amount`, berapa pun besarnya.
+    var startAmount by remember { mutableStateOf(amount) }
+    val progress = remember { Animatable(1f) }
+    val animatedAmount = startAmount + ((amount - startAmount) * progress.value).toLong()
+    LaunchedEffect(amount) {
+        if (startAmount != amount) {
+            val from = startAmount + ((amount - startAmount) * progress.value).toLong()
+            startAmount = from
+            progress.snapTo(0f)
+            if (animationsEnabled) progress.animateTo(1f, tween(300)) else progress.snapTo(1f)
+        }
+    }
+    val displayAmount = if (isBalanceHidden) "Rp ••••••••" else animatedAmount.formatRupiah()
 
     ArusCard(modifier = modifier) {
         Row(
@@ -651,8 +717,17 @@ fun ArusSegmentedControl(
         ) {
             options.forEachIndexed { index, option ->
                 val isSelected = index == selectedIndex
-                val backgroundColor = if (isSelected) ArusBrandPrimary else Color.Transparent
-                val textColor = if (isSelected) Color.White else ArusTextSecondary
+                // P2-6: pill hitam bergeser/berubah halus, bukan instan.
+                val backgroundColor by animateColorAsState(
+                    targetValue = if (isSelected) ArusBrandPrimary else Color.Transparent,
+                    animationSpec = tween(200),
+                    label = "seg-bg-$index"
+                )
+                val textColor by animateColorAsState(
+                    targetValue = if (isSelected) Color.White else ArusTextSecondary,
+                    animationSpec = tween(200),
+                    label = "seg-text-$index"
+                )
                 val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
 
                 Box(
@@ -769,6 +844,8 @@ fun ArusBarChart(
     entries: List<BarChartEntry>,
     modifier: Modifier = Modifier
 ) {
+    // P2-9: batang yang diketuk menampilkan nilainya; reset bila data berubah.
+    var selectedEntry by remember(entries) { mutableStateOf<BarChartEntry?>(null) }
     ArusCard(modifier = modifier) {
         Text(
             text = "PERBANDINGAN PEMASUKAN VS PENGELUARAN",
@@ -815,6 +892,7 @@ fun ArusBarChart(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
+                            .clickable { selectedEntry = if (selectedEntry == entry) null else entry }
                     ) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -874,6 +952,26 @@ fun ArusBarChart(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(text = "Pengeluaran", style = ArusTypography.labelSmall, color = ArusTextPrimary)
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            if (selectedEntry != null) {
+                val selected = selectedEntry!!
+                Text(
+                    text = "${selected.label} · Masuk ${selected.incomeAmount.formatRupiah()} · Keluar ${selected.expenseAmount.formatRupiah()}",
+                    style = ArusTypography.labelMedium,
+                    color = ArusTextPrimary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                Text(
+                    text = "Ketuk batang untuk melihat nilai",
+                    style = ArusTypography.labelSmall,
+                    color = ArusTextSecondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
@@ -1086,6 +1184,7 @@ fun ArusEmptyState(
     title: String,
     description: String,
     modifier: Modifier = Modifier,
+    iconResId: Int = R.drawable.fa_money_bill,
     actionButtonText: String? = null,
     onActionClick: (() -> Unit)? = null
 ) {
@@ -1104,7 +1203,7 @@ fun ArusEmptyState(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.fa_money_bill),
+                painter = painterResource(id = iconResId),
                 contentDescription = null,
                 tint = ArusBrandPrimary,
                 modifier = Modifier.size(36.dp)
@@ -1152,6 +1251,86 @@ fun ArusLoadingState(
     }
 }
 
+// P2-4: skeleton placeholder (kartu abu-abu berdenyut) untuk Beranda
+// (showHero = kartu saldo + 2 kartu bulanan) dan Riwayat (tanpa hero,
+// kotak pertama menyerupai kolom pencarian). Diam (abu statis) bila
+// kurangi-animasi aktif di perangkat.
+@Composable
+fun ArusSkeletonLoading(
+    modifier: Modifier = Modifier,
+    showHero: Boolean = true,
+    rows: Int = 5
+) {
+    val context = LocalContext.current
+    val animationsEnabled = remember {
+        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
+    }
+    val pulseAlpha = if (animationsEnabled) {
+        val infiniteTransition = rememberInfiniteTransition(label = "skeleton-pulse")
+        infiniteTransition.animateFloat(
+            initialValue = 0.45f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(tween(900), RepeatMode.Reverse),
+            label = "skeleton-alpha"
+        ).value
+    } else {
+        0.7f
+    }
+    val skeletonColor = ArusBrandSoft.copy(alpha = pulseAlpha)
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Spacer(modifier = Modifier.height(8.dp))
+        if (showHero) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(118.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(skeletonColor)
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(96.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(skeletonColor)
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(96.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(skeletonColor)
+                )
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(skeletonColor)
+            )
+        }
+        repeat(rows) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(skeletonColor)
+            )
+        }
+    }
+}
+
 // ============================================================================
 // 15. ARUS HELPER COMPONENTS (Section Header, Date Header, Confirmation Sheet)
 // ============================================================================
@@ -1183,13 +1362,23 @@ fun ArusSectionHeader(
                     .padding(horizontal = 8.dp, vertical = 12.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = actionText,
-                    style = ArusTypography.labelLarge.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = ArusBrandPrimary
+                // P2-13: chevron sebagai ikon, bukan karakter teks ›.
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = actionText,
+                        style = ArusTypography.labelLarge.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = ArusBrandPrimary
+                        )
                     )
-                )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Icon(
+                        painter = painterResource(id = R.drawable.fa_chevron_right),
+                        contentDescription = null,
+                        tint = ArusBrandPrimary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
         }
     }
@@ -1804,6 +1993,7 @@ data class TransactionDetailData(
     val type: TransactionType,
     val dateText: String,
     val walletText: String,
+    val targetWalletText: String? = null,
     val noteText: String? = null,
     val iconResId: Int = R.drawable.fa_tags,
     val tileColor: Color = NotionSkySoft,
@@ -1894,10 +2084,44 @@ fun ArusTransactionDetailSheet(
             Spacer(modifier = Modifier.height(24.dp))
 
             // 3. Property Details List Card
-            ArusCard(cornerRadius = 20.dp) {
+            ArusCard(cornerRadius = 24.dp) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     DetailRow(label = "Tanggal & Waktu", value = data.dateText)
-                    DetailRow(label = "Dompet", value = data.walletText)
+                    if (data.targetWalletText != null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Dompet",
+                                style = ArusTypography.bodyMedium,
+                                color = ArusTextSecondary
+                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = data.walletText,
+                                    style = ArusTypography.bodyMedium,
+                                    color = ArusTextPrimary
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    painter = painterResource(id = R.drawable.fa_chevron_right),
+                                    contentDescription = null,
+                                    tint = ArusTextSecondary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = data.targetWalletText,
+                                    style = ArusTypography.bodyMedium,
+                                    color = ArusTextPrimary
+                                )
+                            }
+                        }
+                    } else {
+                        DetailRow(label = "Dompet", value = data.walletText)
+                    }
                     if (!data.noteText.isNullOrBlank()) {
                         DetailRow(label = "Catatan", value = data.noteText)
                     }

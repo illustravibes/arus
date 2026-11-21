@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.core.database.entity.CategoryEntity
+import com.illustravibes.arus.R
 import com.illustravibes.arus.core.designsystem.*
 import com.illustravibes.arus.feature.home.mapDrawableIcon
 import com.illustravibes.arus.feature.home.parseHexColor
@@ -67,7 +68,8 @@ fun CategoryScreen(
             if (uiState.categories.isEmpty()) {
                 ArusEmptyState(
                     title = "Belum ada kategori ${if (uiState.selectedTypeTab == "EXPENSE") "pengeluaran" else "pemasukan"}",
-                    description = "Tambah kategori pertama Anda dengan tombol di atas."
+                    description = "Tambah kategori pertama Anda dengan tombol di atas.",
+                    iconResId = R.drawable.fa_tags
                 )
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

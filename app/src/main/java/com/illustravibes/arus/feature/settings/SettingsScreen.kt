@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.illustravibes.arus.BuildConfig
 import com.illustravibes.arus.R
 import com.illustravibes.arus.core.designsystem.*
 
@@ -204,7 +205,7 @@ fun SettingsScreen(
 
             ArusCard {
                 Text(
-                    text = "Arus Android MVP v0.1.0",
+                    text = "Arus Android MVP v${BuildConfig.VERSION_NAME}",
                     style = ArusTypography.titleMedium,
                     color = ArusTextPrimary
                 )

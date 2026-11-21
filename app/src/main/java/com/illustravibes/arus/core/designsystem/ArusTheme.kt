@@ -1,6 +1,5 @@
 package com.illustravibes.arus.core.designsystem
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -168,7 +167,7 @@ val ArusShapes = Shapes(
 )
 
 val SoftTileShape = RoundedCornerShape(14.dp)
-val CardShape = RoundedCornerShape(20.dp)
+val CardShape = RoundedCornerShape(24.dp)
 val LargeCardShape = RoundedCornerShape(24.dp)
 val PillShape = RoundedCornerShape(100.dp)
 
@@ -192,9 +191,10 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun ArusTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
+    // P2-10: Arus tampil terang penuh (light-only) — keputusan eksplisit.
+    // Tidak ada token dark; jangan setengah-setengah (campuran terang/gelap).
     val customColors = ArusCustomColors()
 
     CompositionLocalProvider(

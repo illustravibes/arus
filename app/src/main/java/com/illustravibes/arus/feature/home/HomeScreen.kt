@@ -270,9 +270,10 @@ fun HomeContent(
                                 TransactionType.EXPENSE -> NotionCoralSoft to NotionCoral
                                 TransactionType.TRANSFER -> NotionSkySoft to NotionSky
                             }
+                            val wallet = uiState.wallets.find { it.id == tx.walletId }
                             ArusTransactionRow(
-                                title = category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer Antardompet" else "Transaksi",
-                                subtitle = formatDateSubtitle(tx.dateMillis, tx.note),
+                                title = tx.note.orEmpty().ifBlank { category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer Antardompet" else "Transaksi" },
+                                subtitle = formatTransactionSubtitle(tx.dateMillis, wallet?.name, category?.name, txType),
                                 amount = tx.amount,
                                 type = txType,
                                 iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),
@@ -455,11 +456,17 @@ private fun groupTransactionsByDate(transactions: List<TransactionEntity>): Map<
     }
 }
 
-private fun formatDateSubtitle(dateMillis: Long, note: String?): String {
-    // Jam transaksi (tanggal sudah ada di header kartu harian).
-    val formatter = SimpleDateFormat("HH:mm", Locale.forLanguageTag("id-ID"))
-    val timeString = formatter.format(Date(dateMillis))
-    return if (!note.isNullOrBlank()) "$timeString • $note" else timeString
+// Hierarki baris transaksi: judul = catatan (pengeluaran untuk apa),
+// subtitle = dompet - kategori - jam.
+private fun formatTransactionSubtitle(
+    dateMillis: Long,
+    walletName: String?,
+    categoryName: String?,
+    txType: TransactionType
+): String {
+    val timeString = SimpleDateFormat("HH:mm", Locale.forLanguageTag("id-ID")).format(Date(dateMillis))
+    val categoryText = categoryName ?: if (txType == TransactionType.TRANSFER) "Transfer" else "Transaksi"
+    return "${walletName ?: "Dompet"} - $categoryText - $timeString"
 }
 
 @Preview(showBackground = true, showSystemUi = true)

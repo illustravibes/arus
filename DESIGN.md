@@ -13,14 +13,14 @@ Arus adalah aplikasi Android native, bukan landing page. Jangan mengadopsi hero 
 Hasil audit 587 screenshot referensi lokal (`design/bevel` + `design/notion`) dan semua keputusan user 2026-11-18 s.d. 2026-11-21. Detail audit per komponen ada di rencana design system di `workspace/goals/arus-ready-to-production/files/rencana-design-system-bevel-notion-2026-11-21.md`.
 
 1. **Struktur ikut Bevel.** Satu kartu putih = satu blok konten; kartu-kartu terpisah dengan gap (bukan hairline antar kartu). Radius kartu 16dp, tanpa bayangan berat.
-2. **Pengelompokan di dalam kartu ikut Notion.** Di dalam satu kartu, baris-baris dipisah hairline tipis (`HorizontalDivider`, `ArusBorder`, 1dp): satu kartu per hari, satu kartu form, "Kelola Data", Kelola Dompet/Kategori, action sheet.
+2. **Pengelompokan di dalam kartu ikut Notion.** Di dalam satu kartu, baris-baris dipisah hairline tipis (`HorizontalDivider`, `ArusBorder`, 1dp): satu kartu per hari, "Kelola Data", Kelola Dompet/Kategori, action sheet; form Catat memakai satu kartu per field + label di atasnya.
 3. **CTA ikut Bevel, warna hitam.** Primary = pill hitam penuh `#1A1A1A`, teks putih Bold. Biru Notion tidak dipakai sebagai warna aksi.
 4. **Warna isi ikut palet Notion.** Kategori, tile ikon, dan status memakai palet Notion; semantik uang tetap hijau `#00A86B` (masuk) / merah `#E53935` (keluar).
 5. **Sheet & menu ikut Notion, tombol sheet ikut Bevel.** Bottom sheet: judul tengah + opsi dalam kartu + drag handle pill 36×4dp. Tombol di bawah sheet: primary hitam penuh + tombol teks di bawahnya.
 
 ## Aturan pola (jangan buat pola baru)
 
-- **Satu kartu per kelompok:** setiap daftar berkelompok = satu `ArusCard` + divider antar baris, tanpa pengecualian.
+- **Satu kartu per kelompok:** setiap daftar berkelompok = satu `ArusCard` + divider antar baris — kecuali form Catat: satu kartu per field + label di atasnya (keputusan user 2026-11-21).
 - **Hitam-putih murni (2026-11-21):** latar `#FFFFFF`, kartu `#FFFFFF` (pemisah = border 1dp `#E5E5E5`), teks `#1A1A1A`/`#616161`, abu pendukung `#F0F0F0`; tidak ada tint biru di latar/kartu/border. Tile ikon warna (palet Notion) tetap sebagai aksen kategori.
 - **Chip:** terpilih = pill hitam; tidak terpilih = latar `ArusBrandSoft` tanpa border.
 - **Baris transaksi:** judul = catatan (dominan), subtitle = `dompet • kategori • jam` (pemisah dot).

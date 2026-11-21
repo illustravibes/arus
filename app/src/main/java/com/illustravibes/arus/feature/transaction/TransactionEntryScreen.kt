@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -95,15 +95,14 @@ fun TransactionEntryScreen(
                     },
                 )
 
-                // 3. Detail transaksi dalam satu kartu (Dompet/Kategori + Tanggal).
-                // Pola yang sama dengan kartu harian & "Kelola Data": satu ArusCard,
-                // baris dipisah divider, inCard = true.
-                ArusCard {
-                    if (uiState.typeIndex == 2) {
-                        val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
-                        val targetWalletTint = parseHexColor(uiState.selectedTargetWallet?.colorHex ?: "#00A86B", NotionMint)
+                // 3. Detail transaksi: tiap field kartu sendiri + label di atasnya
+                // (form lebih informatif: Dompet, Kategori, Tanggal).
+                if (uiState.typeIndex == 2) {
+                    // Transfer: Dompet Asal & Dompet Tujuan
+                    val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
+                    val targetWalletTint = parseHexColor(uiState.selectedTargetWallet?.colorHex ?: "#00A86B", NotionMint)
 
-                        // Transfer: Dompet Asal & Dompet Tujuan
+                    LabeledFieldCard(label = "Dompet Asal") {
                         ArusPropertySelectorRow(
                             label = "Dompet Asal",
                             valueOnLeft = true,
@@ -115,7 +114,8 @@ fun TransactionEntryScreen(
                             logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug),
                             inCard = true
                         )
-                        HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                    }
+                    LabeledFieldCard(label = "Dompet Tujuan") {
                         ArusPropertySelectorRow(
                             label = "Dompet Tujuan",
                             valueOnLeft = true,
@@ -127,11 +127,13 @@ fun TransactionEntryScreen(
                             logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedTargetWallet?.logoSlug),
                             inCard = true
                         )
-                    } else {
-                        val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
-                        val categoryTint = parseHexColor(uiState.selectedCategory?.colorHex ?: "#00A86B", NotionMint)
+                    }
+                } else {
+                    // Pemasukan/Pengeluaran: Dompet & Kategori
+                    val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
+                    val categoryTint = parseHexColor(uiState.selectedCategory?.colorHex ?: "#00A86B", NotionMint)
 
-                        // Pemasukan/Pengeluaran: Dompet & Kategori
+                    LabeledFieldCard(label = "Dompet") {
                         ArusPropertySelectorRow(
                             label = "Pilih Dompet",
                             valueOnLeft = true,
@@ -143,7 +145,8 @@ fun TransactionEntryScreen(
                             logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug),
                             inCard = true
                         )
-                        HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                    }
+                    LabeledFieldCard(label = "Kategori") {
                         ArusPropertySelectorRow(
                             label = "Kategori",
                             valueOnLeft = true,
@@ -155,10 +158,11 @@ fun TransactionEntryScreen(
                             inCard = true
                         )
                     }
-                    HorizontalDivider(color = ArusBorder, thickness = 1.dp)
-                    // Tanggal transaksi (bisa diubah; maks. hari ini).
-                    // tileColor: NotionSkySoft polos (dulu NotionSkySoft 15% — nyaris
-                    // tak terlihat di atas putih; pola yang sama dengan Kelola Data).
+                }
+                // Tanggal transaksi (bisa diubah; maks. hari ini).
+                // tileColor: NotionSkySoft polos (dulu NotionSkySoft 15% — nyaris
+                // tak terlihat di atas putih; pola yang sama dengan Kelola Data).
+                LabeledFieldCard(label = "Tanggal") {
                     ArusPropertySelectorRow(
                         label = "Tanggal",
                         valueOnLeft = true,
@@ -175,8 +179,9 @@ fun TransactionEntryScreen(
                 ArusTextField(
                     value = uiState.note,
                     onValueChange = { note -> viewModel.onNoteChange(note) },
-                    label = "Catatan (Opsional)",
-                    placeholder = "mis. Makan siang bersama Budi"
+                    label = "Catatan Transaksi",
+                    placeholder = "mis. Makan siang bersama Budi",
+                    helperText = "Ditampilkan sebagai judul transaksi di Beranda & Riwayat"
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -276,6 +281,29 @@ fun TransactionEntryScreen(
                 },
                 onDismiss = { showDatePicker = false }
             )
+        }
+    }
+}
+
+/**
+ * Satu field form: label di atas + isi dalam kartu.
+ * Dipakai di form Catat (Dompet, Kategori, Tanggal) agar tiap baris jelas
+ * maksudnya — gaya label sama dengan [ArusTextField].
+ */
+@Composable
+private fun LabeledFieldCard(
+    label: String,
+    content: @Composable () -> Unit
+) {
+    Column {
+        Text(
+            text = label,
+            style = ArusTypography.labelLarge,
+            color = ArusTextPrimary,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+        ArusCard {
+            content()
         }
     }
 }

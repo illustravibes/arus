@@ -516,6 +516,7 @@ fun ArusTextField(
     placeholder: String = "",
     isCurrency: Boolean = false,
     errorMessage: String? = null,
+    helperText: String? = null,
     singleLine: Boolean = true,
     showClearButton: Boolean = false
 ) {
@@ -597,6 +598,13 @@ fun ArusTextField(
                 text = errorMessage,
                 style = ArusTypography.labelSmall,
                 color = ArusExpense,
+                modifier = Modifier.padding(top = 4.dp, start = 4.dp)
+            )
+        } else if (helperText != null) {
+            Text(
+                text = helperText,
+                style = ArusTypography.labelSmall,
+                color = ArusTextSecondary,
                 modifier = Modifier.padding(top = 4.dp, start = 4.dp)
             )
         }

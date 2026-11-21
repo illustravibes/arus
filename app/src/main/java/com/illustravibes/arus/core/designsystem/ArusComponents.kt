@@ -396,16 +396,21 @@ fun ArusPropertySelectorRow(
     tileColor: Color = NotionSkySoft,
     iconTint: Color = NotionSky,
     placeholder: String = "Pilih",
-    logoResId: Int? = null
+    logoResId: Int? = null,
+    inCard: Boolean = false
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(ArusSurface)
-            .border(1.dp, ArusBorder, RoundedCornerShape(16.dp))
+            .then(
+                if (inCard) Modifier
+                else Modifier
+                    .clip(PillShape)
+                    .background(ArusSurface)
+                    .border(1.dp, ArusBorder, PillShape)
+            )
             .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 14.dp),
+            .padding(horizontal = if (inCard) 0.dp else 12.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -528,7 +533,7 @@ fun ArusTextField(
                 }
             } else null,
             isError = errorMessage != null,
-            shape = RoundedCornerShape(16.dp),
+            shape = PillShape,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = ArusSurface,
                 unfocusedContainerColor = ArusSurface,
@@ -909,7 +914,8 @@ fun ArusTransactionRow(
     tileColor: Color,
     iconTint: Color,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    inCard: Boolean = false
 ) {
     val amountPrefix = when (type) {
         TransactionType.INCOME -> "+ "
@@ -925,11 +931,15 @@ fun ArusTransactionRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(ArusSurface)
-            .border(1.dp, ArusBorder, RoundedCornerShape(16.dp))
+            .then(
+                if (inCard) Modifier
+                else Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(ArusSurface)
+                    .border(1.dp, ArusBorder, RoundedCornerShape(16.dp))
+            )
             .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
-            .padding(14.dp),
+            .padding(if (inCard) PaddingValues(vertical = 12.dp) else PaddingValues(14.dp)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         ArusCategoryTile(
@@ -1553,6 +1563,29 @@ fun ArusDateHeaderRow(
     }
 }
 
+// ============================================================================
+// 13b. ARUS DAY CARD (satu kartu per hari: header tanggal + total di dalam
+// kartu, baris-baris di bawahnya dipisah divider — pola Bevel/Notion,
+// audit action button 2026-11-21)
+// ============================================================================
+
+@Composable
+fun ArusDayCard(
+    dateText: String,
+    totalDailyText: String?,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    ArusCard(modifier = modifier) {
+        ArusDateHeaderRow(
+            dateText = dateText,
+            totalDailyText = totalDailyText
+        )
+        HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+        content()
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArusConfirmationSheet(
@@ -2034,7 +2067,7 @@ fun ArusPasswordSheet(
                     }
                 } else null,
                 textStyle = ArusTypography.bodyLarge.copy(color = ArusTextPrimary),
-                shape = RoundedCornerShape(16.dp),
+                shape = PillShape,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = ArusSurface,
                     unfocusedContainerColor = ArusSurface,

@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -227,11 +228,7 @@ fun HomeContent(
 
         // 6. Recent Activity Section
         item {
-            ArusSectionHeader(
-                title = "Aktivitas Terbaru",
-                actionText = if (uiState.recentTransactions.isNotEmpty()) "Lihat Semua" else null,
-                onActionClick = onNavigateToTransactionHistory
-            )
+            ArusSectionHeader(title = "Aktivitas Terbaru")
         }
 
         if (uiState.recentTransactions.isEmpty()) {
@@ -244,29 +241,56 @@ fun HomeContent(
             )
             }
         } else {
-            items(uiState.recentTransactions, key = { it.id }) { tx ->
-                    val category = uiState.categoriesMap[tx.categoryId]
-                    val txType = when (tx.type) {
-                        "INCOME" -> TransactionType.INCOME
-                        "EXPENSE" -> TransactionType.EXPENSE
-                        else -> TransactionType.TRANSFER
+            val groupedRecent = groupTransactionsByDate(uiState.recentTransactions)
+            groupedRecent.forEach { (dateHeader, txList) ->
+                val dailyTotal = txList.sumOf { tx ->
+                    when (tx.type) {
+                        "INCOME" -> tx.amount
+                        "EXPENSE" -> -tx.amount
+                        else -> 0L
                     }
-                    val (tileColor, iconTint) = when (txType) {
-                        TransactionType.INCOME -> NotionMintSoft to NotionMint
-                        TransactionType.EXPENSE -> NotionCoralSoft to NotionCoral
-                        TransactionType.TRANSFER -> NotionSkySoft to NotionSky
+                }
+                item(key = "day-$dateHeader") {
+                    ArusDayCard(
+                        dateText = dateHeader,
+                        totalDailyText = if (dailyTotal != 0L) (if (dailyTotal > 0) "+ " else "") + dailyTotal.formatRupiah() else null
+                    ) {
+                        txList.forEachIndexed { index, tx ->
+                            if (index > 0) {
+                                HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                            }
+                            val category = uiState.categoriesMap[tx.categoryId]
+                            val txType = when (tx.type) {
+                                "INCOME" -> TransactionType.INCOME
+                                "EXPENSE" -> TransactionType.EXPENSE
+                                else -> TransactionType.TRANSFER
+                            }
+                            val (tileColor, iconTint) = when (txType) {
+                                TransactionType.INCOME -> NotionMintSoft to NotionMint
+                                TransactionType.EXPENSE -> NotionCoralSoft to NotionCoral
+                                TransactionType.TRANSFER -> NotionSkySoft to NotionSky
+                            }
+                            ArusTransactionRow(
+                                title = category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer Antardompet" else "Transaksi",
+                                subtitle = formatDateSubtitle(tx.dateMillis, tx.note),
+                                amount = tx.amount,
+                                type = txType,
+                                iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),
+                                tileColor = tileColor,
+                                iconTint = iconTint,
+                                inCard = true,
+                                onClick = { selectedDetailTx = tx }
+                            )
+                        }
                     }
-
-                    ArusTransactionRow(
-                        title = category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer Antardompet" else "Transaksi",
-                        subtitle = formatDateSubtitle(tx.dateMillis, tx.note),
-                        amount = tx.amount,
-                        type = txType,
-                        iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),
-                        tileColor = tileColor,
-                        iconTint = iconTint,
-                        onClick = { selectedDetailTx = tx }
-                    )
+                }
+            }
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                ArusSecondaryButton(
+                    text = "Lihat Semua Transaksi",
+                    onClick = onNavigateToTransactionHistory
+                )
             }
         }
 
@@ -422,6 +446,13 @@ fun parseHexColor(hexString: String, defaultColor: Color): Color {
         val colorInt = android.graphics.Color.parseColor(hexString)
         Color(colorInt)
     }.getOrDefault(defaultColor)
+}
+
+private fun groupTransactionsByDate(transactions: List<TransactionEntity>): Map<String, List<TransactionEntity>> {
+    val formatter = SimpleDateFormat("EEEE, d MMMM yyyy", Locale.forLanguageTag("id-ID"))
+    return transactions.groupBy { tx ->
+        formatter.format(Date(tx.dateMillis))
+    }
 }
 
 private fun formatDateSubtitle(dateMillis: Long, note: String?): String {

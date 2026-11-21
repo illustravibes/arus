@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -73,18 +74,23 @@ fun CategoryScreen(
                     iconResId = R.drawable.fa_tags
                 )
             } else {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                uiState.categories.forEach { category ->
-                    val defaultTint = if (category.type == "EXPENSE") NotionCoral else NotionMint
-                    val iconTint = parseHexColor(category.colorHex, defaultTint)
-                    val tileColor = iconTint.copy(alpha = 0.15f)
+                ArusCard {
+                    Column {
+                        uiState.categories.forEachIndexed { index, category ->
+                            if (index > 0) {
+                                HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                            }
+                            val defaultTint = if (category.type == "EXPENSE") NotionCoral else NotionMint
+                            val iconTint = parseHexColor(category.colorHex, defaultTint)
+                            val tileColor = iconTint.copy(alpha = 0.15f)
 
-                    ArusCard {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.weight(1f)
@@ -117,14 +123,19 @@ fun CategoryScreen(
             // V2-P1-5: kategori terarsip bisa dipulihkan dari sini.
             if (uiState.archivedCategories.isNotEmpty()) {
                 ArusSectionHeader(title = "Kategori Terarsip (${uiState.archivedCategories.size})")
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    uiState.archivedCategories.forEach { category ->
-                        val defaultTint = if (category.type == "EXPENSE") NotionCoral else NotionMint
-                        val iconTint = parseHexColor(category.colorHex, defaultTint)
-                        val tileColor = iconTint.copy(alpha = 0.15f)
-                        ArusCard {
+                ArusCard {
+                    Column {
+                        uiState.archivedCategories.forEachIndexed { index, category ->
+                            if (index > 0) {
+                                HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                            }
+                            val defaultTint = if (category.type == "EXPENSE") NotionCoral else NotionMint
+                            val iconTint = parseHexColor(category.colorHex, defaultTint)
+                            val tileColor = iconTint.copy(alpha = 0.15f)
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {

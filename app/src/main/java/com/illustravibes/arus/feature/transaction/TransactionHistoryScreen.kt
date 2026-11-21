@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -121,45 +122,49 @@ fun TransactionHistoryScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     groupedTransactions.forEach { (dateHeader, txList) ->
-                    val dailyTotal = txList.sumOf { tx ->
-                        when (tx.type) {
-                            "INCOME" -> tx.amount
-                            "EXPENSE" -> -tx.amount
-                            else -> 0L
+                        val dailyTotal = txList.sumOf { tx ->
+                            when (tx.type) {
+                                "INCOME" -> tx.amount
+                                "EXPENSE" -> -tx.amount
+                                else -> 0L
+                            }
                         }
-                    }
 
-                        item(key = "header-$dateHeader") {
-                            ArusDateHeaderRow(
+                        item(key = "day-$dateHeader") {
+                            ArusDayCard(
                                 dateText = dateHeader,
                                 totalDailyText = if (dailyTotal != 0L) (if (dailyTotal > 0) "+ " else "") + dailyTotal.formatRupiah() else null
-                            )
-                        }
+                            ) {
+                                txList.forEachIndexed { index, tx ->
+                                    if (index > 0) {
+                                        HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                                    }
+                                    val category = uiState.categoriesMap[tx.categoryId]
+                                    val txType = when (tx.type) {
+                                        "INCOME" -> TransactionType.INCOME
+                                        "EXPENSE" -> TransactionType.EXPENSE
+                                        else -> TransactionType.TRANSFER
+                                    }
+                                    val (tileColor, iconTint) = when (txType) {
+                                        TransactionType.INCOME -> NotionMintSoft to NotionMint
+                                        TransactionType.EXPENSE -> NotionCoralSoft to NotionCoral
+                                        TransactionType.TRANSFER -> NotionSkySoft to NotionSky
+                                    }
 
-                        items(txList, key = { it.id }) { tx ->
-                            val category = uiState.categoriesMap[tx.categoryId]
-                            val txType = when (tx.type) {
-                                "INCOME" -> TransactionType.INCOME
-                                "EXPENSE" -> TransactionType.EXPENSE
-                                else -> TransactionType.TRANSFER
+                                    val wallet = uiState.wallets.find { it.id == tx.walletId }
+                                    ArusTransactionRow(
+                                        title = category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer Antardompet" else "Transaksi",
+                                        subtitle = tx.note.orEmpty().ifBlank { wallet?.name ?: "Dompet" },
+                                        amount = tx.amount,
+                                        type = txType,
+                                        iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),
+                                        tileColor = tileColor,
+                                        iconTint = iconTint,
+                                        inCard = true,
+                                        onClick = { selectedDetailTx = tx }
+                                    )
+                                }
                             }
-                            val (tileColor, iconTint) = when (txType) {
-                                TransactionType.INCOME -> NotionMintSoft to NotionMint
-                                TransactionType.EXPENSE -> NotionCoralSoft to NotionCoral
-                                TransactionType.TRANSFER -> NotionSkySoft to NotionSky
-                            }
-
-                            val wallet = uiState.wallets.find { it.id == tx.walletId }
-                            ArusTransactionRow(
-                                title = category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer Antardompet" else "Transaksi",
-                                subtitle = tx.note.orEmpty().ifBlank { wallet?.name ?: "Dompet" },
-                                amount = tx.amount,
-                                type = txType,
-                                iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),
-                                tileColor = tileColor,
-                                iconTint = iconTint,
-                                onClick = { selectedDetailTx = tx }
-                            )
                         }
                     }
 

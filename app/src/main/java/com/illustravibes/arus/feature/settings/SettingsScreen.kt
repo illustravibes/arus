@@ -10,6 +10,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -101,22 +102,27 @@ fun SettingsScreen(
 
             // 1. Management Section
             ArusSectionHeader(title = "Kelola Data")
-            ArusPropertySelectorRow(
-                label = "Kelola Dompet",
-                selectedValue = "${uiState.wallets.size} Dompet",
-                onClick = onNavigateToWalletManagement,
-                iconResId = R.drawable.fa_wallet,
-                tileColor = NotionSkySoft,
-                iconTint = NotionSky
-            )
-            ArusPropertySelectorRow(
-                label = "Kelola Kategori",
-                selectedValue = "${uiState.categories.size} Kategori",
-                onClick = onNavigateToCategoryManagement,
-                iconResId = R.drawable.fa_tags,
-                tileColor = NotionMintSoft,
-                iconTint = NotionMint
-            )
+            ArusCard {
+                ArusPropertySelectorRow(
+                    label = "Kelola Dompet",
+                    selectedValue = "${uiState.wallets.size} Dompet",
+                    onClick = onNavigateToWalletManagement,
+                    iconResId = R.drawable.fa_wallet,
+                    tileColor = NotionSkySoft,
+                    iconTint = NotionSky,
+                    inCard = true
+                )
+                HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                ArusPropertySelectorRow(
+                    label = "Kelola Kategori",
+                    selectedValue = "${uiState.categories.size} Kategori",
+                    onClick = onNavigateToCategoryManagement,
+                    iconResId = R.drawable.fa_tags,
+                    tileColor = NotionMintSoft,
+                    iconTint = NotionMint,
+                    inCard = true
+                )
+            }
 
             // 2. Backup & Restore Section
             ArusSectionHeader(title = "Backup & Restore Terenkripsi")

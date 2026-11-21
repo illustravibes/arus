@@ -41,6 +41,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -682,12 +683,13 @@ fun ArusCategoryTile(
     tileColor: Color,
     modifier: Modifier = Modifier,
     iconTint: Color = ArusTextPrimary,
-    size: Dp = 44.dp
+    size: Dp = 44.dp,
+    shape: Shape = SoftTileShape
 ) {
     Box(
         modifier = modifier
             .size(size)
-            .clip(SoftTileShape)
+            .clip(shape)
             .background(tileColor),
         contentAlignment = Alignment.Center
     ) {
@@ -709,13 +711,14 @@ fun ArusWalletTile(
     tileColor: Color,
     modifier: Modifier = Modifier,
     iconTint: Color = ArusTextPrimary,
-    size: Dp = 44.dp
+    size: Dp = 44.dp,
+    shape: Shape = SoftTileShape
 ) {
     if (logoResId != null) {
         Box(
             modifier = modifier
                 .size(size)
-                .clip(SoftTileShape),
+                .clip(shape),
             contentAlignment = Alignment.Center
         ) {
             Image(
@@ -731,7 +734,8 @@ fun ArusWalletTile(
             tileColor = tileColor,
             modifier = modifier,
             iconTint = iconTint,
-            size = size
+            size = size,
+            shape = shape
         )
     }
 }
@@ -2963,9 +2967,9 @@ fun ArusSelectionSheet(
                     val rowBorderColor = if (isSelected) ArusBrandPrimary else ArusBorder
                     val rowBgColor = if (isSelected) ArusBrandSoft else ArusSurface
 
-                    // Tiap opsi satu pill penuh (56dp: tile 40dp +
-                    // padding vertikal 8dp) — keputusan user 2026-11-21.
-                    // Sama seperti opsi di action sheet.
+                    // Tiap opsi satu pill penuh 48dp (tile lingkaran
+                    // 36dp + padding vertikal 6dp) — keputusan user
+                    // 2026-11-21.
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -2976,7 +2980,7 @@ fun ArusSelectionSheet(
                                 onItemSelected(item)
                                 onDismiss()
                             }
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -2990,7 +2994,8 @@ fun ArusSelectionSheet(
                                     iconResId = item.iconResId ?: R.drawable.fa_wallet,
                                     tileColor = item.tileColor,
                                     iconTint = item.iconTint,
-                                    size = 40.dp
+                                    size = 36.dp,
+                                    shape = CircleShape
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                             }
@@ -3010,17 +3015,28 @@ fun ArusSelectionSheet(
                                 }
                             }
                         }
-                        RadioButton(
-                            selected = isSelected,
-                            onClick = {
-                                onItemSelected(item)
-                                onDismiss()
-                            },
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = ArusBrandPrimary,
-                                unselectedColor = ArusTextSecondary
-                            )
-                        )
+                        // Indikator radio kustom 20dp (bukan M3
+                        // RadioButton 48dp) supaya pill bisa compact
+                        // 48dp; barisnya sendiri yang bisa diketuk.
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .border(
+                                    width = 2.dp,
+                                    color = if (isSelected) ArusBrandPrimary else ArusTextSecondary,
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isSelected) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .clip(CircleShape)
+                                        .background(ArusBrandPrimary)
+                                )
+                            }
+                        }
                     }
                 }
             }

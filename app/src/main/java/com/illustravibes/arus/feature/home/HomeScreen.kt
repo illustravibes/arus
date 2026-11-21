@@ -466,7 +466,7 @@ private fun formatTransactionSubtitle(
 ): String {
     val timeString = SimpleDateFormat("HH:mm", Locale.forLanguageTag("id-ID")).format(Date(dateMillis))
     val categoryText = categoryName ?: if (txType == TransactionType.TRANSFER) "Transfer" else "Transaksi"
-    return "${walletName ?: "Dompet"} - $categoryText - $timeString"
+    return "${walletName ?: "Dompet"} • $categoryText • $timeString"
 }
 
 @Preview(showBackground = true, showSystemUi = true)

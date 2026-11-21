@@ -153,7 +153,7 @@ fun TransactionHistoryScreen(
                                     val timeString = SimpleDateFormat("HH:mm", Locale.forLanguageTag("id-ID")).format(Date(tx.dateMillis))
                                     ArusTransactionRow(
                                         title = tx.note.orEmpty().ifBlank { category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer Antardompet" else "Transaksi" },
-                                        subtitle = "${wallet?.name ?: "Dompet"} - ${category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer" else "Transaksi"} - $timeString",
+                                        subtitle = "${wallet?.name ?: "Dompet"} • ${category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer" else "Transaksi"} • $timeString",
                                         amount = tx.amount,
                                         type = txType,
                                         iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),

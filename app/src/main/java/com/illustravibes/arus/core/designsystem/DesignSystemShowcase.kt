@@ -23,6 +23,7 @@ fun DesignSystemShowcaseScreen() {
     var showSelectionSheet by remember { mutableStateOf(false) }
     var showDetailSheet by remember { mutableStateOf(false) }
     var selectedWalletName by remember { mutableStateOf("Dompet Tunai") }
+    var searchQuery by remember { mutableStateOf("") }
     var toggleState by remember { mutableStateOf(true) }
 
     val sampleBarEntries = listOf(
@@ -266,6 +267,20 @@ fun DesignSystemShowcaseScreen() {
                         onDismiss = { showDetailSheet = false }
                     )
                 }
+
+                // Section 6b: Search Field & Snackbar (baru Fase 1-2)
+                Text(text = "Pencarian & Snackbar (Baru)", style = ArusTypography.titleLarge)
+                ArusSearchField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = "Cari nama kategori, catatan, nominal..."
+                )
+                ArusSnackbar(
+                    message = "Transaksi Rp10.000 tersimpan",
+                    actionLabel = "Lihat",
+                    onAction = {},
+                    onDismiss = {}
+                )
 
                 // Section 7: Progres & Setting Toggle (Bevel Advanced)
                 Text(text = "Progres & Pengaturan (Bevel Style)", style = ArusTypography.titleLarge)

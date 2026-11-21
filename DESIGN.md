@@ -8,33 +8,59 @@
 
 Arus adalah aplikasi Android native, bukan landing page. Jangan mengadopsi hero foto, mockup perangkat, banner promosi, katalog, footer web, atau komposisi dan skala tipografi desktop dari referensi. Fitur dan perilaku tetap mengikuti PRD, aturan bisnis, dan alur pengguna.
 
+## Lima prinsip design system (Bevel + Notion, diputuskan 2026-11-21)
+
+Hasil audit 587 screenshot referensi lokal (`design/bevel` + `design/notion`) dan semua keputusan user 2026-11-18 s.d. 2026-11-21. Detail audit per komponen ada di rencana design system di `workspace/goals/arus-ready-to-production/files/rencana-design-system-bevel-notion-2026-11-21.md`.
+
+1. **Struktur ikut Bevel.** Satu kartu putih = satu blok konten; kartu-kartu terpisah dengan gap (bukan hairline antar kartu). Radius kartu 16dp, tanpa bayangan berat.
+2. **Pengelompokan di dalam kartu ikut Notion.** Di dalam satu kartu, baris-baris dipisah hairline tipis (`HorizontalDivider`, `ArusBorder`, 1dp): satu kartu per hari, satu kartu form, "Kelola Data", Kelola Dompet/Kategori, action sheet.
+3. **CTA ikut Bevel, warna hitam.** Primary = pill hitam penuh `#1F2029`, teks putih Bold. Biru Notion tidak dipakai sebagai warna aksi.
+4. **Warna isi ikut palet Notion.** Kategori, tile ikon, dan status memakai palet Notion; semantik uang tetap hijau `#00A86B` (masuk) / merah `#E53935` (keluar).
+5. **Sheet & menu ikut Notion, tombol sheet ikut Bevel.** Bottom sheet: judul tengah + opsi dalam kartu + drag handle pill 36×4dp. Tombol di bawah sheet: primary hitam penuh + tombol teks di bawahnya.
+
+## Aturan pola (jangan buat pola baru)
+
+- **Satu kartu per kelompok:** setiap daftar berkelompok = satu `ArusCard` + divider antar baris, tanpa pengecualian.
+- **Chip:** terpilih = pill hitam; tidak terpilih = latar `ArusBrandSoft` tanpa border.
+- **Baris transaksi:** judul = catatan (dominan), subtitle = `dompet • kategori • jam` (pemisah dot).
+- **Chart Laporan:** batang hijau/merah (semantik uang); label sumbu-Y di kanan (format ringkas "3 jt"/"250 rb"); batang terpilih opacity penuh, yang lain 0.45.
+- **Snackbar:** `ArusSnackbar` — pill hitam + centang putih + aksi "Lihat" putih Bold, di atas bottom nav (bottom 160dp).
+- **Detail sheet transaksi:** "Ubah" hitam penuh + "Hapus" teks merah di bawahnya; "Tutup" via drag/scrim/back (tanpa tombol).
+- **Sheet chrome (semua `ModalBottomSheet`):** `skipPartiallyExpanded = true`, radius atas 28dp, `ArusSurface`, drag handle pill.
+- **Action sheet (menu •••):** bottom sheet ala Notion — judul = nama item (tengah), opsi dalam satu kartu + hairline, ikon kiri + teks, destruktif merah.
+- **Selector row:** nilai yang dipilih di kiri, chevron tipis 12dp di kanan; baris navigasi (Kelola Data) memakai pola normal (label kiri + nilai + chevron).
+
 ## Warna
 
 | Token | Nilai | Penggunaan |
 |---|---|---|
 | Background | `#F6F8FE` | Latar layar biru-abu terang |
 | Surface | `#FFFFFF` | Kartu, sheet, dan permukaan konten |
-| Text primary | `#34364A` | Judul, nominal, dan konten utama |
+| Text primary | `#1F2029` | Judul, nominal, dan konten utama |
 | Text secondary | `#60657A` | Label dan keterangan pendukung |
 | Border | `#E5E9F2` | Pemisah dan batas kartu yang halus |
-| Brand candidate | `#0009FF` | Kandidat aksi utama dan state aktif, setelah pengujian kontras |
+| Brand primary | `#1F2029` | Aksi utama (CTA hitam); biru `#0009FF` ditolak user 2026-11-18 |
+| Brand soft | `#F0F2F7` | Latar field search, chip tak terpilih |
+| Pemasukan | `#00A86B` | Semantik uang masuk (soft `#E3F8EE`) |
+| Pengeluaran | `#E53935` | Semantik uang keluar (soft `#FDEAF0`) |
 
-Biru brand bukan kewajiban jika tidak lolos pengujian kontras pada pasangan warna dan state yang dipakai. Pilih warna pengganti yang lolos, lalu gunakan konsisten; jangan menganggap satu nilai aman di semua latar. Gunakan warna semantik yang konsisten untuk pemasukan, pengeluaran, error, dan sukses; jenis dan status juga harus disampaikan lewat teks atau ikon, bukan warna saja.
+Primer hitam `#1F2029` adalah keputusan final user (2026-11-18, "Tetap hitam"); biru terang `#0009FF` ditolak dan tidak dipakai sebagai warna aksi di mana pun. Biru Notion hanya hidup sebagai warna kategori/ikon (Notion Sky). Gunakan warna semantik yang konsisten untuk pemasukan, pengeluaran, error, dan sukses; jenis dan status juga harus disampaikan lewat teks atau ikon, bukan warna saja.
 
 ### Palet kategori
 
-Palet pilihan pengguna terinspirasi dari accent Notion: Marigold `#FFB110`, Coral `#F64932`, Mocha `#B18164`, Signal Blue `#097FE8`, Sky `#62AEF0`, dan Midnight `#02093A`. Ini palet awal, bukan jaminan kontras. Gunakan warna secara konsisten pada ikon, tile, atau chip kategori; tint lembut boleh digunakan untuk latar. Tentukan warna foreground yang terbaca untuk setiap kombinasi dan uji kontras aktual, termasuk state terpilih. Nama kategori dan ikon tetap tersedia tanpa bergantung pada warna. Warna kategori tidak menentukan jenis pemasukan atau pengeluaran.
+Palet kategori memakai accent Notion (token di `ArusTheme.kt`): Marigold `#FFB110`, Coral `#F64932`, Sky `#62AEF0`, Mocha `#B18164`, Mint `#00A86B`, Lavender `#8B5CF6`, masing-masing dengan versi soft (`#FFF7E6`, `#FEECE9`, `#EFF7FF`, `#F7F2EF`, `#E3F8EE`, `#F3E8FF`) untuk tile ikon. Gunakan warna secara konsisten pada ikon, tile, atau chip kategori. Nama kategori dan ikon tetap tersedia tanpa bergantung pada warna. Warna kategori tidak menentukan jenis pemasukan atau pengeluaran.
 
 ## Tipografi dan ruang
 
 - Gunakan Inter sebagai pengganti SF Pro pada referensi Bevel, dengan fallback sans-serif. Judul tegas, label dan isi mudah dipindai; nominal menjadi fokus dan gunakan angka tabular bila tersedia.
 - Ukuran mengikuti kebutuhan layar Android, tidak menyalin ukuran display situs referensi. Izinkan teks membesar dan membungkus saat font sistem diperbesar; jangan memotong nominal atau label penting.
-- Padding layar dasar 16dp; gunakan jarak kelipatan 4dp dan whitespace terstruktur. Kepadatan harus tetap nyaman pada layar sempit.
+- Padding layar dasar 12dp (compact rapat 40%, keputusan user 2026-11-21); gap antar section 16dp; spacer bawah layar tab 110dp; gunakan jarak kelipatan 4dp. Kepadatan harus tetap nyaman pada layar sempit.
+- Label dan judul memakai sentence case (bukan ALL-CAPS); tidak ada `.uppercase()` di komponen UI. Pengecualian: nama merek (BCA, DANA, OCBC) dan kode tipe data.
 - Target sentuh minimum 48dp, termasuk ikon dan kontrol kecil.
 
 ## Bentuk dan permukaan
 
-Kartu utama menggunakan sudut besar dan lembut, sebagai titik awal 24–32dp; elemen di dalamnya dapat memakai radius lebih kecil. CTA utama dan chip memakai bentuk pill. Sesuaikan radius dengan ukuran komponen agar tidak mengganggu isi atau target sentuh. Gunakan border halus dan shadow minimal; bedakan permukaan terutama lewat warna dan jarak. Pertahankan konsistensi bentuk, bukan radius yang sama secara kaku pada semua komponen.
+Kartu utama (`ArusCard`) memakai radius 16dp dan padding 12dp, border 1dp `ArusBorder`, tanpa bayangan berat. CTA utama dan chip memakai bentuk pill. Field input memakai pill penuh (keputusan user); satu-satunya pengecualian adalah field search (`ArusSearchField`: radius 12dp, latar `ArusBrandSoft`, tanpa border). Sesuaikan radius dengan ukuran komponen agar tidak mengganggu isi atau target sentuh. Bedakan permukaan terutama lewat warna dan jarak.
 
 ## Komponen dan interaksi
 
@@ -43,7 +69,8 @@ Kartu utama menggunakan sudut besar dan lembut, sebagai titik awal 24–32dp; el
 - **Kategori:** ikon yang mudah dikenali dalam soft tile dan nama kategori; chip pill dapat memakai warna pilihan pengguna. Pilihan aktif juga ditandai dengan ikon atau label, bukan warna saja.
 - **Daftar transaksi:** tampilkan hierarki nama/kategori, keterangan relevan, dan nominal dengan jelas. Bedakan pemasukan, pengeluaran, dan transfer lewat teks atau ikon selain warna.
 - **Form, dialog, dan sheet:** gunakan Material 3 untuk perilaku, validasi, aksesibilitas, dan state. Jelaskan error di dekat input; konfirmasi tindakan destruktif sesuai alur.
-- **Grafik:** batang rounded boleh digunakan jika tidak mengurangi ketepatan pembacaan. Sertakan label, legenda, serta nilai ringkasan dalam teks; transfer tidak masuk seri pemasukan/pengeluaran.
+- **Grafik:** batang rounded boleh digunakan jika tidak mengurangi ketepatan pembacaan. Sertakan label sumbu-Y di kanan (format ringkas "3 jt"/"250 rb"), legenda, serta nilai ringkasan dalam teks; batang terpilih ditandai opacity penuh vs 0.45; transfer tidak masuk seri pemasukan/pengeluaran.
+- **Snackbar:** `ArusSnackbar` (pill hitam + centang putih + aksi "Lihat" putih Bold) untuk sukses simpan; posisi tetap di atas bottom nav (bottom 160dp).
 - **Komponen bersama:** beri nama `Arus*` ketika benar-benar digunakan berulang; hindari abstraksi prematur.
 
 ## Ilustrasi, gerak, dan bahasa

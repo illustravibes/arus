@@ -3027,9 +3027,9 @@ fun ArusTransactionDetailSheet(
     }
 
     val typeBadgeText = when (data.type) {
-        TransactionType.INCOME -> "PEMASUKAN"
-        TransactionType.EXPENSE -> "PENGELUARAN"
-        TransactionType.TRANSFER -> "TRANSFER"
+        TransactionType.INCOME -> "Pemasukan"
+        TransactionType.EXPENSE -> "Pengeluaran"
+        TransactionType.TRANSFER -> "Transfer"
     }
 
     val trendStyle = when (data.type) {

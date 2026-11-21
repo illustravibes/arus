@@ -2963,17 +2963,20 @@ fun ArusSelectionSheet(
                     val rowBorderColor = if (isSelected) ArusBrandPrimary else ArusBorder
                     val rowBgColor = if (isSelected) ArusBrandSoft else ArusSurface
 
+                    // Tiap opsi satu pill penuh (56dp: tile 40dp +
+                    // padding vertikal 8dp) — keputusan user 2026-11-21.
+                    // Sama seperti opsi di action sheet.
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
+                            .clip(PillShape)
                             .background(rowBgColor)
-                            .border(1.dp, rowBorderColor, RoundedCornerShape(16.dp))
+                            .border(1.dp, rowBorderColor, PillShape)
                             .clickable {
                                 onItemSelected(item)
                                 onDismiss()
                             }
-                            .padding(14.dp),
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {

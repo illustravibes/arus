@@ -1,7 +1,6 @@
 package com.illustravibes.arus.core.designsystem
 
 import android.provider.Settings
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloat
@@ -2581,7 +2580,6 @@ fun ArusDatePickerSheet(
     var selectedMinute by remember { mutableIntStateOf(initialCal.get(Calendar.MINUTE)) }
     var displayedYear by remember { mutableIntStateOf(initialCal.get(Calendar.YEAR)) }
     var displayedMonth by remember { mutableIntStateOf(initialCal.get(Calendar.MONTH)) }
-    var showTimeWheels by remember { mutableStateOf(false) }
 
     val todayMillis = remember {
         Calendar.getInstance().apply {
@@ -2670,22 +2668,35 @@ fun ArusDatePickerSheet(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = {
-                        if (displayedMonth == Calendar.JANUARY) {
-                            displayedYear -= 1
-                            displayedMonth = Calendar.DECEMBER
-                        } else {
-                            displayedMonth -= 1
-                        }
-                    }
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .clickable {
+                            if (displayedMonth == Calendar.JANUARY) {
+                                displayedYear -= 1
+                                displayedMonth = Calendar.DECEMBER
+                            } else {
+                                displayedMonth -= 1
+                            }
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_chevron_left_thin),
-                        contentDescription = "Bulan sebelumnya",
-                        tint = ArusTextPrimary,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(ArusSurface)
+                            .border(1.dp, ArusBorder, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_chevron_left_thin),
+                            contentDescription = "Bulan sebelumnya",
+                            tint = ArusTextPrimary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
                 Text(
                     text = monthTitle,
@@ -2694,23 +2705,35 @@ fun ArusDatePickerSheet(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f)
                 )
-                IconButton(
-                    onClick = {
-                        if (displayedMonth == Calendar.DECEMBER) {
-                            displayedYear += 1
-                            displayedMonth = Calendar.JANUARY
-                        } else {
-                            displayedMonth += 1
-                        }
-                    },
-                    enabled = !isCurrentMonth
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .clickable(enabled = !isCurrentMonth) {
+                            if (displayedMonth == Calendar.DECEMBER) {
+                                displayedYear += 1
+                                displayedMonth = Calendar.JANUARY
+                            } else {
+                                displayedMonth += 1
+                            }
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_chevron_right_thin),
-                        contentDescription = "Bulan berikutnya",
-                        tint = if (isCurrentMonth) ArusTextSecondary else ArusTextPrimary,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(ArusSurface)
+                            .border(1.dp, ArusBorder, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_chevron_right_thin),
+                            contentDescription = "Bulan berikutnya",
+                            tint = if (isCurrentMonth) ArusTextSecondary else ArusTextPrimary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -2794,61 +2817,36 @@ fun ArusDatePickerSheet(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            // Baris Jam (ketuk untuk membuka roda jam/menit).
+            // Jam langsung tampil di bawah kalender (tanpa dropdown hide/show).
+            Text(
+                text = "Jam",
+                style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = ArusTextPrimary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(PillShape)
-                    .clickable { showTimeWheels = !showTimeWheels }
-                    .padding(vertical = 12.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                ArusWheelPicker(
+                    values = (0..23).map { "%02d".format(it) },
+                    selectedIndex = selectedHour,
+                    onSelected = { selectedHour = it },
+                    modifier = Modifier.width(88.dp)
+                )
                 Text(
-                    text = "Jam",
-                    style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = ArusTextPrimary
+                    text = ":",
+                    style = ArusTypography.displayMedium,
+                    color = ArusTextPrimary,
+                    modifier = Modifier.padding(horizontal = 4.dp)
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = "%02d:%02d".format(selectedHour, selectedMinute),
-                    style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = ArusTextPrimary
+                ArusWheelPicker(
+                    values = (0..59).map { "%02d".format(it) },
+                    selectedIndex = selectedMinute,
+                    onSelected = { selectedMinute = it },
+                    modifier = Modifier.width(88.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_chevron_right_thin),
-                    contentDescription = null,
-                    tint = ArusTextSecondary,
-                    modifier = Modifier
-                        .size(12.dp)
-                        .rotate(if (showTimeWheels) 90f else 0f)
-                )
-            }
-            AnimatedVisibility(visible = showTimeWheels) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ArusWheelPicker(
-                        values = (0..23).map { "%02d".format(it) },
-                        selectedIndex = selectedHour,
-                        onSelected = { selectedHour = it },
-                        modifier = Modifier.width(88.dp)
-                    )
-                    Text(
-                        text = ":",
-                        style = ArusTypography.displayMedium,
-                        color = ArusTextPrimary,
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    )
-                    ArusWheelPicker(
-                        values = (0..59).map { "%02d".format(it) },
-                        selectedIndex = selectedMinute,
-                        onSelected = { selectedMinute = it },
-                        modifier = Modifier.width(88.dp)
-                    )
-                }
             }
             Spacer(modifier = Modifier.height(16.dp))
             ArusPrimaryButton(

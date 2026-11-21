@@ -1081,7 +1081,6 @@ data class BarChartEntry(
     val expenseAmount: Long
 )
 
-@Composable
 // K7 (Fase 2): angka sumbu-Y chart yang ringkas ("3 jt", "250 rb", "0").
 private fun formatCompactRupiah(value: Long): String {
     return when {
@@ -1099,6 +1098,7 @@ private fun formatCompactRupiah(value: Long): String {
     }
 }
 
+@Composable
 fun ArusBarChart(
     entries: List<BarChartEntry>,
     modifier: Modifier = Modifier

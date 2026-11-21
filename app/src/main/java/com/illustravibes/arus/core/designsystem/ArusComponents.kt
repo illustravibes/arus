@@ -1829,7 +1829,9 @@ fun ArusOverflowMenu(
                 painter = painterResource(id = R.drawable.fa_ellipsis_vertical),
                 contentDescription = "Opsi lainnya",
                 tint = ArusTextSecondary,
-                modifier = Modifier.size(20.dp)
+                // Viewport ikon 128x512 (1:4) — ukuran ikut rasio supaya
+                // titik-titiknya tetap bulat, bukan oval.
+                modifier = Modifier.size(width = 6.dp, height = 24.dp)
             )
         }
         DropdownMenu(

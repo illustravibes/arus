@@ -2047,35 +2047,37 @@ fun ArusActionSheet(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
-            ArusCard {
-                Column {
-                    items.forEachIndexed { index, item ->
-                        if (index > 0) {
-                            HorizontalDivider(color = ArusBorder, thickness = 1.dp)
-                        }
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onDismissRequest()
-                                    item.onClick()
-                                }
-                                .padding(vertical = 14.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                painter = painterResource(id = item.iconResId),
-                                contentDescription = null,
-                                tint = if (item.destructive) ArusExpense else ArusTextPrimary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = item.label,
-                                style = ArusTypography.titleMedium,
-                                color = if (item.destructive) ArusExpense else ArusTextPrimary
-                            )
-                        }
+            // Tiap opsi satu pill penuh (56dp), gap 8dp — bukan satu kartu
+            // + hairline. Keputusan user 2026-11-21.
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items.forEach { item ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(PillShape)
+                            .background(ArusSurface)
+                            .border(1.dp, ArusBorder, PillShape)
+                            .clickable {
+                                onDismissRequest()
+                                item.onClick()
+                            }
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = item.iconResId),
+                            contentDescription = null,
+                            tint = if (item.destructive) ArusExpense else ArusTextPrimary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = item.label,
+                            style = ArusTypography.titleMedium,
+                            color = if (item.destructive) ArusExpense else ArusTextPrimary
+                        )
                     }
                 }
             }

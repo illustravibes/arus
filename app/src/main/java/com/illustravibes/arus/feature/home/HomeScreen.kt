@@ -90,10 +90,10 @@ fun HomeContent(
             .fillMaxSize()
             .statusBarsPadding()
             .imePadding(),
-        contentPadding = PaddingValues(horizontal = 16.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item { Spacer(modifier = Modifier.height(8.dp)) }
+        item { Spacer(modifier = Modifier.height(6.dp)) }
 
         // 1. Viewing Area: Greeting Header
         item {

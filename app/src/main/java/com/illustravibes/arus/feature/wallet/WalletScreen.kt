@@ -45,7 +45,7 @@ fun WalletScreen(
             modifier = modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 12.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -86,7 +86,7 @@ fun WalletScreen(
                                     iconResId = mapDrawableIcon(wallet.icon),
                                     tileColor = tileColor,
                                     iconTint = iconTint,
-                                    size = 44.dp
+                                    size = 40.dp
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column {
@@ -228,7 +228,7 @@ fun WalletScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     ArusPrimaryButton(
                         text = "Simpan Dompet",

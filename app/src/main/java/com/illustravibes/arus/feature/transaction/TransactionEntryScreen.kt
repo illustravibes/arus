@@ -57,7 +57,7 @@ fun TransactionEntryScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .imePadding()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 12.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -145,7 +145,7 @@ fun TransactionEntryScreen(
                 placeholder = "mis. Makan siang bersama Budi"
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // 5. Submit Button — P1-6: nonaktif sampai input valid.
             val isFormValid = (uiState.amountInput.toLongOrNull() ?: 0L) > 0 &&

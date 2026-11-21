@@ -91,7 +91,7 @@ fun formatInputRupiah(input: String): String {
 @Composable
 fun ArusCard(
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 24.dp,
+    cornerRadius: Dp = 16.dp,
     backgroundColor: Color = ArusSurface,
     borderColor: Color = ArusBorder,
     onClick: (() -> Unit)? = null,
@@ -104,7 +104,7 @@ fun ArusCard(
         .background(backgroundColor)
         .border(1.dp, borderColor, shape)
         .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
-        .padding(16.dp)
+        .padding(12.dp)
 
     Column(
         modifier = cardModifier,
@@ -136,7 +136,7 @@ fun ArusPrimaryButton(
         ),
         modifier = modifier
             .fillMaxWidth()
-            .height(54.dp)
+            .height(48.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -181,7 +181,7 @@ fun ArusSecondaryButton(
         ),
         modifier = modifier
             .fillMaxWidth()
-            .height(54.dp)
+            .height(48.dp)
     ) {
         Text(
             text = text,
@@ -213,7 +213,7 @@ fun ArusDestructiveButton(
         ),
         modifier = modifier
             .fillMaxWidth()
-            .height(54.dp)
+            .height(48.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -281,14 +281,14 @@ fun ArusAmountHeroInput(
 
     ArusCard(
         modifier = modifier,
-        cornerRadius = 24.dp
+        cornerRadius = 16.dp
     ) {
         Text(
             text = label.uppercase(),
             style = ArusTypography.labelMedium,
             color = ArusTextSecondary
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
@@ -296,7 +296,7 @@ fun ArusAmountHeroInput(
             Text(
                 text = "Rp ",
                 style = ArusTypography.displayLarge.copy(
-                    fontSize = 32.sp,
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = amountColor
                 )
@@ -332,7 +332,7 @@ fun ArusAmountHeroInput(
                 },
                 modifier = Modifier.fillMaxWidth().onFocusChanged { onFocusChange(it.isFocused) },
                 textStyle = ArusTypography.displayLarge.copy(
-                    fontSize = 36.sp,
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = amountColor
                 ),
@@ -345,7 +345,7 @@ fun ArusAmountHeroInput(
                             Text(
                                 text = placeholder,
                                 style = ArusTypography.displayLarge.copy(
-                                    fontSize = 36.sp,
+                                    fontSize = 28.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = ArusTextSecondary.copy(alpha = 0.4f)
                                 )
@@ -386,7 +386,7 @@ fun ArusPropertySelectorRow(
             .background(ArusSurface)
             .border(1.dp, ArusBorder, RoundedCornerShape(16.dp))
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 12.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -785,7 +785,7 @@ fun ArusWalletCard(
                 size = 36.dp
             )
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = walletName,
             style = ArusTypography.labelMedium,
@@ -917,7 +917,7 @@ fun ArusTransactionRow(
             iconResId = iconResId,
             tileColor = tileColor,
             iconTint = iconTint,
-            size = 44.dp
+            size = 40.dp
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -969,7 +969,7 @@ fun ArusBarChart(
             style = ArusTypography.labelMedium,
             color = ArusTextSecondary
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         if (entries.isEmpty() || entries.all { it.incomeAmount == 0L && it.expenseAmount == 0L }) {
             Column(
@@ -1033,7 +1033,7 @@ fun ArusBarChart(
                                     .background(ArusExpense)
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = entry.label,
                             style = ArusTypography.labelSmall,
@@ -1044,7 +1044,7 @@ fun ArusBarChart(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -1071,7 +1071,7 @@ fun ArusBarChart(
                 Text(text = "Pengeluaran", style = ArusTypography.labelSmall, color = ArusTextPrimary)
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             if (selectedEntry != null) {
                 val selected = selectedEntry!!
                 Text(
@@ -1331,7 +1331,7 @@ fun ArusEmptyState(
                 modifier = Modifier.size(36.dp)
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = title,
             style = ArusTypography.titleLarge,
@@ -1404,16 +1404,16 @@ fun ArusSkeletonLoading(
         modifier = modifier
             .fillMaxSize()
             .statusBarsPadding()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         if (showHero) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(118.dp)
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .background(skeletonColor)
             )
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -1421,14 +1421,14 @@ fun ArusSkeletonLoading(
                     modifier = Modifier
                         .weight(1f)
                         .height(96.dp)
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(16.dp))
                         .background(skeletonColor)
                 )
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .height(96.dp)
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(16.dp))
                         .background(skeletonColor)
                 )
             }
@@ -1446,7 +1446,7 @@ fun ArusSkeletonLoading(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .background(skeletonColor)
             )
         }
@@ -1578,9 +1578,9 @@ fun ArusConfirmationSheet(
                     iconResId = iconResId,
                     tileColor = tileColor,
                     iconTint = iconTint,
-                    size = 56.dp
+                    size = 52.dp
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
             }
             Text(
                 text = title,
@@ -1588,14 +1588,14 @@ fun ArusConfirmationSheet(
                 color = ArusTextPrimary,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = message,
                 style = ArusTypography.bodyMedium,
                 color = ArusTextSecondary,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -1625,7 +1625,7 @@ fun ArusConfirmationSheet(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -1682,7 +1682,7 @@ fun ArusActionPill(
         Row(
             modifier = buttonModifier
                 .heightIn(min = 48.dp)
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -1963,7 +1963,7 @@ fun ArusPasswordSheet(
                 color = ArusTextPrimary,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = message,
                 style = ArusTypography.bodyMedium,
@@ -2025,7 +2025,7 @@ fun ArusPasswordSheet(
                     errorBorderColor = ArusExpense
                 )
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -2048,7 +2048,7 @@ fun ArusPasswordSheet(
                         ),
                         modifier = Modifier
                             .weight(1f)
-                            .height(54.dp)
+                            .height(48.dp)
                     ) {
                         Text(
                             text = confirmButtonText,
@@ -2067,7 +2067,7 @@ fun ArusPasswordSheet(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -2121,7 +2121,7 @@ fun ArusSelectionSheet(
                 style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = ArusTextPrimary
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // V2-P2-8: daftar pemilih bisa di-scroll (kategori bisa > 8).
             Column(
@@ -2193,7 +2193,7 @@ fun ArusSelectionSheet(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -2271,9 +2271,9 @@ fun ArusTransactionDetailSheet(
                 iconResId = data.iconResId,
                 tileColor = data.tileColor,
                 iconTint = data.iconTint,
-                size = 56.dp
+                size = 52.dp
             )
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = data.title,
@@ -2284,22 +2284,22 @@ fun ArusTransactionDetailSheet(
 
             ArusTrendBadge(text = typeBadgeText, style = trendStyle)
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // 2. Large Nominal Amount
             Text(
                 text = "$amountPrefix${data.amount.formatRupiah()}",
                 style = ArusTypography.displayLarge.copy(
-                    fontSize = 32.sp,
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = amountColor
                 )
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // 3. Property Details List Card
-            ArusCard(cornerRadius = 24.dp) {
+            ArusCard(cornerRadius = 16.dp) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     DetailRow(label = "Tanggal & Waktu", value = data.dateText)
                     if (data.targetWalletText != null) {
@@ -2343,7 +2343,7 @@ fun ArusTransactionDetailSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // 4. Action Buttons
             Row(
@@ -2442,7 +2442,7 @@ fun ArusToggleRow(
             .background(ArusSurface)
             .border(1.dp, ArusBorder, RoundedCornerShape(16.dp))
             .clickable { onCheckedChange(!checked) }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -2520,7 +2520,7 @@ fun ArusProgressCard(
                 style = if (currentAmount <= totalAmount) TrendStyle.POSITIVE else TrendStyle.NEGATIVE
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -2537,7 +2537,7 @@ fun ArusProgressCard(
                 color = ArusTextSecondary
             )
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         LinearProgressIndicator(
             progress = { progress },
             modifier = Modifier
@@ -2548,7 +2548,7 @@ fun ArusProgressCard(
             trackColor = ArusBrandSoft
         )
         if (subtitle != null) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = subtitle,
                 style = ArusTypography.labelSmall,
@@ -2587,7 +2587,7 @@ fun ArusKeypadView(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(54.dp)
+                            .height(48.dp)
                             .clip(PillShape)
                             .background(ArusSurface)
                             .border(1.dp, ArusBorder, PillShape)

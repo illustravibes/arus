@@ -87,8 +87,8 @@ val ArusTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = InterFontFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 32.sp,
-        lineHeight = 38.sp,
+        fontSize = 28.sp,
+        lineHeight = 34.sp,
         letterSpacing = (-0.5).sp,
         fontFeatureSettings = TabularNumberFeature,
         color = ArusTextPrimary
@@ -105,8 +105,8 @@ val ArusTypography = Typography(
     titleLarge = TextStyle(
         fontFamily = InterFontFamily,
         fontWeight = FontWeight.Bold,
-        fontSize = 20.sp,
-        lineHeight = 26.sp,
+        fontSize = 18.sp,
+        lineHeight = 24.sp,
         letterSpacing = (-0.2).sp,
         color = ArusTextPrimary
     ),
@@ -162,13 +162,13 @@ val ArusTypography = Typography(
 val ArusShapes = Shapes(
     small = RoundedCornerShape(12.dp),      // Soft Tiles / Small Buttons
     medium = RoundedCornerShape(16.dp),     // Input Fields / Modals
-    large = RoundedCornerShape(24.dp),      // Cards & Sheets
+    large = RoundedCornerShape(16.dp),      // Cards & Sheets
     extraLarge = RoundedCornerShape(100.dp) // Pill Buttons & Chips
 )
 
 val SoftTileShape = RoundedCornerShape(14.dp)
-val CardShape = RoundedCornerShape(24.dp)
-val LargeCardShape = RoundedCornerShape(24.dp)
+val CardShape = RoundedCornerShape(16.dp)
+val LargeCardShape = RoundedCornerShape(16.dp)
 val PillShape = RoundedCornerShape(100.dp)
 
 // ============================================================================

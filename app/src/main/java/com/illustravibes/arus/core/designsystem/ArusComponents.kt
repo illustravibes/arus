@@ -804,20 +804,39 @@ fun ArusStatCard(
     }
 
     ArusCard(modifier = modifier) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = title,
-                style = ArusTypography.labelMedium,
-                color = ArusTextSecondary
-            )
+        // Tombol mata 48dp (area sentuh) mengambang di kanan atas dan
+        // tidak lagi menentukan tinggi kartu — dulu baris header 48dp
+        // membuat label dan nominal berjarak jauh. Lingkaran visual
+        // 32dp sejajar dengan baris nominal (yang ia sembunyikan).
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column {
+                Text(
+                    text = title,
+                    style = ArusTypography.labelMedium,
+                    color = ArusTextSecondary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = displayAmount,
+                    style = amountStyle,
+                    color = accentColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (subtitle != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = subtitle,
+                        style = ArusTypography.labelSmall,
+                        color = ArusTextSecondary
+                    )
+                }
+            }
             if (showEyeButton && onToggleHideBalance != null) {
                 // P1-1: area sentuh 48dp, lingkaran visual tetap 32dp.
                 Box(
                     modifier = Modifier
+                        .align(Alignment.TopEnd)
                         .size(48.dp)
                         .clip(CircleShape)
                         .clickable { onToggleHideBalance() },
@@ -839,22 +858,6 @@ fun ArusStatCard(
                     }
                 }
             }
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = displayAmount,
-            style = amountStyle,
-            color = accentColor,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        if (subtitle != null) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = subtitle,
-                style = ArusTypography.labelSmall,
-                color = ArusTextSecondary
-            )
         }
     }
 }

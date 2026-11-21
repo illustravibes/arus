@@ -874,7 +874,7 @@ fun ArusWalletCard(
     onClick: (() -> Unit)? = null,
     logoResId: Int? = null
 ) {
-    // V2-P1-4: saldo sangat panjang mengecil otomatis (kartu dompet 220dp).
+    // V2-P1-4: saldo sangat panjang mengecil otomatis (kartu dompet 200dp).
     val balanceText = balance.formatRupiah()
     val balanceStyle = when {
         balanceText.length > 18 -> ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 12.sp, lineHeight = 16.sp)
@@ -883,7 +883,7 @@ fun ArusWalletCard(
         else -> ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold)
     }
     ArusCard(
-        modifier = modifier.width(220.dp),
+        modifier = modifier.width(200.dp),
         onClick = onClick
     ) {
         Row(

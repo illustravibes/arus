@@ -2910,10 +2910,13 @@ fun ArusSelectionSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Full rounded: keempat sudut 28dp + sheet mengambang 16dp dari bawah
+    // (padding di modifier hanya mengangkat Surface sheet-nya; scrim tetap
+    // layar penuh). Keputusan user 2026-11-21.
     ModalBottomSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        shape = RoundedCornerShape(28.dp),
         containerColor = ArusSurface,
         dragHandle = {
             Box(
@@ -2925,7 +2928,7 @@ fun ArusSelectionSheet(
                     .background(ArusBorder)
             )
         },
-        modifier = modifier
+        modifier = modifier.padding(bottom = 16.dp)
     ) {
         Column(
             modifier = Modifier

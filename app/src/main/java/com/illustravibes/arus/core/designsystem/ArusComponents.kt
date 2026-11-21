@@ -691,9 +691,7 @@ fun ArusWalletTile(
         Box(
             modifier = modifier
                 .size(size)
-                .clip(SoftTileShape)
-                .background(ArusSurface)
-                .border(1.dp, ArusBorder, SoftTileShape),
+                .clip(SoftTileShape),
             contentAlignment = Alignment.Center
         ) {
             Image(
@@ -2167,7 +2165,6 @@ fun ArusWalletBrandPicker(
                             modifier = Modifier
                                 .size(width = 64.dp, height = 32.dp)
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(ArusSurface)
                                 .padding(4.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -2189,14 +2186,6 @@ fun ArusWalletBrandPicker(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f)
                         )
-                        if (isSelected) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_check),
-                                contentDescription = "Terpilih",
-                                tint = ArusBrandPrimary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
                     }
                 }
             }

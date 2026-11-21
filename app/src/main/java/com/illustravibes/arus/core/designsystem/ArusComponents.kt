@@ -1086,7 +1086,7 @@ fun ArusBarChart(
     var selectedEntry by remember(entries) { mutableStateOf<BarChartEntry?>(null) }
     ArusCard(modifier = modifier) {
         Text(
-            text = "PERBANDINGAN PEMASUKAN VS PENGELUARAN",
+            text = "Perbandingan Pemasukan vs Pengeluaran",
             style = ArusTypography.labelMedium,
             color = ArusTextSecondary
         )

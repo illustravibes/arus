@@ -62,117 +62,128 @@ fun TransactionEntryScreen(
                 .padding(paddingValues)
                 .imePadding()
                 .padding(horizontal = 12.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(4.dp))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(4.dp))
 
-            // 1. Type Switcher (Pemasukan, Pengeluaran, Transfer)
-            ArusSegmentedControl(
-                options = listOf("Pemasukan", "Pengeluaran", "Transfer"),
-                selectedIndex = uiState.typeIndex,
-                onOptionSelected = { index -> viewModel.onTypeChange(index) }
-            )
+                // 1. Type Switcher (Pemasukan, Pengeluaran, Transfer)
+                ArusSegmentedControl(
+                    options = listOf("Pemasukan", "Pengeluaran", "Transfer"),
+                    selectedIndex = uiState.typeIndex,
+                    onOptionSelected = { index -> viewModel.onTypeChange(index) }
+                )
 
-            // 2. Hero Amount Input (36sp bold with IDR formatting)
-            ArusAmountHeroInput(
-                value = uiState.amountInput,
-                onValueChange = { input -> viewModel.onAmountChange(input) },
-                label = "NOMINAL " + when (uiState.typeIndex) {
-                    0 -> "PEMASUKAN"
-                    1 -> "PENGELUARAN"
-                    else -> "TRANSFER"
-                },
-                errorMessage = uiState.errorMessage,
-                amountColor = when (uiState.typeIndex) {
-                    0 -> ArusIncome
-                    1 -> ArusExpense
-                    else -> ArusTextPrimary
-                },
-            )
+                // 2. Hero Amount Input (36sp bold with IDR formatting)
+                ArusAmountHeroInput(
+                    value = uiState.amountInput,
+                    onValueChange = { input -> viewModel.onAmountChange(input) },
+                    label = "NOMINAL " + when (uiState.typeIndex) {
+                        0 -> "PEMASUKAN"
+                        1 -> "PENGELUARAN"
+                        else -> "TRANSFER"
+                    },
+                    errorMessage = uiState.errorMessage,
+                    amountColor = when (uiState.typeIndex) {
+                        0 -> ArusIncome
+                        1 -> ArusExpense
+                        else -> ArusTextPrimary
+                    },
+                )
 
-            // 3. Detail transaksi dalam satu kartu (Dompet/Kategori + Tanggal).
-            // Pola yang sama dengan kartu harian & "Kelola Data": satu ArusCard,
-            // baris dipisah divider, inCard = true.
-            ArusCard {
-                if (uiState.typeIndex == 2) {
-                    val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
-                    val targetWalletTint = parseHexColor(uiState.selectedTargetWallet?.colorHex ?: "#00A86B", NotionMint)
+                // 3. Detail transaksi dalam satu kartu (Dompet/Kategori + Tanggal).
+                // Pola yang sama dengan kartu harian & "Kelola Data": satu ArusCard,
+                // baris dipisah divider, inCard = true.
+                ArusCard {
+                    if (uiState.typeIndex == 2) {
+                        val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
+                        val targetWalletTint = parseHexColor(uiState.selectedTargetWallet?.colorHex ?: "#00A86B", NotionMint)
 
-                    // Transfer: Dompet Asal & Dompet Tujuan
-                    ArusPropertySelectorRow(
-                        label = "Dompet Asal",
-                        selectedValue = uiState.selectedWallet?.name ?: "Pilih Dompet",
-                        onClick = { showWalletSheet = true },
-                        iconResId = mapDrawableIcon(uiState.selectedWallet?.icon ?: "fa_wallet"),
-                        tileColor = walletTint.copy(alpha = 0.15f),
-                        iconTint = walletTint,
-                        logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug),
-                        inCard = true
-                    )
+                        // Transfer: Dompet Asal & Dompet Tujuan
+                        ArusPropertySelectorRow(
+                            label = "Dompet Asal",
+                            valueOnLeft = true,
+                            selectedValue = uiState.selectedWallet?.name ?: "",
+                            onClick = { showWalletSheet = true },
+                            iconResId = mapDrawableIcon(uiState.selectedWallet?.icon ?: "fa_wallet"),
+                            tileColor = walletTint.copy(alpha = 0.15f),
+                            iconTint = walletTint,
+                            logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug),
+                            inCard = true
+                        )
+                        HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                        ArusPropertySelectorRow(
+                            label = "Dompet Tujuan",
+                            valueOnLeft = true,
+                            selectedValue = uiState.selectedTargetWallet?.name ?: "",
+                            onClick = { showTargetWalletSheet = true },
+                            iconResId = mapDrawableIcon(uiState.selectedTargetWallet?.icon ?: "fa_wallet"),
+                            tileColor = targetWalletTint.copy(alpha = 0.15f),
+                            iconTint = targetWalletTint,
+                            logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedTargetWallet?.logoSlug),
+                            inCard = true
+                        )
+                    } else {
+                        val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
+                        val categoryTint = parseHexColor(uiState.selectedCategory?.colorHex ?: "#00A86B", NotionMint)
+
+                        // Pemasukan/Pengeluaran: Dompet & Kategori
+                        ArusPropertySelectorRow(
+                            label = "Pilih Dompet",
+                            valueOnLeft = true,
+                            selectedValue = uiState.selectedWallet?.name ?: "",
+                            onClick = { showWalletSheet = true },
+                            iconResId = mapDrawableIcon(uiState.selectedWallet?.icon ?: "fa_wallet"),
+                            tileColor = walletTint.copy(alpha = 0.15f),
+                            iconTint = walletTint,
+                            logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug),
+                            inCard = true
+                        )
+                        HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                        ArusPropertySelectorRow(
+                            label = "Kategori",
+                            valueOnLeft = true,
+                            selectedValue = uiState.selectedCategory?.name ?: "",
+                            onClick = { showCategorySheet = true },
+                            iconResId = mapDrawableIcon(uiState.selectedCategory?.icon ?: "fa_tags"),
+                            tileColor = categoryTint.copy(alpha = 0.15f),
+                            iconTint = categoryTint,
+                            inCard = true
+                        )
+                    }
                     HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                    // Tanggal transaksi (bisa diubah; maks. hari ini).
+                    // tileColor: NotionSkySoft polos (dulu NotionSkySoft 15% — nyaris
+                    // tak terlihat di atas putih; pola yang sama dengan Kelola Data).
                     ArusPropertySelectorRow(
-                        label = "Dompet Tujuan",
-                        selectedValue = uiState.selectedTargetWallet?.name ?: "Pilih Dompet Tujuan",
-                        onClick = { showTargetWalletSheet = true },
-                        iconResId = mapDrawableIcon(uiState.selectedTargetWallet?.icon ?: "fa_wallet"),
-                        tileColor = targetWalletTint.copy(alpha = 0.15f),
-                        iconTint = targetWalletTint,
-                        logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedTargetWallet?.logoSlug),
-                        inCard = true
-                    )
-                } else {
-                    val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
-                    val categoryTint = parseHexColor(uiState.selectedCategory?.colorHex ?: "#00A86B", NotionMint)
-
-                    // Pemasukan/Pengeluaran: Dompet & Kategori
-                    ArusPropertySelectorRow(
-                        label = "Pilih Dompet",
-                        selectedValue = uiState.selectedWallet?.name ?: "Pilih Dompet",
-                        onClick = { showWalletSheet = true },
-                        iconResId = mapDrawableIcon(uiState.selectedWallet?.icon ?: "fa_wallet"),
-                        tileColor = walletTint.copy(alpha = 0.15f),
-                        iconTint = walletTint,
-                        logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug),
-                        inCard = true
-                    )
-                    HorizontalDivider(color = ArusBorder, thickness = 1.dp)
-                    ArusPropertySelectorRow(
-                        label = "Kategori",
-                        selectedValue = uiState.selectedCategory?.name ?: "Pilih Kategori",
-                        onClick = { showCategorySheet = true },
-                        iconResId = mapDrawableIcon(uiState.selectedCategory?.icon ?: "fa_tags"),
-                        tileColor = categoryTint.copy(alpha = 0.15f),
-                        iconTint = categoryTint,
+                        label = "Tanggal",
+                        valueOnLeft = true,
+                        selectedValue = SimpleDateFormat("EEEE, d MMM yyyy", Locale("id", "ID")).format(Date(uiState.dateMillis)),
+                        onClick = { showDatePicker = true },
+                        iconResId = R.drawable.fa_calendar,
+                        tileColor = NotionSkySoft,
+                        iconTint = NotionSky,
                         inCard = true
                     )
                 }
-                HorizontalDivider(color = ArusBorder, thickness = 1.dp)
-                // Tanggal transaksi (bisa diubah; maks. hari ini).
-                // tileColor: NotionSkySoft polos (dulu NotionSkySoft 15% — nyaris
-                // tak terlihat di atas putih; pola yang sama dengan Kelola Data).
-                ArusPropertySelectorRow(
-                    label = "Tanggal",
-                    selectedValue = SimpleDateFormat("EEEE, d MMMM yyyy", Locale("id", "ID")).format(Date(uiState.dateMillis)),
-                    onClick = { showDatePicker = true },
-                    iconResId = R.drawable.fa_calendar,
-                    tileColor = NotionSkySoft,
-                    iconTint = NotionSky,
-                    inCard = true
+
+                // 4. Note Field
+                ArusTextField(
+                    value = uiState.note,
+                    onValueChange = { note -> viewModel.onNoteChange(note) },
+                    label = "Catatan (Opsional)",
+                    placeholder = "mis. Makan siang bersama Budi"
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // 4. Note Field
-            ArusTextField(
-                value = uiState.note,
-                onValueChange = { note -> viewModel.onNoteChange(note) },
-                label = "Catatan (Opsional)",
-                placeholder = "mis. Makan siang bersama Budi"
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // 5. Submit Button — P1-6: nonaktif sampai input valid.
+            // 5. Submit Button — ditempel ke bawah layar; P1-6: nonaktif
+            // sampai input valid.
             val isFormValid = (uiState.amountInput.toLongOrNull() ?: 0L) > 0 &&
                 uiState.selectedWallet != null &&
                 if (uiState.typeIndex == 2) uiState.selectedTargetWallet != null
@@ -183,7 +194,7 @@ fun TransactionEntryScreen(
                 enabled = isFormValid
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         // Selection Bottom Sheets

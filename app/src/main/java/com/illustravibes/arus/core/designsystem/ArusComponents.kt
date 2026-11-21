@@ -401,7 +401,8 @@ fun ArusPropertySelectorRow(
     iconTint: Color = NotionSky,
     placeholder: String = "Pilih",
     logoResId: Int? = null,
-    inCard: Boolean = false
+    inCard: Boolean = false,
+    valueOnLeft: Boolean = false
 ) {
     Row(
         modifier = modifier
@@ -432,31 +433,53 @@ fun ArusPropertySelectorRow(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
             }
-            Text(
-                text = label,
-                style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = ArusTextPrimary
-            )
+            if (valueOnLeft) {
+                // Nilai di kiri (ala Bevel/Notion): teks kiri = nilai yang
+                // dipilih, atau label (abu-abu) kalau belum dipilih.
+                Text(
+                    text = selectedValue.ifEmpty { label },
+                    style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = if (selectedValue.isNotEmpty()) ArusTextPrimary else ArusTextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            } else {
+                Text(
+                    text = label,
+                    style = ArusTypography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = ArusTextPrimary
+                )
+            }
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = selectedValue.ifEmpty { placeholder },
-                style = ArusTypography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium,
-                    color = if (selectedValue.isNotEmpty()) ArusTextPrimary else ArusTextSecondary
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.width(6.dp))
+        if (valueOnLeft) {
+            // Kanan cukup chevron kecil tipis (referensi Bevel/Notion).
             Icon(
-                painter = painterResource(id = R.drawable.fa_chevron_right),
+                painter = painterResource(id = R.drawable.ic_chevron_right_thin),
                 contentDescription = null,
                 tint = ArusTextSecondary,
-                modifier = Modifier.size(14.dp)
+                modifier = Modifier.size(12.dp)
             )
+        } else {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = selectedValue.ifEmpty { placeholder },
+                    style = ArusTypography.bodyMedium.copy(
+                        fontWeight = FontWeight.Medium,
+                        color = if (selectedValue.isNotEmpty()) ArusTextPrimary else ArusTextSecondary
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(
+                    painter = painterResource(id = R.drawable.fa_chevron_right),
+                    contentDescription = null,
+                    tint = ArusTextSecondary,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
         }
     }
 }

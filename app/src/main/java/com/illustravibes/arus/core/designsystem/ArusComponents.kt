@@ -2968,8 +2968,8 @@ fun ArusSelectionSheet(
                     val rowBgColor = if (isSelected) ArusBrandSoft else ArusSurface
 
                     // Tiap opsi satu pill penuh 48dp (tile lingkaran
-                    // 36dp + padding vertikal 6dp) — keputusan user
-                    // 2026-11-21.
+                    // 36dp + padding vertikal 6dp, kiri 6dp) — keputusan
+                    // user 2026-11-21.
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -2980,7 +2980,7 @@ fun ArusSelectionSheet(
                                 onItemSelected(item)
                                 onDismiss()
                             }
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                            .padding(start = 6.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {

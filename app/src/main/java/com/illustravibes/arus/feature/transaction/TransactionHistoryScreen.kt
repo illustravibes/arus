@@ -55,12 +55,10 @@ fun TransactionHistoryScreen(
             Spacer(modifier = Modifier.height(4.dp))
 
             // 1. Search Bar
-            ArusTextField(
+            ArusSearchField(
                 value = uiState.searchQuery,
                 onValueChange = { query -> viewModel.onSearchChange(query) },
-                label = "Cari Transaksi",
-                placeholder = "Cari nama kategori, catatan, nominal...",
-                showClearButton = true
+                placeholder = "Cari nama kategori, catatan, nominal..."
             )
 
             // 2. Type & Wallet Filter Chips
@@ -168,7 +166,7 @@ fun TransactionHistoryScreen(
                         }
                     }
 
-                    item { Spacer(modifier = Modifier.height(102.dp)) }
+                    item { Spacer(modifier = Modifier.height(110.dp)) }
                 }
             }
         }

@@ -589,6 +589,66 @@ fun ArusTextField(
 }
 
 // ============================================================================
+// 4b. ARUS SEARCH FIELD (Bevel/Notion: latar abu-abu terisi, tanpa border,
+// kaca pembesar kiri, clear x kanan — plan design system 2026-11-21 Fase 1)
+// ============================================================================
+
+@Composable
+fun ArusSearchField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: String = "Cari..."
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp),
+        placeholder = {
+            Text(
+                text = placeholder,
+                style = ArusTypography.bodyMedium,
+                color = ArusTextSecondary
+            )
+        },
+        leadingIcon = {
+            Icon(
+                painter = painterResource(id = R.drawable.fa_magnifying_glass),
+                contentDescription = null,
+                tint = ArusTextSecondary,
+                modifier = Modifier.size(18.dp)
+            )
+        },
+        trailingIcon = if (value.isNotEmpty()) {
+            {
+                IconButton(
+                    onClick = { onValueChange("") },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_close),
+                        contentDescription = "Hapus pencarian",
+                        tint = ArusTextSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        } else null,
+        singleLine = true,
+        textStyle = ArusTypography.bodyMedium.copy(color = ArusTextPrimary),
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = ArusBrandSoft,
+            unfocusedContainerColor = ArusBrandSoft,
+            focusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = Color.Transparent
+        )
+    )
+}
+
+// ============================================================================
 // 5. ARUS CATEGORY TILE (Soft Tile with Notion Accent Colors)
 // ============================================================================
 
@@ -666,16 +726,14 @@ fun ArusChip(
     modifier: Modifier = Modifier,
     accentColor: Color = ArusBrandPrimary
 ) {
-    val backgroundColor = if (selected) accentColor else ArusSurface
+    val backgroundColor = if (selected) accentColor else ArusBrandSoft
     val textColor = if (selected) Color.White else ArusTextPrimary
-    val borderColor = if (selected) accentColor else ArusBorder
 
     Box(
         modifier = modifier
             .heightIn(min = 48.dp)
             .clip(PillShape)
             .background(backgroundColor)
-            .border(1.dp, borderColor, PillShape)
             .clickable { onClick() }
             .padding(horizontal = 20.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
@@ -754,7 +812,7 @@ fun ArusStatCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = title.uppercase(),
+                text = title,
                 style = ArusTypography.labelMedium,
                 color = ArusTextSecondary
             )
@@ -1583,7 +1641,7 @@ fun ArusDateHeaderRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = dateText.uppercase(),
+            text = dateText,
             style = ArusTypography.labelSmall.copy(fontWeight = FontWeight.Bold),
             color = ArusTextSecondary
         )
@@ -1933,7 +1991,9 @@ fun ArusFormSheet(
             Text(
                 text = title,
                 style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = ArusTextPrimary
+                color = ArusTextPrimary,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
             content()
         }
@@ -2066,48 +2126,10 @@ fun ArusWalletBrandPicker(
         else brands.filter { it.name.contains(query.trim(), ignoreCase = true) }
     }
     Column(modifier = modifier.fillMaxWidth()) {
-        OutlinedTextField(
+        ArusSearchField(
             value = query,
             onValueChange = { query = it },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = {
-                Text(
-                    text = searchPlaceholder,
-                    style = ArusTypography.bodyMedium,
-                    color = ArusTextSecondary
-                )
-            },
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.fa_magnifying_glass),
-                    contentDescription = null,
-                    tint = ArusTextSecondary,
-                    modifier = Modifier.size(20.dp)
-                )
-            },
-            trailingIcon = if (query.isNotEmpty()) {
-                {
-                    IconButton(
-                        onClick = { query = "" },
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_close),
-                            contentDescription = "Hapus pencarian",
-                            tint = ArusTextSecondary,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-            } else null,
-            singleLine = true,
-            shape = PillShape,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = ArusSurface,
-                unfocusedContainerColor = ArusSurface,
-                focusedBorderColor = ArusBrandPrimary,
-                unfocusedBorderColor = ArusBorder
-            )
+            placeholder = searchPlaceholder
         )
         Spacer(modifier = Modifier.height(8.dp))
         if (filteredBrands.isEmpty()) {
@@ -3202,7 +3224,7 @@ fun ArusProgressCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = title.uppercase(),
+                text = title,
                 style = ArusTypography.labelMedium,
                 color = ArusTextSecondary
             )

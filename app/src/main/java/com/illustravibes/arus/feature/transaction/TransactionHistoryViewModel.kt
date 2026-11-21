@@ -39,7 +39,8 @@ class TransactionHistoryViewModel(
         combine(
             transactionRepository.allTransactionsFlow,
             walletRepository.walletsFlow,
-            categoryRepository.activeCategoriesFlow,
+            // V2-P1-5: peta tampilan pakai semua kategori (termasuk terarsip).
+            categoryRepository.allCategoriesFlow,
             _uiState.map { Triple(it.searchQuery, it.selectedWalletFilterId, it.selectedTypeFilter) }.distinctUntilChanged()
         ) { allTransactions, wallets, categories, (query, walletFilter, typeFilter) ->
             val categoriesMap = categories.associateBy { it.id }
@@ -48,10 +49,14 @@ class TransactionHistoryViewModel(
                 val category = categoriesMap[tx.categoryId]
                 val matchesWallet = walletFilter == null || tx.walletId == walletFilter || tx.targetWalletId == walletFilter
                 val matchesType = typeFilter == null || tx.type == typeFilter
+                // V2-P1-1: "100.000" / "Rp100.000" harus ketemu seperti
+                // "100000" — bandingkan juga versi digit saja dari query.
+                val queryDigits = query.filter { it.isDigit() }
                 val matchesQuery = query.isBlank() ||
                         (category?.name?.contains(query, ignoreCase = true) == true) ||
                         (tx.note?.contains(query, ignoreCase = true) == true) ||
-                        tx.amount.toString().contains(query)
+                        tx.amount.toString().contains(query) ||
+                        (queryDigits.isNotEmpty() && tx.amount.toString().contains(queryDigits))
 
                 matchesWallet && matchesType && matchesQuery
             }

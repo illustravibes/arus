@@ -34,7 +34,8 @@ fun ReportScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         if (uiState.isLoading) {
-            ArusLoadingState()
+            // V2-P2-3: skeleton, bukan spinner fullscreen.
+            ArusSkeletonLoading(showHero = false, modifier = Modifier.padding(paddingValues))
         } else {
         Column(
             modifier = modifier
@@ -84,12 +85,14 @@ fun ReportScreen(
                     title = "Pemasukan",
                     amount = uiState.totalIncome,
                     isIncome = true,
+                    compactAmount = true,
                     modifier = Modifier.weight(1f)
                 )
                 ArusStatCard(
                     title = "Pengeluaran",
                     amount = uiState.totalExpense,
                     isIncome = false,
+                    compactAmount = true,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -98,7 +101,13 @@ fun ReportScreen(
                 title = "Selisih (Cash Flow)",
                 amount = uiState.netDifference,
                 isIncome = if (uiState.netDifference >= 0L) true else false,
-                subtitle = if (uiState.netDifference >= 0L) "Pemasukan lebih besar dari pengeluaran" else "Pengeluaran melebihi pemasukan"
+                // V2-P2-1: saat keduanya nol, tidak ada yang "lebih besar".
+                subtitle = when {
+                    uiState.totalIncome == 0L && uiState.totalExpense == 0L -> "Belum ada pemasukan maupun pengeluaran pada periode ini"
+                    uiState.netDifference > 0L -> "Pemasukan lebih besar dari pengeluaran"
+                    uiState.netDifference < 0L -> "Pengeluaran melebihi pemasukan"
+                    else -> "Pemasukan dan pengeluaran sama besar"
+                }
             )
 
             // 4. Progress Ratio Card

@@ -37,7 +37,8 @@ fun CategoryScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         if (uiState.isLoading) {
-            ArusLoadingState()
+            // V2-P2-3: skeleton, bukan spinner fullscreen.
+            ArusSkeletonLoading(showHero = false, modifier = Modifier.padding(paddingValues))
         } else {
         Column(
             modifier = modifier
@@ -113,6 +114,47 @@ fun CategoryScreen(
             }
             }
 
+            // V2-P1-5: kategori terarsip bisa dipulihkan dari sini.
+            if (uiState.archivedCategories.isNotEmpty()) {
+                ArusSectionHeader(title = "Kategori Terarsip (${uiState.archivedCategories.size})")
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    uiState.archivedCategories.forEach { category ->
+                        val defaultTint = if (category.type == "EXPENSE") NotionCoral else NotionMint
+                        val iconTint = parseHexColor(category.colorHex, defaultTint)
+                        val tileColor = iconTint.copy(alpha = 0.15f)
+                        ArusCard {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    ArusCategoryTile(
+                                        iconResId = mapDrawableIcon(category.icon),
+                                        tileColor = tileColor,
+                                        iconTint = iconTint,
+                                        size = 44.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = category.name,
+                                        style = ArusTypography.titleMedium,
+                                        color = ArusTextSecondary
+                                    )
+                                }
+                                ArusActionPill(
+                                    text = "Pulihkan",
+                                    onClick = { viewModel.unarchiveCategory(category) }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(80.dp))
         }
         }
@@ -173,7 +215,9 @@ fun CategoryScreen(
 
                     ArusPrimaryButton(
                         text = "Simpan Kategori",
-                        onClick = { viewModel.saveCategory() }
+                        onClick = { viewModel.saveCategory() },
+                        // V2-P1-6: Simpan nonaktif sampai nama terisi (pola layar Catat).
+                        enabled = uiState.nameInput.isNotBlank()
                     )
             }
         }

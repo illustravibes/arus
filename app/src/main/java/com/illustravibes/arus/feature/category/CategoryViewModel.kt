@@ -10,6 +10,9 @@ import kotlinx.coroutines.launch
 data class CategoryUiState(
     val isLoading: Boolean = true,
     val categories: List<CategoryEntity> = emptyList(),
+    // V2-P1-5: daftar arsip + semua kategori (untuk cek duplikat lintas status).
+    val archivedCategories: List<CategoryEntity> = emptyList(),
+    val allCategories: List<CategoryEntity> = emptyList(),
     val selectedTypeTab: String = "EXPENSE", // "EXPENSE" or "INCOME"
     val showDialog: Boolean = false,
     val nameInput: String = "",
@@ -32,10 +35,16 @@ class CategoryViewModel(
     private fun loadCategories() {
         combine(
             categoryRepository.activeCategoriesFlow,
+            categoryRepository.archivedCategoriesFlow,
+            categoryRepository.allCategoriesFlow,
             _uiState.map { it.selectedTypeTab }.distinctUntilChanged()
-        ) { allCategories, type ->
-            val filtered = allCategories.filter { it.type == type }
-            _uiState.value.copy(categories = filtered, isLoading = false)
+        ) { active, archived, all, type ->
+            _uiState.value.copy(
+                categories = active.filter { it.type == type },
+                archivedCategories = archived.filter { it.type == type },
+                allCategories = all,
+                isLoading = false
+            )
         }.onEach { state ->
             _uiState.value = state
         }.launchIn(viewModelScope)
@@ -81,6 +90,17 @@ class CategoryViewModel(
                 return@launch
             }
 
+            // V2-P2-6: nama duplikat (abaikan kapitalisasi/spasi, termasuk
+            // yang terarsip) ditolak — pulihkan yang lama, jangan buat baru.
+            val normalizedName = state.nameInput.trim()
+            val isDuplicateName = state.allCategories.any {
+                it.type == state.selectedTypeTab && it.name.trim().equals(normalizedName, ignoreCase = true)
+            }
+            if (isDuplicateName) {
+                _uiState.update { it.copy(errorMessage = "Nama kategori sudah dipakai") }
+                return@launch
+            }
+
             categoryRepository.createCategory(
                 name = state.nameInput.trim(),
                 type = state.selectedTypeTab,
@@ -95,6 +115,13 @@ class CategoryViewModel(
     fun archiveCategory(category: CategoryEntity) {
         viewModelScope.launch {
             categoryRepository.archiveCategory(category)
+        }
+    }
+
+    // V2-P1-5: batalkan arsip — kategori muncul lagi di pemilih.
+    fun unarchiveCategory(category: CategoryEntity) {
+        viewModelScope.launch {
+            categoryRepository.unarchiveCategory(category)
         }
     }
 }

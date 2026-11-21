@@ -8,6 +8,11 @@ class CategoryRepository(private val db: ArusDatabase) {
 
     val activeCategoriesFlow: Flow<List<CategoryEntity>> = db.categoryDao().getActiveCategoriesFlow()
 
+    // V2-P1-5: peta tampilan memakai SEMUA kategori (termasuk terarsip).
+    val allCategoriesFlow: Flow<List<CategoryEntity>> = db.categoryDao().getAllCategoriesFlow()
+
+    val archivedCategoriesFlow: Flow<List<CategoryEntity>> = db.categoryDao().getArchivedCategoriesFlow()
+
     fun getCategoriesByTypeFlow(type: String): Flow<List<CategoryEntity>> {
         return db.categoryDao().getActiveCategoriesByTypeFlow(type)
     }
@@ -30,5 +35,10 @@ class CategoryRepository(private val db: ArusDatabase) {
 
     suspend fun archiveCategory(category: CategoryEntity) {
         db.categoryDao().updateCategory(category.copy(isArchived = true))
+    }
+
+    // V2-P1-5: batalkan arsip — kategori muncul lagi di pemilih.
+    suspend fun unarchiveCategory(category: CategoryEntity) {
+        db.categoryDao().updateCategory(category.copy(isArchived = false))
     }
 }

@@ -1,5 +1,6 @@
 package com.illustravibes.arus.feature.home
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.illustravibes.arus.core.database.entity.CategoryEntity
@@ -9,6 +10,7 @@ import com.illustravibes.arus.data.repository.CategoryRepository
 import com.illustravibes.arus.data.repository.TransactionRepository
 import com.illustravibes.arus.data.repository.WalletRepository
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 data class HomeUiState(
@@ -20,16 +22,22 @@ data class HomeUiState(
     val wallets: List<WalletEntity> = emptyList(),
     val walletBalances: Map<Long, Long> = emptyMap(),
     val recentTransactions: List<TransactionEntity> = emptyList(),
-    val categoriesMap: Map<Long, CategoryEntity> = emptyMap()
+    val categoriesMap: Map<Long, CategoryEntity> = emptyMap(),
+    val transactionToDelete: TransactionEntity? = null
 )
 
 class HomeViewModel(
     private val walletRepository: WalletRepository,
     private val categoryRepository: CategoryRepository,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    context: Context
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUiState())
+    // V2-P2-2: pilihan sembunyikan saldo bertahan setelah aplikasi ditutup.
+    // Hanya applicationContext yang disimpan (bukan Activity) supaya aman.
+    private val prefs = context.applicationContext.getSharedPreferences("arus_prefs", Context.MODE_PRIVATE)
+
+    private val _uiState = MutableStateFlow(HomeUiState(isBalanceHidden = prefs.getBoolean("balance_hidden", false)))
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
@@ -39,7 +47,7 @@ class HomeViewModel(
     private fun loadHomeData() {
         combine(
             walletRepository.walletsFlow,
-            combine(transactionRepository.allTransactionsFlow, categoryRepository.activeCategoriesFlow) { t, c -> Pair(t, c) }
+            combine(transactionRepository.allTransactionsFlow, categoryRepository.allCategoriesFlow) { t, c -> Pair(t, c) }
         ) { wallets, (allTransactions, categories) ->
             val categoriesMap = categories.associateBy { it.id }
             val nowMillis = System.currentTimeMillis()
@@ -81,13 +89,37 @@ class HomeViewModel(
             )
         }.onEach { state ->
             _uiState.update { currentState ->
-                state.copy(isBalanceHidden = currentState.isBalanceHidden)
+                state.copy(
+                    isBalanceHidden = currentState.isBalanceHidden,
+                    transactionToDelete = currentState.transactionToDelete
+                )
             }
         }.launchIn(viewModelScope)
     }
 
     fun toggleHideBalance() {
-        _uiState.update { it.copy(isBalanceHidden = !it.isBalanceHidden) }
+        val newValue = !_uiState.value.isBalanceHidden
+        prefs.edit().putBoolean("balance_hidden", newValue).apply()
+        _uiState.update { it.copy(isBalanceHidden = newValue) }
+    }
+
+    // V2-P1-2: hapus transaksi dari detail sheet Beranda (cermin Riwayat).
+    fun onDeleteRequest(transaction: TransactionEntity) {
+        _uiState.update { it.copy(transactionToDelete = transaction) }
+    }
+
+    fun cancelDelete() {
+        _uiState.update { it.copy(transactionToDelete = null) }
+    }
+
+    fun confirmDelete() {
+        viewModelScope.launch {
+            val tx = _uiState.value.transactionToDelete
+            if (tx != null) {
+                transactionRepository.deleteTransaction(tx)
+                _uiState.update { it.copy(transactionToDelete = null) }
+            }
+        }
     }
 
     private fun getMonthBounds(): Pair<Long, Long> {

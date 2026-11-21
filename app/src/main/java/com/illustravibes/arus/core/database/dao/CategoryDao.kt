@@ -10,6 +10,13 @@ interface CategoryDao {
     @Query("SELECT * FROM categories WHERE isArchived = 0 ORDER BY name ASC")
     fun getActiveCategoriesFlow(): Flow<List<CategoryEntity>>
 
+    // V2-P1-5: peta tampilan + cek duplikat memakai semua kategori.
+    @Query("SELECT * FROM categories ORDER BY name ASC")
+    fun getAllCategoriesFlow(): Flow<List<CategoryEntity>>
+
+    @Query("SELECT * FROM categories WHERE isArchived = 1 ORDER BY name ASC")
+    fun getArchivedCategoriesFlow(): Flow<List<CategoryEntity>>
+
     @Query("SELECT * FROM categories WHERE type = :type AND isArchived = 0 ORDER BY name ASC")
     fun getActiveCategoriesByTypeFlow(type: String): Flow<List<CategoryEntity>>
 

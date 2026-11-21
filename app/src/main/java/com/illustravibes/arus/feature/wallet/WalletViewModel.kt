@@ -114,6 +114,16 @@ class WalletViewModel(
                 return@launch
             }
 
+            // V2-P2-6: nama dompet duplikat (abaikan kapitalisasi/spasi) ditolak.
+            val normalizedName = state.nameInput.trim()
+            val isDuplicateName = state.wallets.any {
+                it.name.trim().equals(normalizedName, ignoreCase = true) && it.id != state.editingWallet?.id
+            }
+            if (isDuplicateName) {
+                _uiState.update { it.copy(errorMessage = "Nama dompet sudah dipakai") }
+                return@launch
+            }
+
             val initialBalance = state.initialBalanceInput.toLongOrNull() ?: 0L
 
             if (state.editingWallet == null) {

@@ -37,7 +37,8 @@ fun WalletScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         if (uiState.isLoading) {
-            ArusLoadingState()
+            // V2-P2-3: skeleton, bukan spinner fullscreen.
+            ArusSkeletonLoading(showHero = false, modifier = Modifier.padding(paddingValues))
         } else {
         Column(
             modifier = modifier
@@ -164,6 +165,17 @@ fun WalletScreen(
                         isCurrency = true
                     )
 
+                    // V2-P2-5: di mode Edit, saldo awal bukan saldo berjalan —
+                    // jelaskan efek mengubahnya.
+                    val editingWallet = uiState.editingWallet
+                    if (editingWallet != null) {
+                        Text(
+                            text = "Saldo berjalan saat ini: ${(uiState.walletBalances[editingWallet.id] ?: editingWallet.initialBalance).formatRupiah()} · Mengubah saldo awal akan menggeser saldo dompet.",
+                            style = ArusTypography.labelSmall,
+                            color = ArusTextSecondary
+                        )
+                    }
+
                     Text(
                         text = "Ikon",
                         style = ArusTypography.labelLarge,
@@ -189,7 +201,9 @@ fun WalletScreen(
 
                     ArusPrimaryButton(
                         text = "Simpan Dompet",
-                        onClick = { viewModel.saveWallet() }
+                        onClick = { viewModel.saveWallet() },
+                        // V2-P1-6: Simpan nonaktif sampai nama terisi (pola layar Catat).
+                        enabled = uiState.nameInput.isNotBlank()
                     )
             }
         }

@@ -85,7 +85,8 @@ fun SettingsScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { paddingValues ->
         if (uiState.isLoading) {
-            ArusLoadingState()
+            // V2-P2-3: skeleton, bukan spinner fullscreen.
+            ArusSkeletonLoading(showHero = false, modifier = Modifier.padding(paddingValues))
         } else {
         Column(
             modifier = modifier

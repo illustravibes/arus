@@ -40,6 +40,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -552,7 +556,9 @@ fun ArusStatCard(
     subtitle: String? = null,
     showEyeButton: Boolean = false,
     isBalanceHidden: Boolean = false,
-    onToggleHideBalance: (() -> Unit)? = null
+    onToggleHideBalance: (() -> Unit)? = null,
+    // V2-P1-4: true untuk kartu setengah lebar (bulanan/laporan).
+    compactAmount: Boolean = false
 ) {
     val accentColor = when (isIncome) {
         true -> ArusIncome
@@ -581,6 +587,18 @@ fun ArusStatCard(
         }
     }
     val displayAmount = if (isBalanceHidden) "Rp ••••••••" else animatedAmount.formatRupiah()
+
+    // V2-P1-4: nominal sangat panjang mengecil otomatis supaya tidak
+    // terpotong "…" di kartu setengah lebar (compact). Kartu lebar penuh
+    // (hero/total) tetap memakai displayMedium 24sp.
+    val amountStyle = if (!compactAmount) {
+        ArusTypography.displayMedium
+    } else when {
+        displayAmount.length > 18 -> ArusTypography.displayMedium.copy(fontSize = 13.sp, lineHeight = 17.sp)
+        displayAmount.length > 15 -> ArusTypography.displayMedium.copy(fontSize = 15.sp, lineHeight = 20.sp)
+        displayAmount.length > 12 -> ArusTypography.displayMedium.copy(fontSize = 18.sp, lineHeight = 23.sp)
+        else -> ArusTypography.displayMedium
+    }
 
     ArusCard(modifier = modifier) {
         Row(
@@ -622,7 +640,7 @@ fun ArusStatCard(
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = displayAmount,
-            style = ArusTypography.displayMedium,
+            style = amountStyle,
             color = accentColor,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -652,6 +670,14 @@ fun ArusWalletCard(
     iconTint: Color = NotionSky,
     onClick: (() -> Unit)? = null
 ) {
+    // V2-P1-4: saldo sangat panjang mengecil otomatis (kartu dompet 180dp).
+    val balanceText = balance.formatRupiah()
+    val balanceStyle = when {
+        balanceText.length > 18 -> ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 12.sp, lineHeight = 16.sp)
+        balanceText.length > 15 -> ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 14.sp, lineHeight = 19.sp)
+        balanceText.length > 12 -> ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 16.sp, lineHeight = 21.sp)
+        else -> ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold)
+    }
     ArusCard(
         modifier = modifier.width(180.dp),
         onClick = onClick
@@ -678,8 +704,8 @@ fun ArusWalletCard(
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
-            text = balance.formatRupiah(),
-            style = ArusTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            text = balanceText,
+            style = balanceStyle,
             color = ArusTextPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -1155,6 +1181,11 @@ fun ArusBottomNavigation(
 				.navigationBarsPadding()
 				.padding(bottom = 22.dp)
 				.size(60.dp)
+				.semantics {
+					// V2-P2-4: TalkBack membacakan FAB sebagai "Catat Transaksi".
+					contentDescription = "Catat Transaksi"
+					role = Role.Button
+				}
 		) {
 			// Ikon "+" digambar dari dua batang (tidak ada drawable fa_plus di proyek).
 			Box(contentAlignment = Alignment.Center) {
@@ -1912,9 +1943,12 @@ fun ArusSelectionSheet(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
+            // V2-P2-8: daftar pemilih bisa di-scroll (kategori bisa > 8).
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
             ) {
                 items.forEach { item ->
                     val isSelected = item.id == selectedItemId
@@ -2313,7 +2347,9 @@ fun ArusProgressCard(
             )
             ArusTrendBadge(
                 text = "$percentage%",
-                style = if (progress <= 0.8f) TrendStyle.POSITIVE else TrendStyle.NEGATIVE
+                // V2-P2-7: badge merah hanya bila pengeluaran melebihi pemasukan
+                // (>100%), selaras dengan subtitle "masih dalam batas aman".
+                style = if (currentAmount <= totalAmount) TrendStyle.POSITIVE else TrendStyle.NEGATIVE
             )
         }
         Spacer(modifier = Modifier.height(8.dp))

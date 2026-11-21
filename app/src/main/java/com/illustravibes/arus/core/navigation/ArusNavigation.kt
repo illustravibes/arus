@@ -118,7 +118,7 @@ fun ArusAppShell() {
     // posisi scroll). Entry tetap di-branch (form baru tiap dibuka).
     // V2-P0-1: ViewModel AndroidX bertahan saat rotasi (remember tidak).
     val homeViewModel: HomeViewModel = viewModel(
-        factory = viewModelFactory { initializer { HomeViewModel(walletRepository, categoryRepository, transactionRepository) } }
+        factory = viewModelFactory { initializer { HomeViewModel(walletRepository, categoryRepository, transactionRepository, context) } }
     )
     val historyViewModel: TransactionHistoryViewModel = viewModel(
         factory = viewModelFactory { initializer { TransactionHistoryViewModel(walletRepository, categoryRepository, transactionRepository) } }
@@ -154,6 +154,8 @@ fun ArusAppShell() {
 
     // V2-P0-1: sesi tiap buka subpage — ViewModel branch baru tiap dibuka
     // (form baru), tapi tetap bertahan saat rotasi (counter-nya saveable).
+    // V2-P1-3: ingat pintu masuk Kelola Dompet supaya back kembali ke layar asal.
+    var walletOpenedFromHome by rememberSaveable { mutableStateOf(false) }
     var walletSession by rememberSaveable { mutableStateOf(0) }
     var categorySession by rememberSaveable { mutableStateOf(0) }
     var entrySession by rememberSaveable { mutableStateOf(0) }
@@ -161,7 +163,15 @@ fun ArusAppShell() {
     val isNotHome = currentScreen != ArusScreen.Home
     BackHandler(enabled = isNotHome) {
         when (currentScreen) {
-            is ArusScreen.WalletManagement, is ArusScreen.CategoryManagement -> {
+            is ArusScreen.WalletManagement -> {
+                if (walletOpenedFromHome) {
+                    selectedTab = ArusTab.BERANDA
+                    currentScreen = ArusScreen.Home
+                } else {
+                    currentScreen = ArusScreen.Settings
+                }
+            }
+            is ArusScreen.CategoryManagement -> {
                 currentScreen = ArusScreen.Settings
             }
             is ArusScreen.TransactionEntry -> {
@@ -226,6 +236,7 @@ fun ArusAppShell() {
                             },
                             onNavigateToWalletManagement = {
                                 walletSession++
+                                walletOpenedFromHome = true
                                 currentScreen = ArusScreen.WalletManagement
                             },
                             listState = homeListState
@@ -251,6 +262,7 @@ fun ArusAppShell() {
                             viewModel = settingsViewModel,
                             onNavigateToWalletManagement = {
                                 walletSession++
+                                walletOpenedFromHome = false
                                 currentScreen = ArusScreen.WalletManagement
                             },
                             onNavigateToCategoryManagement = {
@@ -269,7 +281,12 @@ fun ArusAppShell() {
                         WalletScreen(
                             viewModel = walletViewModel,
                             onBackClick = {
-                                currentScreen = ArusScreen.Settings
+                                if (walletOpenedFromHome) {
+                                    selectedTab = ArusTab.BERANDA
+                                    currentScreen = ArusScreen.Home
+                                } else {
+                                    currentScreen = ArusScreen.Settings
+                                }
                             }
                         )
                     }

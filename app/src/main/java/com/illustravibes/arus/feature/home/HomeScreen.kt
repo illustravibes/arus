@@ -15,6 +15,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.illustravibes.arus.R
+import com.illustravibes.arus.core.database.entity.TransactionEntity
 import com.illustravibes.arus.core.database.entity.WalletEntity
 import com.illustravibes.arus.core.designsystem.*
 import java.text.SimpleDateFormat
@@ -52,6 +56,10 @@ fun HomeScreen(
         onNavigateToTransactionHistory = onNavigateToTransactionHistory,
         onNavigateToWalletManagement = onNavigateToWalletManagement,
         onToggleHideBalance = { viewModel.toggleHideBalance() },
+        transactionToDelete = uiState.transactionToDelete,
+        onDeleteRequest = { viewModel.onDeleteRequest(it) },
+        onConfirmDelete = { viewModel.confirmDelete() },
+        onCancelDelete = { viewModel.cancelDelete() },
         modifier = modifier,
         listState = listState
     )
@@ -64,9 +72,15 @@ fun HomeContent(
     onNavigateToTransactionHistory: () -> Unit,
     onNavigateToWalletManagement: () -> Unit,
     onToggleHideBalance: () -> Unit = {},
+    transactionToDelete: TransactionEntity? = null,
+    onDeleteRequest: (TransactionEntity) -> Unit = {},
+    onConfirmDelete: () -> Unit = {},
+    onCancelDelete: () -> Unit = {},
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
 ) {
+    // V2-P1-2: detail transaksi dibuka dari Beranda (cermin Riwayat).
+    var selectedDetailTx by remember { mutableStateOf<TransactionEntity?>(null) }
     val greetingText = getGreetingText()
     val todayDateText = getTodayDateText()
 
@@ -121,6 +135,7 @@ fun HomeContent(
                 amount = uiState.incomeThisMonth,
                 isIncome = true,
                 subtitle = "Bulan ini",
+                compactAmount = true,
                 modifier = Modifier.weight(1f)
             )
             ArusStatCard(
@@ -128,6 +143,7 @@ fun HomeContent(
                 amount = uiState.expenseThisMonth,
                 isIncome = false,
                 subtitle = "Bulan ini",
+                compactAmount = true,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -249,12 +265,64 @@ fun HomeContent(
                         iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),
                         tileColor = tileColor,
                         iconTint = iconTint,
-                        onClick = onNavigateToTransactionHistory
+                        onClick = { selectedDetailTx = tx }
                     )
             }
         }
 
         item { Spacer(modifier = Modifier.height(110.dp)) }
+    }
+
+    // V2-P1-2: detail transaksi dari Beranda (cermin Riwayat).
+    if (selectedDetailTx != null) {
+        val tx = selectedDetailTx!!
+        val category = uiState.categoriesMap[tx.categoryId]
+        val wallet = uiState.wallets.find { it.id == tx.walletId }
+        val targetWallet = uiState.wallets.find { it.id == tx.targetWalletId }
+        val txType = when (tx.type) {
+            "INCOME" -> TransactionType.INCOME
+            "EXPENSE" -> TransactionType.EXPENSE
+            else -> TransactionType.TRANSFER
+        }
+        val (tileColor, iconTint) = when (txType) {
+            TransactionType.INCOME -> NotionMintSoft to NotionMint
+            TransactionType.EXPENSE -> NotionCoralSoft to NotionCoral
+            TransactionType.TRANSFER -> NotionSkySoft to NotionSky
+        }
+        val dateText = SimpleDateFormat("EEEE, d MMMM yyyy · HH:mm", Locale.forLanguageTag("id-ID")).format(Date(tx.dateMillis))
+        val walletText = wallet?.name ?: "Dompet"
+        val targetWalletText = if (txType == TransactionType.TRANSFER) targetWallet?.name else null
+        ArusTransactionDetailSheet(
+            data = TransactionDetailData(
+                title = category?.name ?: if (txType == TransactionType.TRANSFER) "Transfer Antardompet" else "Transaksi",
+                amount = tx.amount,
+                type = txType,
+                dateText = dateText,
+                walletText = walletText,
+                targetWalletText = targetWalletText,
+                noteText = tx.note,
+                iconResId = mapDrawableIcon(category?.icon ?: if (txType == TransactionType.TRANSFER) "fa_right_left" else "fa_tags"),
+                tileColor = tileColor,
+                iconTint = iconTint
+            ),
+            onDeleteClick = {
+                selectedDetailTx = null
+                onDeleteRequest(tx)
+            },
+            onDismiss = { selectedDetailTx = null }
+        )
+    }
+
+    if (transactionToDelete != null) {
+        val txToDelete = transactionToDelete!!
+        ArusConfirmationSheet(
+            title = "Hapus Transaksi Ini?",
+            message = "Transaksi senilai ${txToDelete.amount.formatRupiah()} akan dihapus secara permanen dan saldo dompet akan diperbarui.",
+            confirmButtonText = "Ya, Hapus",
+            onConfirm = { onConfirmDelete() },
+            onDismiss = { onCancelDelete() },
+            isDestructive = true
+        )
     }
 }
 

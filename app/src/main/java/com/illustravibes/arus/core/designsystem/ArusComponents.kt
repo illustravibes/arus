@@ -60,7 +60,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.illustravibes.arus.R
 import java.text.NumberFormat
+import java.util.Calendar
 import java.util.Locale
+import java.util.TimeZone
 
 // ============================================================================
 // 1. CURRENCY FORMATTER UTILITY
@@ -2224,6 +2226,126 @@ data class SelectionItem(
     val iconTint: Color = NotionSky,
     val logoResId: Int? = null
 )
+
+// ============================================================================
+// ARUS DATE PICKER SHEET (Bottom Sheet Kalender, locale id-ID)
+// Menggantikan DatePickerDialog (modal tengah, headline bahasa Inggris):
+// kalender yang sama dipindah ke ModalBottomSheet ala Bevel — sudut atas
+// membulat, drag handle, header "Pilih Tanggal" + chip "Hari ini", tombol
+// pill hitam "Pilih Tanggal" + teks "Batal". Locale id-ID dipaksa lewat
+// DatePickerState(locale = ...) supaya bulan/hari/headline berbahasa
+// Indonesia walau locale sistem HP bahasa Inggris.
+// ============================================================================
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ArusDatePickerSheet(
+    initialDateMillis: Long,
+    onDateSelected: (utcDateMillis: Long) -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // Tengah malam UTC hari ini (dipakai chip "Hari ini").
+    val todayUtcMillis = remember {
+        Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+            val now = Calendar.getInstance()
+            set(Calendar.YEAR, now.get(Calendar.YEAR))
+            set(Calendar.MONTH, now.get(Calendar.MONTH))
+            set(Calendar.DAY_OF_MONTH, now.get(Calendar.DAY_OF_MONTH))
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+    }
+    val datePickerState = remember(initialDateMillis) {
+        DatePickerState(
+            locale = Locale("id", "ID"),
+            initialSelectedDateMillis = initialDateMillis,
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    val endOfToday = Calendar.getInstance().apply {
+                        set(Calendar.HOUR_OF_DAY, 23)
+                        set(Calendar.MINUTE, 59)
+                        set(Calendar.SECOND, 59)
+                        set(Calendar.MILLISECOND, 999)
+                    }.timeInMillis
+                    return utcTimeMillis <= endOfToday
+                }
+            }
+        )
+    }
+    val isTodaySelected = datePickerState.selectedDateMillis == todayUtcMillis
+    ModalBottomSheet(
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = ArusSurface,
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 12.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(PillShape)
+                    .background(ArusBorder)
+            )
+        },
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Pilih Tanggal",
+                    style = ArusTypography.titleLarge,
+                    color = ArusTextPrimary
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                ArusChip(
+                    text = "Hari ini",
+                    selected = isTodaySelected,
+                    onClick = {
+                        datePickerState.selectedDateMillis = todayUtcMillis
+                        datePickerState.displayedMonthMillis = todayUtcMillis
+                    }
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            DatePicker(
+                state = datePickerState,
+                title = null,
+                showModeToggle = false
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            ArusPrimaryButton(
+                text = "Pilih Tanggal",
+                onClick = {
+                    datePickerState.selectedDateMillis?.let { onDateSelected(it) }
+                },
+                enabled = datePickerState.selectedDateMillis != null
+            )
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Text(
+                    text = "Batal",
+                    style = ArusTypography.labelLarge,
+                    color = ArusTextSecondary
+                )
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

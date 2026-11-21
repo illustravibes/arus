@@ -3,14 +3,9 @@ package com.illustravibes.arus.feature.transaction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SelectableDates
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -96,65 +91,76 @@ fun TransactionEntryScreen(
                 },
             )
 
-            // 3. Property Selector Rows
-            if (uiState.typeIndex == 2) {
-                val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
-                val targetWalletTint = parseHexColor(uiState.selectedTargetWallet?.colorHex ?: "#00A86B", NotionMint)
+            // 3. Detail transaksi dalam satu kartu (Dompet/Kategori + Tanggal).
+            // Pola yang sama dengan kartu harian & "Kelola Data": satu ArusCard,
+            // baris dipisah divider, inCard = true.
+            ArusCard {
+                if (uiState.typeIndex == 2) {
+                    val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
+                    val targetWalletTint = parseHexColor(uiState.selectedTargetWallet?.colorHex ?: "#00A86B", NotionMint)
 
-                // Transfer Mode: Source Wallet & Target Wallet
-                ArusPropertySelectorRow(
-                    label = "Dompet Asal",
-                    selectedValue = uiState.selectedWallet?.name ?: "Pilih Dompet",
-                    onClick = { showWalletSheet = true },
-                    iconResId = mapDrawableIcon(uiState.selectedWallet?.icon ?: "fa_wallet"),
-                    tileColor = walletTint.copy(alpha = 0.15f),
-                    iconTint = walletTint,
-                    logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug)
-                )
+                    // Transfer: Dompet Asal & Dompet Tujuan
+                    ArusPropertySelectorRow(
+                        label = "Dompet Asal",
+                        selectedValue = uiState.selectedWallet?.name ?: "Pilih Dompet",
+                        onClick = { showWalletSheet = true },
+                        iconResId = mapDrawableIcon(uiState.selectedWallet?.icon ?: "fa_wallet"),
+                        tileColor = walletTint.copy(alpha = 0.15f),
+                        iconTint = walletTint,
+                        logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug),
+                        inCard = true
+                    )
+                    HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                    ArusPropertySelectorRow(
+                        label = "Dompet Tujuan",
+                        selectedValue = uiState.selectedTargetWallet?.name ?: "Pilih Dompet Tujuan",
+                        onClick = { showTargetWalletSheet = true },
+                        iconResId = mapDrawableIcon(uiState.selectedTargetWallet?.icon ?: "fa_wallet"),
+                        tileColor = targetWalletTint.copy(alpha = 0.15f),
+                        iconTint = targetWalletTint,
+                        logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedTargetWallet?.logoSlug),
+                        inCard = true
+                    )
+                } else {
+                    val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
+                    val categoryTint = parseHexColor(uiState.selectedCategory?.colorHex ?: "#00A86B", NotionMint)
 
+                    // Pemasukan/Pengeluaran: Dompet & Kategori
+                    ArusPropertySelectorRow(
+                        label = "Pilih Dompet",
+                        selectedValue = uiState.selectedWallet?.name ?: "Pilih Dompet",
+                        onClick = { showWalletSheet = true },
+                        iconResId = mapDrawableIcon(uiState.selectedWallet?.icon ?: "fa_wallet"),
+                        tileColor = walletTint.copy(alpha = 0.15f),
+                        iconTint = walletTint,
+                        logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug),
+                        inCard = true
+                    )
+                    HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                    ArusPropertySelectorRow(
+                        label = "Kategori",
+                        selectedValue = uiState.selectedCategory?.name ?: "Pilih Kategori",
+                        onClick = { showCategorySheet = true },
+                        iconResId = mapDrawableIcon(uiState.selectedCategory?.icon ?: "fa_tags"),
+                        tileColor = categoryTint.copy(alpha = 0.15f),
+                        iconTint = categoryTint,
+                        inCard = true
+                    )
+                }
+                HorizontalDivider(color = ArusBorder, thickness = 1.dp)
+                // Tanggal transaksi (bisa diubah; maks. hari ini).
+                // tileColor: NotionSkySoft polos (dulu NotionSkySoft 15% — nyaris
+                // tak terlihat di atas putih; pola yang sama dengan Kelola Data).
                 ArusPropertySelectorRow(
-                    label = "Dompet Tujuan",
-                    selectedValue = uiState.selectedTargetWallet?.name ?: "Pilih Dompet Tujuan",
-                    onClick = { showTargetWalletSheet = true },
-                    iconResId = mapDrawableIcon(uiState.selectedTargetWallet?.icon ?: "fa_wallet"),
-                    tileColor = targetWalletTint.copy(alpha = 0.15f),
-                    iconTint = targetWalletTint,
-                    logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedTargetWallet?.logoSlug)
-                )
-            } else {
-                val walletTint = parseHexColor(uiState.selectedWallet?.colorHex ?: "#62AEF0", NotionSky)
-                val categoryTint = parseHexColor(uiState.selectedCategory?.colorHex ?: "#00A86B", NotionMint)
-
-                // Income/Expense Mode: Wallet & Category
-                ArusPropertySelectorRow(
-                    label = "Pilih Dompet",
-                    selectedValue = uiState.selectedWallet?.name ?: "Pilih Dompet",
-                    onClick = { showWalletSheet = true },
-                    iconResId = mapDrawableIcon(uiState.selectedWallet?.icon ?: "fa_wallet"),
-                    tileColor = walletTint.copy(alpha = 0.15f),
-                    iconTint = walletTint,
-                    logoResId = WalletMasterData.logoResIdForSlug(uiState.selectedWallet?.logoSlug)
-                )
-
-                ArusPropertySelectorRow(
-                    label = "Kategori",
-                    selectedValue = uiState.selectedCategory?.name ?: "Pilih Kategori",
-                    onClick = { showCategorySheet = true },
-                    iconResId = mapDrawableIcon(uiState.selectedCategory?.icon ?: "fa_tags"),
-                    tileColor = categoryTint.copy(alpha = 0.15f),
-                    iconTint = categoryTint
+                    label = "Tanggal",
+                    selectedValue = SimpleDateFormat("EEEE, d MMMM yyyy", Locale("id", "ID")).format(Date(uiState.dateMillis)),
+                    onClick = { showDatePicker = true },
+                    iconResId = R.drawable.fa_calendar,
+                    tileColor = NotionSkySoft,
+                    iconTint = NotionSky,
+                    inCard = true
                 )
             }
-
-            // 3b. Tanggal transaksi (bisa diubah; maks. hari ini).
-            ArusPropertySelectorRow(
-                label = "Tanggal",
-                selectedValue = SimpleDateFormat("EEEE, d MMMM yyyy", Locale("id", "ID")).format(Date(uiState.dateMillis)),
-                onClick = { showDatePicker = true },
-                iconResId = R.drawable.fa_calendar,
-                tileColor = NotionSkySoft.copy(alpha = 0.15f),
-                iconTint = NotionSky
-            )
 
             // 4. Note Field
             ArusTextField(
@@ -247,8 +253,9 @@ fun TransactionEntryScreen(
         }
 
         // Pemilih tanggal (maks. hari ini — transaksi masa depan tidak
-        // masuk saldo). DatePicker bekerja dalam UTC, jadi tanggal lokal
-        // dikonversi ke tengah malam UTC sebelum diserahkan ke picker.
+        // masuk saldo). Bottom sheet kalender ala Bevel, locale id-ID.
+        // DatePicker bekerja dalam UTC, jadi tanggal lokal dikonversi ke
+        // tengah malam UTC sebelum diserahkan ke picker.
         if (showDatePicker) {
             val initialPickerMillis = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
                 val local = Calendar.getInstance().apply { timeInMillis = uiState.dateMillis }
@@ -260,34 +267,14 @@ fun TransactionEntryScreen(
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
             }.timeInMillis
-            val datePickerState = rememberDatePickerState(
-                initialSelectedDateMillis = initialPickerMillis,
-                selectableDates = object : SelectableDates {
-                    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                        val endOfToday = Calendar.getInstance().apply {
-                            set(Calendar.HOUR_OF_DAY, 23)
-                            set(Calendar.MINUTE, 59)
-                            set(Calendar.SECOND, 59)
-                            set(Calendar.MILLISECOND, 999)
-                        }.timeInMillis
-                        return utcTimeMillis <= endOfToday
-                    }
-                }
-            )
-            DatePickerDialog(
-                onDismissRequest = { showDatePicker = false },
-                confirmButton = {
-                    TextButton(onClick = {
-                        datePickerState.selectedDateMillis?.let { viewModel.onDatePicked(it) }
-                        showDatePicker = false
-                    }) { Text("Pilih") }
+            ArusDatePickerSheet(
+                initialDateMillis = initialPickerMillis,
+                onDateSelected = { utcMillis ->
+                    viewModel.onDatePicked(utcMillis)
+                    showDatePicker = false
                 },
-                dismissButton = {
-                    TextButton(onClick = { showDatePicker = false }) { Text("Batal") }
-                }
-            ) {
-                DatePicker(state = datePickerState)
-            }
+                onDismiss = { showDatePicker = false }
+            )
         }
     }
 }

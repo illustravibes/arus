@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.core.database.entity.CategoryEntity
 import com.illustravibes.arus.R
@@ -105,11 +106,14 @@ fun CategoryScreen(
                                 Text(
                                     text = category.name,
                                     style = ArusTypography.titleMedium,
-                                    color = ArusTextPrimary
+                                    color = ArusTextPrimary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
 
                             ArusActionPill(
+                                text = "Arsipkan",
                                 onClick = { categoryToArchive = category },
                                 style = ArusActionPillStyle.NEUTRAL,
                                 iconResId = R.drawable.fa_box_archive
@@ -153,10 +157,13 @@ fun CategoryScreen(
                                     Text(
                                         text = category.name,
                                         style = ArusTypography.titleMedium,
-                                        color = ArusTextSecondary
+                                        color = ArusTextSecondary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                                 ArusActionPill(
+                                    text = "Pulihkan",
                                     onClick = { viewModel.unarchiveCategory(category) },
                                     iconResId = R.drawable.fa_arrow_rotate_left
                                 )

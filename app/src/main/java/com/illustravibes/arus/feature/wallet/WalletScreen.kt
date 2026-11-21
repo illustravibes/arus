@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.illustravibes.arus.R
 import com.illustravibes.arus.core.database.entity.WalletEntity
@@ -99,7 +100,9 @@ fun WalletScreen(
                                     Text(
                                         text = wallet.name,
                                         style = ArusTypography.titleMedium,
-                                        color = ArusTextPrimary
+                                        color = ArusTextPrimary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
@@ -112,12 +115,14 @@ fun WalletScreen(
 
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                 ArusActionPill(
+                                    text = "Edit",
                                     onClick = { viewModel.openEditDialog(wallet) },
                                     iconResId = R.drawable.fa_pen
                                 )
 
                                 if (uiState.wallets.size > 1) {
                                     ArusActionPill(
+                                        text = "Hapus",
                                         onClick = { walletToDelete = wallet },
                                         style = ArusActionPillStyle.DESTRUCTIVE,
                                         iconResId = R.drawable.fa_trash_can

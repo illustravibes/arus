@@ -85,6 +85,7 @@ fun TransactionHistoryScreen(
             ) {
                 ArusSearchField(
                     value = uiState.searchQuery,
+                    shape = PillShape,
                     onValueChange = { query -> viewModel.onSearchChange(query) },
                     modifier = Modifier.weight(1f),
                     placeholder = "Cari nama kategori, catatan, nominal..."
@@ -301,33 +302,26 @@ private fun groupTransactionsByDate(transactions: List<TransactionEntity>): Map<
     }
 }
 
-// Tombol Filter di kanan search: pill 48dp, ikon funnel + label; hitam
+// Tombol Filter di kanan search: lingkaran 48dp, ikon funnel saja; hitam
 // saat ada filter aktif (pola pemicu aktif Bevel: "3 groups").
 @Composable
 private fun FilterButton(
     hasActiveFilters: Boolean,
     onClick: () -> Unit
 ) {
-    Row(
+    Box(
         modifier = Modifier
-            .height(48.dp)
-            .clip(PillShape)
+            .size(48.dp)
+            .clip(CircleShape)
             .background(if (hasActiveFilters) ArusBrandPrimary else ArusBrandSoft)
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
     ) {
         Icon(
             painter = painterResource(id = R.drawable.fa_filter),
             contentDescription = "Filter",
             tint = if (hasActiveFilters) Color.White else ArusTextPrimary,
             modifier = Modifier.size(18.dp)
-        )
-        Text(
-            text = "Filter",
-            style = ArusTypography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-            color = if (hasActiveFilters) Color.White else ArusTextPrimary
         )
     }
 }

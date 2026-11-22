@@ -624,7 +624,8 @@ fun ArusSearchField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "Cari..."
+    placeholder: String = "Cari...",
+    shape: Shape = RoundedCornerShape(12.dp)
 ) {
     OutlinedTextField(
         value = value,
@@ -664,7 +665,7 @@ fun ArusSearchField(
         } else null,
         singleLine = true,
         textStyle = ArusTypography.bodyMedium.copy(color = ArusTextPrimary),
-        shape = RoundedCornerShape(12.dp),
+        shape = shape,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = ArusBrandSoft,
             unfocusedContainerColor = ArusBrandSoft,

@@ -556,6 +556,7 @@ private fun FilterOptionPill(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(48.dp)
             .clip(PillShape)
             .background(if (selected) ArusBrandSoft else ArusSurface)
             .border(1.dp, if (selected) ArusBrandPrimary else ArusBorder, PillShape)

@@ -2750,7 +2750,7 @@ fun ArusDatePickerSheet(
                             painter = painterResource(id = R.drawable.fa_chevron_left),
                             contentDescription = "Bulan sebelumnya",
                             tint = ArusTextPrimary,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(12.dp)
                         )
                     }
                 }
@@ -2787,7 +2787,7 @@ fun ArusDatePickerSheet(
                             painter = painterResource(id = R.drawable.fa_chevron_right),
                             contentDescription = "Bulan berikutnya",
                             tint = if (isCurrentMonth) ArusTextSecondary else ArusTextPrimary,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(12.dp)
                         )
                     }
                 }

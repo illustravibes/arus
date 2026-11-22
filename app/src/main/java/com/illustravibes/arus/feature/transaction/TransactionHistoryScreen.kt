@@ -635,7 +635,7 @@ private fun FilterSection(
         ) {
             Text(
                 text = label,
-                style = ArusTypography.labelMedium,
+                style = ArusTypography.titleMedium,
                 color = ArusTextSecondary
             )
             if (!expanded) {

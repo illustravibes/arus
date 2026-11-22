@@ -2747,7 +2747,7 @@ fun ArusDatePickerSheet(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_chevron_left_thin),
+                            painter = painterResource(id = R.drawable.fa_chevron_left),
                             contentDescription = "Bulan sebelumnya",
                             tint = ArusTextPrimary,
                             modifier = Modifier.size(16.dp)
@@ -2784,7 +2784,7 @@ fun ArusDatePickerSheet(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_chevron_right_thin),
+                            painter = painterResource(id = R.drawable.fa_chevron_right),
                             contentDescription = "Bulan berikutnya",
                             tint = if (isCurrentMonth) ArusTextSecondary else ArusTextPrimary,
                             modifier = Modifier.size(16.dp)

@@ -651,12 +651,13 @@ private fun FilterSection(
                 Spacer(modifier = Modifier.weight(1f))
             }
             Icon(
-                painter = painterResource(id = R.drawable.ic_chevron_right_thin),
+                painter = painterResource(id = R.drawable.fa_chevron_right),
                 contentDescription = if (expanded) "Tutup $label" else "Buka $label",
                 tint = ArusTextSecondary,
                 modifier = Modifier
                     .size(12.dp)
                     .rotate(chevronDegrees)
+                    .padding(end = 4.dp)
             )
         }
         AnimatedVisibility(visible = expanded) {

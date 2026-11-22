@@ -29,7 +29,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -107,11 +111,7 @@ fun TransactionHistoryScreen(
                 ) {
                     if (uiState.selectedTypeFilter != null) {
                         ActiveFilterChip(
-                            label = when (uiState.selectedTypeFilter) {
-                                "INCOME" -> "Pemasukan"
-                                "EXPENSE" -> "Pengeluaran"
-                                else -> "Transfer"
-                            },
+                            label = typeFilterLabel(uiState.selectedTypeFilter),
                             onClose = { viewModel.onTypeFilterSelect(null) }
                         )
                     }
@@ -358,6 +358,13 @@ private fun ActiveFilterChip(
     }
 }
 
+private fun typeFilterLabel(type: String?): String = when (type) {
+    "INCOME" -> "Pemasukan"
+    "EXPENSE" -> "Pengeluaran"
+    "TRANSFER" -> "Transfer"
+    else -> "Semua"
+}
+
 private fun dateFilterLabel(date: HistoryDateFilter): String = when (date) {
     HistoryDateFilter.ALL -> "Semua"
     HistoryDateFilter.TODAY -> "Hari ini"
@@ -386,9 +393,33 @@ private fun FilterSheet(
         uiState.selectedWalletFilterId != null ||
         uiState.selectedCategoryFilterId != null ||
         uiState.selectedDateFilter != HistoryDateFilter.ALL
+    // Snapshot filter saat sheet dibuka: Batal mengembalikan ke sini
+    // (pilihan di sheet diterapkan langsung seperti sebelumnya, jadi
+    // Batal = kembalikan + tutup; Terapkan = tutup saja).
+    val initialTypeFilter = remember { uiState.selectedTypeFilter }
+    val initialWalletFilterId = remember { uiState.selectedWalletFilterId }
+    val initialCategoryFilterId = remember { uiState.selectedCategoryFilterId }
+    val initialDateFilter = remember { uiState.selectedDateFilter }
+    val revertAndDismiss: () -> Unit = {
+        onTypeSelect(initialTypeFilter)
+        onWalletSelect(initialWalletFilterId)
+        onCategorySelect(initialCategoryFilterId)
+        onDateSelect(initialDateFilter)
+        onDismiss()
+    }
+    // Seksi yang terbuka: Jenis selalu terbuka saat sheet dibuka, plus
+    // seksi lain yang punya filter aktif.
+    val expandedSections = remember {
+        mutableStateMapOf(
+            "jenis" to true,
+            "dompet" to (uiState.selectedWalletFilterId != null),
+            "kategori" to (uiState.selectedCategoryFilterId != null),
+            "tanggal" to (uiState.selectedDateFilter != HistoryDateFilter.ALL)
+        )
+    }
     ModalBottomSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        onDismissRequest = onDismiss,
+        onDismissRequest = revertAndDismiss,
         shape = RoundedCornerShape(28.dp),
         containerColor = ArusSurface,
         dragHandle = {
@@ -446,7 +477,13 @@ private fun FilterSheet(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-                FilterSection(label = "Jenis") {
+                FilterSection(
+                    label = "Jenis",
+                    summary = typeFilterLabel(uiState.selectedTypeFilter),
+                    hasSelection = uiState.selectedTypeFilter != null,
+                    expanded = expandedSections["jenis"] == true,
+                    onToggle = { expandedSections["jenis"] = !(expandedSections["jenis"] == true) }
+                ) {
                     FilterOptionPill(
                         title = "Semua",
                         selected = uiState.selectedTypeFilter == null,
@@ -464,7 +501,13 @@ private fun FilterSheet(
                         )
                     }
                 }
-                FilterSection(label = "Dompet") {
+                FilterSection(
+                    label = "Dompet",
+                    summary = uiState.wallets.find { it.id == uiState.selectedWalletFilterId }?.name ?: "Semua",
+                    hasSelection = uiState.selectedWalletFilterId != null,
+                    expanded = expandedSections["dompet"] == true,
+                    onToggle = { expandedSections["dompet"] = !(expandedSections["dompet"] == true) }
+                ) {
                     FilterOptionPill(
                         title = "Semua",
                         selected = uiState.selectedWalletFilterId == null,
@@ -489,7 +532,13 @@ private fun FilterSheet(
                         )
                     }
                 }
-                FilterSection(label = "Kategori") {
+                FilterSection(
+                    label = "Kategori",
+                    summary = uiState.categories.find { it.id == uiState.selectedCategoryFilterId }?.name ?: "Semua",
+                    hasSelection = uiState.selectedCategoryFilterId != null,
+                    expanded = expandedSections["kategori"] == true,
+                    onToggle = { expandedSections["kategori"] = !(expandedSections["kategori"] == true) }
+                ) {
                     FilterOptionPill(
                         title = "Semua",
                         selected = uiState.selectedCategoryFilterId == null,
@@ -513,7 +562,13 @@ private fun FilterSheet(
                         )
                     }
                 }
-                FilterSection(label = "Tanggal") {
+                FilterSection(
+                    label = "Tanggal",
+                    summary = dateFilterLabel(uiState.selectedDateFilter),
+                    hasSelection = uiState.selectedDateFilter != HistoryDateFilter.ALL,
+                    expanded = expandedSections["tanggal"] == true,
+                    onToggle = { expandedSections["tanggal"] = !(expandedSections["tanggal"] == true) }
+                ) {
                     listOf(
                         HistoryDateFilter.ALL to "Semua",
                         HistoryDateFilter.TODAY to "Hari ini",
@@ -528,23 +583,85 @@ private fun FilterSheet(
                         )
                     }
                 }
+                // Terapkan/Batal di ujung konten (pola tombol sheet tanggal):
+                // Terapkan = tutup (pilihan sudah diterapkan langsung),
+                // Batal = kembalikan ke filter saat sheet dibuka + tutup.
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ArusSecondaryButton(
+                        text = "Batal",
+                        onClick = revertAndDismiss,
+                        modifier = Modifier.weight(1f)
+                    )
+                    ArusPrimaryButton(
+                        text = "Terapkan",
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }
 }
 
+// Satu seksi filter yang bisa dibuka-tutup (pola disclosure Notion):
+// header menampilkan label + ringkasan pilihan saat ini + chevron
+// yang berputar; isi (pill opsi) muncul dengan animasi saat terbuka.
 @Composable
 private fun FilterSection(
     label: String,
+    summary: String,
+    hasSelection: Boolean,
+    expanded: Boolean,
+    onToggle: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = label,
-            style = ArusTypography.labelMedium,
-            color = ArusTextSecondary
+        val chevronDegrees by animateFloatAsState(
+            targetValue = if (expanded) 90f else 0f,
+            label = "chevron"
         )
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .clip(PillShape)
+                .clickable { onToggle() }
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = label,
+                style = ArusTypography.labelMedium,
+                color = ArusTextSecondary
+            )
+            if (!expanded) {
+                Text(
+                    text = summary,
+                    style = ArusTypography.bodyMedium,
+                    color = if (hasSelection) ArusTextPrimary else ArusTextSecondary,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.End,
+                    maxLines = 1
+                )
+            } else {
+                Spacer(modifier = Modifier.weight(1f))
+            }
+            Icon(
+                painter = painterResource(id = R.drawable.ic_chevron_right_thin),
+                contentDescription = if (expanded) "Tutup $label" else "Buka $label",
+                tint = ArusTextSecondary,
+                modifier = Modifier
+                    .size(12.dp)
+                    .rotate(chevronDegrees)
+            )
+        }
+        AnimatedVisibility(visible = expanded) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp), content = content)
+        }
     }
 }
 

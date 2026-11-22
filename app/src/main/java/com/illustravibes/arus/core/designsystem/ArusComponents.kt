@@ -462,14 +462,16 @@ fun ArusPropertySelectorRow(
             }
         }
         if (valueOnLeft) {
-            // Chevron bawah (pola pill pemilih nilai Bevel "Active v" +
-            // field dropdown Notion): baris ini menampilkan nilai +
-            // membuka sheet pemilih, bukan navigasi (itu pakai ">").
+            // Chevron bawah FontAwesome solid (pola pill pemilih nilai
+            // Bevel "Active v" + field dropdown Notion): baris ini
+            // menampilkan nilai + membuka sheet pemilih, bukan navigasi.
+            // Versi tipis hasil putar path (ic_chevron_down_thin)
+            // dihapus 2026-11-22 karena jelek (kelihatan seperti huruf v).
             Icon(
-                painter = painterResource(id = R.drawable.ic_chevron_down_thin),
+                painter = painterResource(id = R.drawable.fa_chevron_down),
                 contentDescription = null,
                 tint = ArusTextSecondary,
-                modifier = Modifier.size(12.dp)
+                modifier = Modifier.size(14.dp)
             )
         } else if (badgeText != null) {
             // Badge jumlah (tanpa chevron): pill abu netral berisi angka.

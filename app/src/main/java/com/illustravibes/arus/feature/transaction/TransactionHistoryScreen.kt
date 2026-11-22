@@ -435,6 +435,16 @@ private fun FilterSheet(
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = if (hasActiveFilters || uiState.searchQuery.isNotBlank()) {
+                    "Menampilkan ${uiState.transactions.size} dari ${uiState.totalTransactionCount} transaksi"
+                } else {
+                    "${uiState.totalTransactionCount} transaksi"
+                },
+                style = ArusTypography.bodyMedium,
+                color = ArusTextSecondary
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),

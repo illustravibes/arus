@@ -34,6 +34,7 @@ data class TransactionHistoryUiState(
     val selectedDateFilter: HistoryDateFilter = HistoryDateFilter.ALL,
     val categories: List<CategoryEntity> = emptyList(), // aktif saja, untuk sheet filter
     val transactions: List<TransactionEntity> = emptyList(),
+    val totalTransactionCount: Int = 0,
     val wallets: List<WalletEntity> = emptyList(),
     val categoriesMap: Map<Long, CategoryEntity> = emptyMap(),
     val transactionToDelete: TransactionEntity? = null
@@ -114,6 +115,7 @@ class TransactionHistoryViewModel(
 
             _uiState.value.copy(
                 transactions = filtered,
+                totalTransactionCount = allTransactions.size,
                 wallets = wallets,
                 categoriesMap = categoriesMap,
                 categories = activeCategories,

@@ -37,7 +37,7 @@ Hasil audit 587 screenshot referensi lokal (`design/bevel` + `design/notion`) da
 - **Sheet chrome (semua `ModalBottomSheet`):** `skipPartiallyExpanded = true`, radius atas 28dp, `ArusSurface`, drag handle pill.
 - **Action sheet (menu •••):** bottom sheet ala Notion — judul = nama item (tengah), tiap opsi satu pill penuh 56dp (gap 8dp), ikon kiri + teks, destruktif merah.
 - **Sheet pemilih (dropdown/picker):** full rounded — keempat sudut 28dp + mengambang 16dp dari bawah: selection sheet (pilih dompet/kategori — tiap opsi satu pill 48dp, tile lingkaran 36dp + radio kustom 20dp), date picker sheet (pilih tanggal+jam), action sheet (menu opsi — tiap opsi satu pill 56dp) — keputusan user 2026-11-21. Sheet lain (form, password, konfirmasi, detail transaksi) tetap sudut atas 28dp menempel bawah.
-- **Selector row:** nilai yang dipilih di kiri, chevron tipis 12dp di kanan; baris navigasi (Kelola Data) memakai pola normal (label kiri + nilai + chevron).
+- **Selector row:** nilai yang dipilih di kiri, chevron bawah tipis 12dp di kanan (pola pill pemilih nilai Bevel "Active ⌄" + field dropdown Notion; ">" hanya untuk navigasi); baris navigasi (Kelola Data) memakai pola normal (label kiri + nilai + chevron).
 
 ## Warna
 

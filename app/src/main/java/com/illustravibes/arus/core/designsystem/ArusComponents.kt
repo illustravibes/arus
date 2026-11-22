@@ -462,9 +462,11 @@ fun ArusPropertySelectorRow(
             }
         }
         if (valueOnLeft) {
-            // Kanan cukup chevron kecil tipis (referensi Bevel/Notion).
+            // Chevron bawah (pola pill pemilih nilai Bevel "Active v" +
+            // field dropdown Notion): baris ini menampilkan nilai +
+            // membuka sheet pemilih, bukan navigasi (itu pakai ">").
             Icon(
-                painter = painterResource(id = R.drawable.ic_chevron_right_thin),
+                painter = painterResource(id = R.drawable.ic_chevron_down_thin),
                 contentDescription = null,
                 tint = ArusTextSecondary,
                 modifier = Modifier.size(12.dp)

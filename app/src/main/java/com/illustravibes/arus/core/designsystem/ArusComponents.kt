@@ -471,7 +471,7 @@ fun ArusPropertySelectorRow(
                 painter = painterResource(id = R.drawable.fa_chevron_down),
                 contentDescription = null,
                 tint = ArusTextSecondary,
-                modifier = Modifier.size(14.dp)
+                modifier = Modifier.size(12.dp).padding(end = 4.dp)
             )
         } else if (badgeText != null) {
             // Badge jumlah (tanpa chevron): pill abu netral berisi angka.
